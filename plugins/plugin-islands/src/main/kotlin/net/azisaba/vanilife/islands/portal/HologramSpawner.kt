@@ -16,10 +16,29 @@ internal interface HologramSpawner {
     suspend fun spawnHologram(stored: Portal, resourceDetected: net.azisaba.vanilife.islands.portal.finder.DetectedPortal): java.util.UUID?
 }
 
+internal typealias EntityLibHologramSpawner = suspend (
+    id: Long,
+    component: Component,
+    resourceDetected: net.azisaba.vanilife.islands.portal.finder.DetectedPortal,
+    loc: org.bukkit.Location,
+    centerX: Double,
+    centerY: Double,
+    centerZ: Double
+) -> java.util.UUID?
+
+internal typealias TextDisplayHologramSpawner = suspend (
+    id: Long,
+    component: Component,
+    resourceDetected: net.azisaba.vanilife.islands.portal.finder.DetectedPortal,
+    loc: org.bukkit.Location
+) -> java.util.UUID?
+
 internal class DefaultHologramSpawner(
     private val plugin: Plugin,
     private val repository: net.azisaba.vanilife.islands.portal.PortalRepository,
-    private val dispatcherProvider: (org.bukkit.Location) -> CoroutineContext = { Dispatchers.Unconfined }
+    private val dispatcherProvider: (org.bukkit.Location) -> CoroutineContext = { Dispatchers.Unconfined },
+    private val entityLibSpawner: EntityLibHologramSpawner? = null,
+    private val textDisplaySpawner: TextDisplayHologramSpawner? = null
 ) : HologramSpawner {
     override suspend fun spawnHologram(stored: Portal, resourceDetected: net.azisaba.vanilife.islands.portal.finder.DetectedPortal): java.util.UUID? {
         var resultUuid: java.util.UUID? = null
@@ -47,8 +66,7 @@ internal class DefaultHologramSpawner(
             resultUuid
         }
     }
-
-    private fun tryEntityLibSpawn(
+    private suspend fun tryEntityLibSpawn(
         id: Long,
         resourceDetected: net.azisaba.vanilife.islands.portal.finder.DetectedPortal,
         loc: org.bukkit.Location,
@@ -56,8 +74,20 @@ internal class DefaultHologramSpawner(
         centerY: Double,
         centerZ: Double
     ): java.util.UUID? {
+        val textComp = Component.text("Resource Portal").font(IslandsFonts.WAVES.key())
+
+        // user-provided spawner takes precedence
+        if (entityLibSpawner != null) {
+            try {
+                val uuid = entityLibSpawner.invoke(id, textComp, resourceDetected, loc, centerX, centerY, centerZ)
+                if (uuid != null) repository.updateHologram(id, uuid)
+                return uuid
+            } catch (e: Exception) {
+                plugin.logger.log(Level.FINE, "EntityLib custom spawner failed, falling back", e)
+            }
+        }
+
         try {
-            val textComp = Component.text("Resource Portal").font(IslandsFonts.WAVES.key())
             val container = me.tofaa.entitylib.container.EntityContainer.basic()
             val wrapper = PortalHologram(textComp)
             val peLoc = com.github.retrooper.packetevents.protocol.world.Location(centerX, centerY, centerZ, 0f, 0f)
@@ -76,13 +106,25 @@ internal class DefaultHologramSpawner(
         return null
     }
 
-    private fun tryTextDisplaySpawn(
+    private suspend fun tryTextDisplaySpawn(
         id: Long,
         resourceDetected: net.azisaba.vanilife.islands.portal.finder.DetectedPortal,
         loc: org.bukkit.Location
     ): java.util.UUID? {
-        try {
-            val textComp = Component.text("Resource Portal").font(IslandsFonts.WAVES.key())
+        val textComp = Component.text("Resource Portal").font(IslandsFonts.WAVES.key())
+
+        // user-provided spawner takes precedence
+        if (textDisplaySpawner != null) {
+            try {
+                val uuid = textDisplaySpawner.invoke(id, textComp, resourceDetected, loc)
+                if (uuid != null) repository.updateHologram(id, uuid)
+                return uuid
+            } catch (e: Exception) {
+                plugin.logger.log(Level.FINE, "TextDisplay custom spawner failed", e)
+            }
+        }
+
+        return try {
             val textDisplay = resourceDetected.world.spawn(loc, org.bukkit.entity.TextDisplay::class.java) {
                 it.isPersistent = false
                 it.text(textComp)
@@ -93,10 +135,10 @@ internal class DefaultHologramSpawner(
                 it.setAlignment(org.bukkit.entity.TextDisplay.TextAlignment.CENTER)
             }
             repository.updateHologram(id, textDisplay.uniqueId)
-            return textDisplay.uniqueId
+            textDisplay.uniqueId
         } catch (ex: Exception) {
             plugin.logger.log(Level.SEVERE, "TextDisplay hologram spawn failed", ex)
+            null
         }
-        return null
     }
 }

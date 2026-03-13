@@ -46,7 +46,7 @@ class Main : JavaPlugin() {
                     get(),
                     get(),
                     CoroutineScope(Dispatchers.IO),
-                    DefaultHologramSpawner(this@Main, get()) { loc -> this@Main.regionDispatcher(loc) }
+                    DefaultHologramSpawner(this@Main, get(), dispatcherProvider = { loc -> this@Main.regionDispatcher(loc) })
                 ) }
                 // ensure PortalHologram (wrapper) class is available to Koin consumers if needed later
                 single { net.azisaba.vanilife.islands.portal.PortalHologram::class }

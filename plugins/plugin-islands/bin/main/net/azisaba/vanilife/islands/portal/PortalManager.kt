@@ -13,6 +13,7 @@ import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Color
 import org.bukkit.plugin.Plugin
+import java.util.logging.Level
 import java.util.concurrent.ConcurrentHashMap
 
 internal class PortalManager(
@@ -75,7 +76,7 @@ internal class PortalManager(
                     }
 
                 } catch (ex: Exception) {
-                    ex.printStackTrace()
+                    plugin.logger.log(Level.SEVERE, "Failed while removing portal resource blocks or hologram", ex)
                 }
 
                 portal.id?.let { portalsById.remove(it) }
@@ -186,8 +187,7 @@ internal class PortalManager(
             try {
                 ResourcePortals.createWithAnimation(plugin, resourceDetected)
             } catch (ex: Exception) {
-                // Log or handle creation failure; for now, print stacktrace so issues are visible during testing
-                ex.printStackTrace()
+                plugin.logger.log(Level.SEVERE, "Failed to create resource portal with animation", ex)
             }
 
             // Spawn a hologram via the injectable HologramSpawner (runs on region dispatcher internally)
@@ -202,7 +202,7 @@ internal class PortalManager(
                         }
                     }
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    plugin.logger.log(Level.SEVERE, "Hologram spawn failed", e)
                 }
             }
         }

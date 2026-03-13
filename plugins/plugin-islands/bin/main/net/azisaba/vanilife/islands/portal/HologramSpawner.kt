@@ -6,6 +6,7 @@ import net.azisaba.vanilife.islands.IslandsFonts
 import net.kyori.adventure.text.Component
 import org.bukkit.Color
 import org.bukkit.plugin.Plugin
+import java.util.logging.Level
 
 /**
  * Abstraction for spawning/updating portal holograms. Default implementation uses EntityLib/TextDisplay.
@@ -42,7 +43,7 @@ internal class DefaultHologramSpawner(private val plugin: Plugin, private val re
                                 repository.updateHologram(id, uuid)
                                 resultUuid = uuid
                             } catch (e: Exception) {
-                                e.printStackTrace()
+                                plugin.logger.log(Level.SEVERE, "Failed to update hologram UUID in repository", e)
                             }
                         } else {
                             // fallback TextDisplay
@@ -55,12 +56,12 @@ internal class DefaultHologramSpawner(private val plugin: Plugin, private val re
                                 it.setShadowed(true)
                                 it.setAlignment(org.bukkit.entity.TextDisplay.TextAlignment.CENTER)
                             }
-                            try {
-                                repository.updateHologram(id, textDisplay.uniqueId)
-                                resultUuid = textDisplay.uniqueId
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
+                             try {
+                                 repository.updateHologram(id, textDisplay.uniqueId)
+                                 resultUuid = textDisplay.uniqueId
+                             } catch (e: Exception) {
+                                 plugin.logger.log(Level.SEVERE, "Failed to update hologram UUID in repository", e)
+                             }
                         }
                     } catch (e: Throwable) {
                         // fallback to TextDisplay
@@ -77,15 +78,15 @@ internal class DefaultHologramSpawner(private val plugin: Plugin, private val re
                             repository.updateHologram(id, textDisplay.uniqueId)
                             resultUuid = textDisplay.uniqueId
                         } catch (ex: Exception) {
-                            ex.printStackTrace()
+                            plugin.logger.log(Level.SEVERE, "TextDisplay fallback failed", ex)
                         }
                     }
                 } catch (e: Throwable) {
-                    e.printStackTrace()
+                    plugin.logger.log(Level.SEVERE, "Unexpected error during hologram spawn", e)
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            plugin.logger.log(Level.SEVERE, "Failed to compute hologram location or schedule spawn", e)
         }
 
         return resultUuid
