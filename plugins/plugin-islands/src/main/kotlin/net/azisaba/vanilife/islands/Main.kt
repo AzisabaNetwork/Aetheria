@@ -57,6 +57,11 @@ class Main : JavaPlugin() {
             server.getPluginCommand("portal")?.setExecutor(portalCmd)
         } catch (_: Exception) {
         }
+        try {
+            val admin = net.azisaba.vanilife.islands.portal.PortalAdminCommands()
+            server.getPluginCommand("portaladmin")?.setExecutor(admin)
+        } catch (_: Exception) {
+        }
     }
 
     override fun onDisable() {

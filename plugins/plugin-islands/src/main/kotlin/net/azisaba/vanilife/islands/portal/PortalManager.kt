@@ -309,4 +309,13 @@ internal class PortalManager(private val plugin: Plugin, private val repository:
         val set = map[chunkKey(chunkX, chunkZ)] ?: return emptySet()
         return set.toSet()
     }
+
+    /**
+     * Rebuild the entire origin chunk index from the in-memory portal map.
+     * Useful for admin reindex operations if the index becomes stale.
+     */
+    fun rebuildOriginIndex() {
+        originChunkIndex.clear()
+        portalsById.values.forEach { p -> indexPortalOrigin(p) }
+    }
 }
