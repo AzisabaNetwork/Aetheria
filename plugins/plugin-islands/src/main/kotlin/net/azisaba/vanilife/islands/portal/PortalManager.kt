@@ -21,7 +21,8 @@ internal class PortalManager(
     private val repository: PortalRepository,
     private val islandRepository: net.azisaba.vanilife.islands.storage.IslandRepository,
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO),
-    private val hologramSpawner: HologramSpawner = DefaultHologramSpawner(plugin, repository)
+    private val hologramSpawner: HologramSpawner = DefaultHologramSpawner(plugin, repository),
+    private val resourcePortalsCreator: (Plugin, DetectedPortal) -> Unit = { pl, det -> ResourcePortals.createWithAnimation(pl, det) }
 ) {
     private val portalsById: MutableMap<Long, Portal> = ConcurrentHashMap()
     // worldName -> chunkKey -> set of portal ids (origin-side index for quick lookup on block breaks)
@@ -191,7 +192,7 @@ internal class PortalManager(
             // Create the resource-side portal blocks with animation. ResourcePortals will
             // run the block changes on the region dispatcher internally.
             try {
-                ResourcePortals.createWithAnimation(plugin, resourceDetected)
+                resourcePortalsCreator(plugin, resourceDetected)
             } catch (ex: Exception) {
                 try {
                     plugin.logger.log(Level.SEVERE, "Failed to create resource portal with animation", ex)
