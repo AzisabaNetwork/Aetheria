@@ -27,8 +27,8 @@ Agent roles
 Completed steps:
 - mover: finder, detected and resource portals moved into plugin-islands and ignite listener registered (commit: "portal: move finder/detected/resourceportals into plugin-islands and register ignite listener")
 - manager: PortalManager added and PortalRepository/Manager registered in Koin (commit: "portal: add PortalManager and register PortalRepository/Manager in Koin")
- - manager: PortalManager added and PortalRepository/Manager registered in Koin (commit: "portal: add PortalManager and register PortalRepository/Manager in Koin")
- - placement: createPortal implements random resource placement and PortalEventListener stub added (commit: "portal: implement random resource placement and add portal event listener stub; expose PortalConfig")
+- placement: createPortal implements random resource placement and PortalEventListener stub added (commit: "portal: implement random resource placement and add portal event listener stub; expose PortalConfig")
+- event: portal region stored and PlayerMove detection + teleport flow implemented (commit: "portal: implement portal region storage, event detection and teleport flow (with cooldown)")
 
 Notes
 - This AGENTS.md is a lightweight loop spec for local automated edits. Manual verification is required before production deployment.
