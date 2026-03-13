@@ -23,7 +23,7 @@ object ResourcePortals {
         3..21
     )
     fun createWithAnimation(plugin: Plugin, detected: DetectedPortal) {
-        val location = Location(detected.world, detected.minBound.x(), detected.minBound.y(), detected.maxBound.z())
+        val location = Location(detected.world, detected.minBound.blockX().toDouble(), detected.minBound.blockY().toDouble(), detected.maxBound.blockZ().toDouble())
         val portalAxis = when (detected.orientation) {
             DetectedPortal.Orientation.XY -> Axis.X
             DetectedPortal.Orientation.ZY -> Axis.Z
