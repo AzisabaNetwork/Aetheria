@@ -35,6 +35,8 @@ class Main : JavaPlugin() {
                 single { config }
                 single { database }
                 single<IslandRepository> { DatabaseIslandRepository(get()) }
+                single<PortalRepository> { net.azisaba.vanilife.islands.portal.DatabasePortalRepository(get()) }
+                single { net.azisaba.vanilife.islands.portal.PortalManager(this@Main, get(), get()) }
                 single<IslandManager> { IslandManager(get(), Bukkit.getIslandsWorld(), get()) }
             })
         }
