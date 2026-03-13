@@ -26,6 +26,7 @@ Agent roles
 
 Completed steps:
 - mover: finder, detected and resource portals moved into plugin-islands and ignite listener registered (commit: "portal: move finder/detected/resourceportals into plugin-islands and register ignite listener")
+- manager: PortalManager added and PortalRepository/Manager registered in Koin (commit: "portal: add PortalManager and register PortalRepository/Manager in Koin")
 
 Notes
 - This AGENTS.md is a lightweight loop spec for local automated edits. Manual verification is required before production deployment.
