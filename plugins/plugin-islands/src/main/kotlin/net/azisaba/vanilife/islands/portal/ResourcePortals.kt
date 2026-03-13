@@ -23,6 +23,8 @@ object ResourcePortals {
         3..21
     )
     fun createWithAnimation(plugin: Plugin, detected: DetectedPortal) {
+        // Defensive: some tests/mock frameworks may call this with nulls during stubbing.
+        if (plugin == null || detected == null) return
         val location = Location(detected.world, detected.minBound.blockX().toDouble(), detected.minBound.blockY().toDouble(), detected.maxBound.blockZ().toDouble())
         val portalAxis = when (detected.orientation) {
             DetectedPortal.Orientation.XY -> Axis.X
