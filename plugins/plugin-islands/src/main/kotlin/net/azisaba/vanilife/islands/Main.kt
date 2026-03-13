@@ -13,6 +13,10 @@ import org.bukkit.plugin.java.JavaPlugin
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import net.azisaba.vanilife.islands.portal.HologramSpawner
+import net.azisaba.vanilife.islands.portal.DefaultHologramSpawner
 
 class Main : JavaPlugin() {
     private lateinit var koinApp: KoinApplication
@@ -36,7 +40,7 @@ class Main : JavaPlugin() {
                 single { database }
                 single<IslandRepository> { DatabaseIslandRepository(get()) }
                 single<net.azisaba.vanilife.islands.portal.PortalRepository> { net.azisaba.vanilife.islands.portal.DatabasePortalRepository(get()) }
-                single { net.azisaba.vanilife.islands.portal.PortalManager(this@Main, get(), get()) }
+                single { net.azisaba.vanilife.islands.portal.PortalManager(this@Main, get(), get(), CoroutineScope(Dispatchers.IO), DefaultHologramSpawner(this@Main, get())) }
                 // ensure PortalHologram (wrapper) class is available to Koin consumers if needed later
                 single { net.azisaba.vanilife.islands.portal.PortalHologram::class }
                 single<IslandManager> { IslandManager(get(), Bukkit.getIslandsWorld(), get()) }

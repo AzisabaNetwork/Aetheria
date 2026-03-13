@@ -15,7 +15,13 @@ import org.bukkit.Color
 import org.bukkit.plugin.Plugin
 import java.util.concurrent.ConcurrentHashMap
 
-internal class PortalManager(private val plugin: Plugin, private val repository: PortalRepository, private val islandRepository: net.azisaba.vanilife.islands.storage.IslandRepository) {
+internal class PortalManager(
+    private val plugin: Plugin,
+    private val repository: PortalRepository,
+    private val islandRepository: net.azisaba.vanilife.islands.storage.IslandRepository,
+    private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+    private val hologramSpawner: HologramSpawner = DefaultHologramSpawner(plugin, repository)
+) {
     private val portalsById: MutableMap<Long, Portal> = ConcurrentHashMap()
     // worldName -> chunkKey -> set of portal ids (origin-side index for quick lookup on block breaks)
     private val originChunkIndex: MutableMap<String, MutableMap<Long, MutableSet<Long>>> = ConcurrentHashMap()
@@ -23,7 +29,7 @@ internal class PortalManager(private val plugin: Plugin, private val repository:
     fun getAllPortals(): Collection<Portal> = portalsById.values
 
     fun removePortal(portal: Portal) {
-        CoroutineScope(Dispatchers.IO).launch {
+        scope.launch {
             portal.id?.let {
                 repository.delete(it)
                 // remove resource blocks and hologram if present
@@ -84,7 +90,7 @@ internal class PortalManager(private val plugin: Plugin, private val repository:
     }
 
     fun loadAll() {
-        CoroutineScope(Dispatchers.IO).launch {
+        scope.launch {
             val active = repository.findActive()
             active.forEach { p ->
                 p.id?.let { id ->
@@ -167,8 +173,8 @@ internal class PortalManager(private val plugin: Plugin, private val repository:
             origin.orientation
         )
 
-        // Persist portal metadata first (IO) and then spawn the resource portal animation
-            CoroutineScope(Dispatchers.IO).launch {
+            // Persist portal metadata first (IO) and then spawn the resource portal animation
+            scope.launch {
                 val stored = repository.insert(portal)
             stored.id?.let { id ->
                 portalsById[id] = stored
@@ -184,77 +190,15 @@ internal class PortalManager(private val plugin: Plugin, private val repository:
                 ex.printStackTrace()
             }
 
-            // Spawn a hologram TextDisplay at the center of the resource portal
-            stored.id?.let { id ->
-                try {
-                    val centerX = (resourceDetected.minBound.blockX() + resourceDetected.maxBound.blockX() + 1) / 2.0
-                    val centerY = (resourceDetected.minBound.blockY() + resourceDetected.maxBound.blockY() + 1) / 2.0
-                    val centerZ = (resourceDetected.minBound.blockZ() + resourceDetected.maxBound.blockZ() + 1) / 2.0
-                    val loc = org.bukkit.Location(resourceDetected.world, centerX, centerY, centerZ)
-
-                    // spawn hologram using EntityLib wrappers for consistent visuals and font
-                    plugin.launch(plugin.regionDispatcher(loc)) {
-                        try {
-                            // Use TextDisplay entity but configure via Adventure component for text and use font key from IslandsFonts
-                            // Prefer EntityLib wrapper PortalHologram for consistent visuals; fallback to TextDisplay spawn
-                            val textComp = Component.text("Resource Portal").font(IslandsFonts.WAVES.key())
-                            try {
-                                // spawn via EntityLib wrapper
-                                val container = me.tofaa.entitylib.container.EntityContainer.basic()
-                                val wrapper = PortalHologram(textComp)
-                                val peLoc = com.github.retrooper.packetevents.protocol.world.Location(centerX, centerY, centerZ, 0f, 0f)
-                                val spawned = wrapper.spawn(peLoc, container)
-                                if (spawned) {
-                                    // find the spawned entity UUID from world entities near center
-                                    val world = resourceDetected.world
-                                    val found = world.entities.find { it.location.distance(org.bukkit.Location(world, centerX, centerY, centerZ)) < 2.0 }
-                                    val uuid = found?.uniqueId
-                                    try {
-                                        repository.updateHologram(id, uuid)
-                                        val current = portalsById[id]
-                                        if (current != null) portalsById[id] = current.copy(hologramUuid = uuid)
-                                    } catch (e: Exception) {
-                                        e.printStackTrace()
-                                    }
-                                } else {
-                                    // fallback to TextDisplay
-                                    val textDisplay = resourceDetected.world.spawn(loc, org.bukkit.entity.TextDisplay::class.java) {
-                                        it.isPersistent = false
-                                        it.text(textComp)
-                                        it.setLineWidth(40)
-                                        it.setBackgroundColor(Color.fromRGB(0, 0, 0))
-                                        it.setTextOpacity(255.toByte())
-                                        it.setShadowed(true)
-                                        it.setAlignment(org.bukkit.entity.TextDisplay.TextAlignment.CENTER)
-                                    }
-                                    try {
-                                        repository.updateHologram(id, textDisplay.uniqueId)
-                                        val current = portalsById[id]
-                                        if (current != null) portalsById[id] = current.copy(hologramUuid = textDisplay.uniqueId)
-                                    } catch (e: Exception) { e.printStackTrace() }
-                                }
-                            } catch (e: Throwable) {
-                                // fallback
-                                try {
-                                    val textDisplay = resourceDetected.world.spawn(loc, org.bukkit.entity.TextDisplay::class.java) {
-                                        it.isPersistent = false
-                                        it.text(textComp)
-                                        it.setLineWidth(40)
-                                        it.setBackgroundColor(Color.fromRGB(0, 0, 0))
-                                        it.setTextOpacity(255.toByte())
-                                        it.setShadowed(true)
-                                        it.setAlignment(org.bukkit.entity.TextDisplay.TextAlignment.CENTER)
-                                    }
-                                    repository.updateHologram(id, textDisplay.uniqueId)
-                                    val current = portalsById[id]
-                                    if (current != null) portalsById[id] = current.copy(hologramUuid = textDisplay.uniqueId)
-                                } catch (ex: Exception) {
-                                    ex.printStackTrace()
-                                }
-                            }
-                        } catch (e: Throwable) {
-                            // fallback: if anything fails, still continue without hologram
-                            e.printStackTrace()
+            // Spawn a hologram via the injectable HologramSpawner (runs on region dispatcher internally)
+            scope.launch {
+                    try {
+                    val uuid = hologramSpawner.spawnHologram(stored, resourceDetected)
+                    // update in-memory copy if repository stored a hologram UUID
+                    stored.id?.let { id ->
+                        if (uuid != null) {
+                            val current = portalsById[id]
+                            if (current != null) portalsById[id] = current.copy(hologramUuid = uuid)
                         }
                     }
                 } catch (e: Exception) {
