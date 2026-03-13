@@ -13,6 +13,8 @@ import org.bukkit.Sound
 import org.bukkit.SoundCategory
 import org.bukkit.block.data.Orientable
 import org.bukkit.plugin.Plugin
+import java.util.logging.Level
+
 
 object ResourcePortals {
     val FRAME_BLOCK: Material = Material.PRISMARINE
@@ -23,8 +25,11 @@ object ResourcePortals {
         3..21
     )
     fun createWithAnimation(plugin: Plugin, detected: DetectedPortal) {
-        // Defensive: some tests/mock frameworks may call this with nulls during stubbing.
-        if (plugin == null || detected == null) return
+        // Defensive: if plugin or detected are misused in tests, log and return
+        if (plugin == null || detected == null) {
+            try { java.util.logging.Logger.getLogger("vanilife").log(Level.FINE, "ResourcePortals.createWithAnimation called with nulls in tests") } catch (_: Throwable) {}
+            return
+        }
         val location = Location(detected.world, detected.minBound.blockX().toDouble(), detected.minBound.blockY().toDouble(), detected.maxBound.blockZ().toDouble())
         val portalAxis = when (detected.orientation) {
             DetectedPortal.Orientation.XY -> Axis.X
