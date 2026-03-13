@@ -6,19 +6,30 @@ import kotlinx.coroutines.launch
 import com.github.shynixn.mccoroutine.folia.launch
 import com.github.shynixn.mccoroutine.folia.regionDispatcher
 import net.azisaba.vanilife.islands.PortalConfig
+import net.azisaba.vanilife.islands.IslandsFonts
 import net.azisaba.vanilife.islands.portal.finder.DetectedPortal
 import net.azisaba.vanilife.islands.storage.IslandRepository
+import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
+import org.bukkit.Color
 import org.bukkit.plugin.Plugin
 import java.util.concurrent.ConcurrentHashMap
 
-internal class PortalManager(private val plugin: Plugin, private val repository: PortalRepository, private val islandRepository: net.azisaba.vanilife.islands.storage.IslandRepository) {
+internal class PortalManager(
+    private val plugin: Plugin,
+    private val repository: PortalRepository,
+    private val islandRepository: net.azisaba.vanilife.islands.storage.IslandRepository,
+    private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+    private val hologramSpawner: HologramSpawner = DefaultHologramSpawner(plugin, repository)
+) {
     private val portalsById: MutableMap<Long, Portal> = ConcurrentHashMap()
+    // worldName -> chunkKey -> set of portal ids (origin-side index for quick lookup on block breaks)
+    private val originChunkIndex: MutableMap<String, MutableMap<Long, MutableSet<Long>>> = ConcurrentHashMap()
 
     fun getAllPortals(): Collection<Portal> = portalsById.values
 
     fun removePortal(portal: Portal) {
-        CoroutineScope(Dispatchers.IO).launch {
+        scope.launch {
             portal.id?.let {
                 repository.delete(it)
                 // remove resource blocks and hologram if present
@@ -79,9 +90,14 @@ internal class PortalManager(private val plugin: Plugin, private val repository:
     }
 
     fun loadAll() {
-        CoroutineScope(Dispatchers.IO).launch {
+        scope.launch {
             val active = repository.findActive()
-            active.forEach { portalsById[it.id!!] = it }
+            active.forEach { p ->
+                p.id?.let { id ->
+                    portalsById[id] = p
+                    indexPortalOrigin(p)
+                }
+            }
         }
     }
 
@@ -100,10 +116,25 @@ internal class PortalManager(private val plugin: Plugin, private val repository:
             val y = world.getHighestBlockYAt(x, z)
             // Basic safety checks: avoid liquid and ensure not inside a portal block
             val block = world.getBlockAt(x, y - 1, z)
-            if (block.type.isSolid) {
-                chosenTriple = Triple(x, y, z)
-                return@repeat
+            if (!block.type.isSolid) return@repeat
+
+            // enforce minPortalDistance: ensure candidate is not too close to existing portals
+            if (config.minPortalDistance > 0) {
+                val minDistSq = config.minPortalDistance.toDouble() * config.minPortalDistance.toDouble()
+                val existing = getPortalsInWorld(world.name)
+                var tooClose = false
+                for (op in existing) {
+                    val ox = (op.resourceMin.blockX() + op.resourceMax.blockX() + 1) / 2.0
+                    val oz = (op.resourceMin.blockZ() + op.resourceMax.blockZ() + 1) / 2.0
+                    val dx2 = ox - x.toDouble()
+                    val dz2 = oz - z.toDouble()
+                    if (dx2 * dx2 + dz2 * dz2 < minDistSq) { tooClose = true; break }
+                }
+                if (tooClose) return@repeat
             }
+
+            chosenTriple = Triple(x, y, z)
+            return@repeat
         }
 
         val (cx, cy, cz) = chosenTriple ?: run {
@@ -142,10 +173,13 @@ internal class PortalManager(private val plugin: Plugin, private val repository:
             origin.orientation
         )
 
-        // Persist portal metadata first (IO) and then spawn the resource portal animation
-        CoroutineScope(Dispatchers.IO).launch {
-            val stored = repository.insert(portal)
-            stored.id?.let { portalsById[it] = stored }
+            // Persist portal metadata first (IO) and then spawn the resource portal animation
+            scope.launch {
+                val stored = repository.insert(portal)
+            stored.id?.let { id ->
+                portalsById[id] = stored
+                indexPortalOrigin(stored)
+            }
 
             // Create the resource-side portal blocks with animation. ResourcePortals will
             // run the block changes on the region dispatcher internally.
@@ -156,31 +190,15 @@ internal class PortalManager(private val plugin: Plugin, private val repository:
                 ex.printStackTrace()
             }
 
-            // Spawn a hologram TextDisplay at the center of the resource portal
-            stored.id?.let { id ->
-                try {
-                    val centerX = (resourceDetected.minBound.blockX() + resourceDetected.maxBound.blockX() + 1) / 2.0
-                    val centerY = (resourceDetected.minBound.blockY() + resourceDetected.maxBound.blockY() + 1) / 2.0
-                    val centerZ = (resourceDetected.minBound.blockZ() + resourceDetected.maxBound.blockZ() + 1) / 2.0
-                    val loc = org.bukkit.Location(resourceDetected.world, centerX, centerY, centerZ)
-
-                    // spawn TextDisplay on region dispatcher
-                    plugin.launch(plugin.regionDispatcher(loc)) {
-                        val textDisplay = resourceDetected.world.spawn(loc, org.bukkit.entity.TextDisplay::class.java) {
-                            it.isPersistent = false
-                            it.customName = "§bResource Portal"
-                            it.isCustomNameVisible = true
-                        }
-                        // store hologram UUID in DB
-                        try {
-                            repository.updateHologram(id, textDisplay.uniqueId)
-                            // update in-memory portal entry
+            // Spawn a hologram via the injectable HologramSpawner (runs on region dispatcher internally)
+            scope.launch {
+                    try {
+                    val uuid = hologramSpawner.spawnHologram(stored, resourceDetected)
+                    // update in-memory copy if repository stored a hologram UUID
+                    stored.id?.let { id ->
+                        if (uuid != null) {
                             val current = portalsById[id]
-                            if (current != null) {
-                                portalsById[id] = current.copy(hologramUuid = textDisplay.uniqueId)
-                            }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
+                            if (current != null) portalsById[id] = current.copy(hologramUuid = uuid)
                         }
                     }
                 } catch (e: Exception) {
@@ -188,5 +206,60 @@ internal class PortalManager(private val plugin: Plugin, private val repository:
                 }
             }
         }
+    }
+
+    private fun chunkKey(cx: Int, cz: Int): Long = (cx.toLong() shl 32) or (cz.toLong() and 0xffffffffL)
+
+    private fun indexPortalOrigin(portal: Portal) {
+        val id = portal.id ?: return
+        val world = portal.originWorldName
+        val map = originChunkIndex.computeIfAbsent(world) { ConcurrentHashMap() }
+        val minChunkX = portal.originMin.blockX() shr 4
+        val maxChunkX = portal.originMax.blockX() shr 4
+        val minChunkZ = portal.originMin.blockZ() shr 4
+        val maxChunkZ = portal.originMax.blockZ() shr 4
+        for (cx in minChunkX..maxChunkX) {
+            for (cz in minChunkZ..maxChunkZ) {
+                val key = chunkKey(cx, cz)
+                val set = map.computeIfAbsent(key) { java.util.concurrent.ConcurrentHashMap.newKeySet<Long>() }
+                set.add(id)
+            }
+        }
+    }
+
+    fun unindexPortalOrigin(portal: Portal) {
+        val id = portal.id ?: return
+        val world = portal.originWorldName
+        val map = originChunkIndex[world] ?: return
+        val minChunkX = portal.originMin.blockX() shr 4
+        val maxChunkX = portal.originMax.blockX() shr 4
+        val minChunkZ = portal.originMin.blockZ() shr 4
+        val maxChunkZ = portal.originMax.blockZ() shr 4
+        for (cx in minChunkX..maxChunkX) {
+            for (cz in minChunkZ..maxChunkZ) {
+                val key = chunkKey(cx, cz)
+                val set = map[key]
+                set?.remove(id)
+                if (set == null || set.isEmpty()) map.remove(key)
+            }
+        }
+        if (map.isEmpty()) originChunkIndex.remove(world)
+    }
+
+    fun getPortalById(id: Long): Portal? = portalsById[id]
+
+    fun getPortalIdsForOriginChunk(worldName: String, chunkX: Int, chunkZ: Int): Set<Long> {
+        val map = originChunkIndex[worldName] ?: return emptySet()
+        val set = map[chunkKey(chunkX, chunkZ)] ?: return emptySet()
+        return set.toSet()
+    }
+
+    /**
+     * Rebuild the entire origin chunk index from the in-memory portal map.
+     * Useful for admin reindex operations if the index becomes stale.
+     */
+    fun rebuildOriginIndex() {
+        originChunkIndex.clear()
+        portalsById.values.forEach { p -> indexPortalOrigin(p) }
     }
 }

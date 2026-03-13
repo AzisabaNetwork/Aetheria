@@ -29,4 +29,8 @@ tasks.test {
 // Paper API for test compile (provides BlockPosition etc.)
 dependencies {
     testImplementation("io.papermc.paper:paper-api:1.20.2-R0.1-SNAPSHOT")
+    // allow tests to use folia-api types (IslandPos, etc.) used across modules
+    testImplementation(project(":folia-api"))
+    // Packetevents is compileOnly in production; include in test classpath so tests can reference types used by PortalHologram
+    testImplementation(libs.packetevents)
 }

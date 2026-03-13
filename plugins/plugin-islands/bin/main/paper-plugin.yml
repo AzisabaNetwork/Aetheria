@@ -9,3 +9,28 @@ dependencies:
       load: BEFORE
     packetevents:
       load: BEFORE
+
+commands:
+  portal:
+    description: Portal admin and owner commands (list/unlink/giveigniter)
+    usage: /portal <list|unlink|giveigniter>
+    permission: vanilife.portal.use
+
+  portaladmin:
+    description: Portal admin utilities (reindex)
+    usage: /portaladmin <reindex>
+    permission: vanilife.portal.admin
+
+permissions:
+  vanilife.portal.use:
+    default: op
+  vanilife.portal.list:
+    default: op
+  vanilife.portal.unlink:
+    default: op
+  vanilife.portal.giveigniter:
+    default: op
+  vanilife.portal.admin.reindex:
+    default: op
+  vanilife.portal.admin:
+    default: op

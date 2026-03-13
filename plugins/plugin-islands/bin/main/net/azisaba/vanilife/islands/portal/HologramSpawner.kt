@@ -1,8 +1,7 @@
 package net.azisaba.vanilife.islands.portal
 
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.Dispatchers
-import kotlin.coroutines.CoroutineContext
+import com.github.shynixn.mccoroutine.folia.launch
+import com.github.shynixn.mccoroutine.folia.regionDispatcher
 import net.azisaba.vanilife.islands.IslandsFonts
 import net.kyori.adventure.text.Component
 import org.bukkit.Color
@@ -15,11 +14,7 @@ internal interface HologramSpawner {
     suspend fun spawnHologram(stored: Portal, resourceDetected: net.azisaba.vanilife.islands.portal.finder.DetectedPortal): java.util.UUID?
 }
 
-internal class DefaultHologramSpawner(
-    private val plugin: Plugin,
-    private val repository: net.azisaba.vanilife.islands.portal.PortalRepository,
-    private val dispatcherProvider: (org.bukkit.Location) -> CoroutineContext = { Dispatchers.Unconfined }
-) : HologramSpawner {
+internal class DefaultHologramSpawner(private val plugin: Plugin, private val repository: net.azisaba.vanilife.islands.portal.PortalRepository) : HologramSpawner {
     override suspend fun spawnHologram(stored: Portal, resourceDetected: net.azisaba.vanilife.islands.portal.finder.DetectedPortal): java.util.UUID? {
         var resultUuid: java.util.UUID? = null
         val id = stored.id ?: return null
@@ -29,9 +24,8 @@ internal class DefaultHologramSpawner(
             val centerZ = (resourceDetected.minBound.blockZ() + resourceDetected.maxBound.blockZ() + 1) / 2.0
             val loc = org.bukkit.Location(resourceDetected.world, centerX, centerY, centerZ)
 
-            // run hologram spawn on provided dispatcher (tests may override)
-            val dispatcher: CoroutineContext = try { dispatcherProvider(loc) } catch (_: Throwable) { Dispatchers.Unconfined }
-            withContext(dispatcher) {
+            // run hologram spawn on region dispatcher for Folia safety
+            plugin.launch(plugin.regionDispatcher(loc)) {
                 try {
                     val textComp = Component.text("Resource Portal").font(IslandsFonts.WAVES.key())
                     try {
