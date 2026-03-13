@@ -18,12 +18,32 @@ class PortalManager(private val plugin: Plugin, private val repository: PortalRe
         }
     }
 
-    fun createPortal(ownerUuid: java.util.UUID, origin: net.azisaba.vanilife.islands.portal.finder.DetectedPortal) {
-        // choose random resource world location (stubbed)
-        val resourceWorld = Bukkit.getWorlds().firstOrNull { it.name == "resources" } ?: Bukkit.getWorlds().first()
-        val centerX = resourceWorld.spawnLocation.blockX
-        val centerY = resourceWorld.spawnLocation.blockY
-        val centerZ = resourceWorld.spawnLocation.blockZ
+    fun createPortal(ownerUuid: java.util.UUID, origin: net.azisaba.vanilife.islands.portal.finder.DetectedPortal, config: net.azisaba.vanilife.islands.Config.PortalConfig) {
+        val resourceWorld = Bukkit.getWorld(config.resourceWorld) ?: Bukkit.getWorlds().first()
+
+        // Random coordinate search (simple implementation): pick random X/Z within radius and use highest block Y
+        val world = resourceWorld
+        val rand = java.util.Random()
+        var chosenTriple: Triple<Int, Int, Int>? = null
+        repeat(config.spawnAttempts) {
+            val dx = rand.nextInt(config.spawnRadius * 2) - config.spawnRadius
+            val dz = rand.nextInt(config.spawnRadius * 2) - config.spawnRadius
+            val x = world.spawnLocation.blockX + dx
+            val z = world.spawnLocation.blockZ + dz
+            val y = world.getHighestBlockYAt(x, z)
+            // Basic safety checks: avoid liquid and ensure not inside a portal block
+            val block = world.getBlockAt(x, y - 1, z)
+            if (block.type.isSolid) {
+                chosenTriple = Triple(x, y, z)
+                return@repeat
+            }
+        }
+
+        val (cx, cy, cz) = chosenTriple ?: run {
+            // fallback to world spawn
+            val sl = resourceWorld.spawnLocation
+            Triple(sl.blockX, sl.blockY, sl.blockZ)
+        }
 
         val portal = Portal(
             id = null,
@@ -35,9 +55,9 @@ class PortalManager(private val plugin: Plugin, private val repository: PortalRe
             innerWidth = origin.innerWidth,
             innerHeight = origin.innerHeight,
             resourceWorldName = resourceWorld.name,
-            resourceCenterX = centerX,
-            resourceCenterY = centerY,
-            resourceCenterZ = centerZ,
+            resourceCenterX = cx,
+            resourceCenterY = cy,
+            resourceCenterZ = cz,
             createdAt = System.currentTimeMillis(),
             active = true,
         )

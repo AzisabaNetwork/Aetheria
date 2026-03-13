@@ -11,4 +11,9 @@ internal fun Main.setupEventListeners(koin: Koin) {
         server.pluginManager.registerEvents(IgniteListener(koin.get()), this)
     } catch (ignored: Exception) {
     }
+
+    try {
+        server.pluginManager.registerEvents(net.azisaba.vanilife.islands.portal.listener.PortalEventListener(this), this)
+    } catch (ignored: Exception) {
+    }
 }
