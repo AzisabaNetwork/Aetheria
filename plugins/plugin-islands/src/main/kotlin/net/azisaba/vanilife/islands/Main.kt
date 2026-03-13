@@ -35,13 +35,28 @@ class Main : JavaPlugin() {
                 single { config }
                 single { database }
                 single<IslandRepository> { DatabaseIslandRepository(get()) }
-                single<PortalRepository> { net.azisaba.vanilife.islands.portal.DatabasePortalRepository(get()) }
+                single<net.azisaba.vanilife.islands.portal.PortalRepository> { net.azisaba.vanilife.islands.portal.DatabasePortalRepository(get()) }
                 single { net.azisaba.vanilife.islands.portal.PortalManager(this@Main, get(), get()) }
+                // ensure PortalHologram (wrapper) class is available to Koin consumers if needed later
+                single { net.azisaba.vanilife.islands.portal.PortalHologram::class }
                 single<IslandManager> { IslandManager(get(), Bukkit.getIslandsWorld(), get()) }
             })
         }
 
         setupEventListeners(koinApp.koin)
+
+        // load portals into memory and register commands
+        try {
+            val pm = koinApp.koin.get<net.azisaba.vanilife.islands.portal.PortalManager>()
+            pm.loadAll()
+        } catch (_: Exception) {
+        }
+
+        try {
+            val portalCmd = net.azisaba.vanilife.islands.portal.PortalCommands()
+            server.getPluginCommand("portal")?.setExecutor(portalCmd)
+        } catch (_: Exception) {
+        }
     }
 
     override fun onDisable() {

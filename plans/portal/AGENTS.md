@@ -31,5 +31,8 @@ Completed steps:
 - event: portal region stored and PlayerMove detection + teleport flow implemented (commit: "portal: implement portal region storage, event detection and teleport flow (with cooldown)")
 - db: add PortalsTable Exposed object and create it at DB setup (commit: "portal: add PortalsTable Exposed object and create it at DB setup")
 
+Next quick iterative step completed:
+- break-listener: added owner/admin permission checks in PortalBreakListener to prevent unauthorized unlinking (permission: `vanilife.portal.unlink`); non-authorized attempts are cancelled and notified to the player. (agent: listener)
+
 Notes
 - This AGENTS.md is a lightweight loop spec for local automated edits. Manual verification is required before production deployment.
