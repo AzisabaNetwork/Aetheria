@@ -31,9 +31,12 @@ internal class DatabasePortalRepository(private val database: Database) : Portal
             it[PortalsTable.innerWidth] = portal.innerWidth
             it[PortalsTable.innerHeight] = portal.innerHeight
             it[PortalsTable.resourceWorld] = portal.resourceWorldName
-            it[PortalsTable.resourceX] = portal.resourceCenterX
-            it[PortalsTable.resourceY] = portal.resourceCenterY
-            it[PortalsTable.resourceZ] = portal.resourceCenterZ
+            it[PortalsTable.resourceMinX] = portal.resourceMin.blockX()
+            it[PortalsTable.resourceMinY] = portal.resourceMin.blockY()
+            it[PortalsTable.resourceMinZ] = portal.resourceMin.blockZ()
+            it[PortalsTable.resourceMaxX] = portal.resourceMax.blockX()
+            it[PortalsTable.resourceMaxY] = portal.resourceMax.blockY()
+            it[PortalsTable.resourceMaxZ] = portal.resourceMax.blockZ()
             it[PortalsTable.createdAt] = portal.createdAt
             it[PortalsTable.active] = portal.active
         }.value
@@ -60,9 +63,8 @@ internal class DatabasePortalRepository(private val database: Database) : Portal
         get(PortalsTable.innerWidth),
         get(PortalsTable.innerHeight),
         get(PortalsTable.resourceWorld),
-        get(PortalsTable.resourceX),
-        get(PortalsTable.resourceY),
-        get(PortalsTable.resourceZ),
+        io.papermc.paper.math.Position.block(get(PortalsTable.resourceMinX), get(PortalsTable.resourceMinY), get(PortalsTable.resourceMinZ)),
+        io.papermc.paper.math.Position.block(get(PortalsTable.resourceMaxX), get(PortalsTable.resourceMaxY), get(PortalsTable.resourceMaxZ)),
         get(PortalsTable.createdAt),
         get(PortalsTable.active),
     )
@@ -80,9 +82,12 @@ internal class DatabasePortalRepository(private val database: Database) : Portal
         val innerWidth = org.jetbrains.exposed.v1.core.integer("inner_width")
         val innerHeight = org.jetbrains.exposed.v1.core.integer("inner_height")
         val resourceWorld = org.jetbrains.exposed.v1.core.varchar("resource_world", 64)
-        val resourceX = org.jetbrains.exposed.v1.core.integer("resource_x")
-        val resourceY = org.jetbrains.exposed.v1.core.integer("resource_y")
-        val resourceZ = org.jetbrains.exposed.v1.core.integer("resource_z")
+        val resourceMinX = org.jetbrains.exposed.v1.core.integer("resource_min_x")
+        val resourceMinY = org.jetbrains.exposed.v1.core.integer("resource_min_y")
+        val resourceMinZ = org.jetbrains.exposed.v1.core.integer("resource_min_z")
+        val resourceMaxX = org.jetbrains.exposed.v1.core.integer("resource_max_x")
+        val resourceMaxY = org.jetbrains.exposed.v1.core.integer("resource_max_y")
+        val resourceMaxZ = org.jetbrains.exposed.v1.core.integer("resource_max_z")
         val createdAt = org.jetbrains.exposed.v1.core.long("created_at")
         val active = org.jetbrains.exposed.v1.core.bool("active").default(true)
     }

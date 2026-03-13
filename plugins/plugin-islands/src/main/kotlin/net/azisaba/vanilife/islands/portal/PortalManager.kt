@@ -11,6 +11,12 @@ import java.util.concurrent.ConcurrentHashMap
 class PortalManager(private val plugin: Plugin, private val repository: PortalRepository, private val islandRepository: IslandRepository) {
     private val portalsById: MutableMap<Long, Portal> = ConcurrentHashMap()
 
+    fun getPortalsInWorld(worldName: String): List<Portal> = portalsById.values.filter { it.resourceWorldName == worldName }
+
+    suspend fun lookupIslandForPortal(portal: Portal): net.azisaba.vanilife.islands.IslandInfo? {
+        return islandRepository.lookupByOwner(portal.ownerUuid)
+    }
+
     fun loadAll() {
         CoroutineScope(Dispatchers.IO).launch {
             val active = repository.findActive()
@@ -45,6 +51,9 @@ class PortalManager(private val plugin: Plugin, private val repository: PortalRe
             Triple(sl.blockX, sl.blockY, sl.blockZ)
         }
 
+        val resourceMin = io.papermc.paper.math.Position.block(cx - 1, cy - 1, cz - 1)
+        val resourceMax = io.papermc.paper.math.Position.block(cx + 1, cy + 3, cz + 1)
+
         val portal = Portal(
             id = null,
             ownerUuid = ownerUuid,
@@ -55,9 +64,8 @@ class PortalManager(private val plugin: Plugin, private val repository: PortalRe
             innerWidth = origin.innerWidth,
             innerHeight = origin.innerHeight,
             resourceWorldName = resourceWorld.name,
-            resourceCenterX = cx,
-            resourceCenterY = cy,
-            resourceCenterZ = cz,
+            resourceMin = resourceMin,
+            resourceMax = resourceMax,
             createdAt = System.currentTimeMillis(),
             active = true,
         )

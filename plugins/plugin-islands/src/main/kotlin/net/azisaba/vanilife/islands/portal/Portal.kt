@@ -15,9 +15,8 @@ data class Portal(
     val innerWidth: Int,
     val innerHeight: Int,
     val resourceWorldName: String,
-    val resourceCenterX: Int,
-    val resourceCenterY: Int,
-    val resourceCenterZ: Int,
+    val resourceMin: BlockPosition,
+    val resourceMax: BlockPosition,
     val createdAt: Long,
     val active: Boolean,
 )
