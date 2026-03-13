@@ -118,6 +118,7 @@ class PortalCommands : CommandExecutor, KoinComponent {
 
         val item = ItemStack(org.bukkit.Material.FLINT_AND_STEEL)
         val meta = item.itemMeta
+        // use plain string display name (ItemMeta#setDisplayName expects String)
         meta?.setDisplayName("Portal Igniter")
         val key = NamespacedKey(plugin, "portal_igniter")
         meta?.persistentDataContainer?.set(key, PersistentDataType.BYTE, 1.toByte())
