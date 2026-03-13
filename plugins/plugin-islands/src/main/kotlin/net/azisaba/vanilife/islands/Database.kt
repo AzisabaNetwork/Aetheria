@@ -25,5 +25,11 @@ internal fun Database.setupTables(): Database = transaction(this) {
     SchemaUtils.create(
         DatabaseIslandRepository.IslandsTable,
     )
+
+    // create portals table if available (defensive, class may exist now)
+    try {
+        SchemaUtils.create(net.azisaba.vanilife.islands.portal.PortalsTable)
+    } catch (_: Throwable) {
+    }
     this@setupTables
 }

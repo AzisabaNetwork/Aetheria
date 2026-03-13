@@ -69,26 +69,29 @@ internal class DatabasePortalRepository(private val database: Database) : Portal
         get(PortalsTable.active),
     )
 
-    private object PortalsTable : LongIdTable(name = "portals") {
-        val owner = org.jetbrains.exposed.v1.core.java.javaUUID("owner")
-        val originWorld = org.jetbrains.exposed.v1.core.varchar("origin_world", 64)
-        val originMinX = org.jetbrains.exposed.v1.core.integer("origin_min_x")
-        val originMinY = org.jetbrains.exposed.v1.core.integer("origin_min_y")
-        val originMinZ = org.jetbrains.exposed.v1.core.integer("origin_min_z")
-        val originMaxX = org.jetbrains.exposed.v1.core.integer("origin_max_x")
-        val originMaxY = org.jetbrains.exposed.v1.core.integer("origin_max_y")
-        val originMaxZ = org.jetbrains.exposed.v1.core.integer("origin_max_z")
-        val orientation = org.jetbrains.exposed.v1.core.integer("orientation")
-        val innerWidth = org.jetbrains.exposed.v1.core.integer("inner_width")
-        val innerHeight = org.jetbrains.exposed.v1.core.integer("inner_height")
-        val resourceWorld = org.jetbrains.exposed.v1.core.varchar("resource_world", 64)
-        val resourceMinX = org.jetbrains.exposed.v1.core.integer("resource_min_x")
-        val resourceMinY = org.jetbrains.exposed.v1.core.integer("resource_min_y")
-        val resourceMinZ = org.jetbrains.exposed.v1.core.integer("resource_min_z")
-        val resourceMaxX = org.jetbrains.exposed.v1.core.integer("resource_max_x")
-        val resourceMaxY = org.jetbrains.exposed.v1.core.integer("resource_max_y")
-        val resourceMaxZ = org.jetbrains.exposed.v1.core.integer("resource_max_z")
-        val createdAt = org.jetbrains.exposed.v1.core.long("created_at")
-        val active = org.jetbrains.exposed.v1.core.bool("active").default(true)
-    }
+}
+
+// Exposed table object for portals (top-level so it can be created at startup)
+object PortalsTable : LongIdTable(name = "portals") {
+    val owner = org.jetbrains.exposed.v1.core.java.javaUUID("owner")
+    val originWorld = org.jetbrains.exposed.v1.core.varchar("origin_world", 64)
+    val originMinX = org.jetbrains.exposed.v1.core.integer("origin_min_x")
+    val originMinY = org.jetbrains.exposed.v1.core.integer("origin_min_y")
+    val originMinZ = org.jetbrains.exposed.v1.core.integer("origin_min_z")
+    val originMaxX = org.jetbrains.exposed.v1.core.integer("origin_max_x")
+    val originMaxY = org.jetbrains.exposed.v1.core.integer("origin_max_y")
+    val originMaxZ = org.jetbrains.exposed.v1.core.integer("origin_max_z")
+    val orientation = org.jetbrains.exposed.v1.core.integer("orientation")
+    val innerWidth = org.jetbrains.exposed.v1.core.integer("inner_width")
+    val innerHeight = org.jetbrains.exposed.v1.core.integer("inner_height")
+    val resourceWorld = org.jetbrains.exposed.v1.core.varchar("resource_world", 64)
+    val resourceMinX = org.jetbrains.exposed.v1.core.integer("resource_min_x")
+    val resourceMinY = org.jetbrains.exposed.v1.core.integer("resource_min_y")
+    val resourceMinZ = org.jetbrains.exposed.v1.core.integer("resource_min_z")
+    val resourceMaxX = org.jetbrains.exposed.v1.core.integer("resource_max_x")
+    val resourceMaxY = org.jetbrains.exposed.v1.core.integer("resource_max_y")
+    val resourceMaxZ = org.jetbrains.exposed.v1.core.integer("resource_max_z")
+    val createdAt = org.jetbrains.exposed.v1.core.long("created_at")
+    val active = org.jetbrains.exposed.v1.core.bool("active").default(true)
+}
 }
