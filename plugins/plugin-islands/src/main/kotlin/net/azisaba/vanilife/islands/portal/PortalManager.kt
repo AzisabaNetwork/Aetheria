@@ -76,7 +76,11 @@ internal class PortalManager(
                     }
 
                 } catch (ex: Exception) {
-                    plugin.logger.log(Level.SEVERE, "Failed while removing portal resource blocks or hologram", ex)
+                    try {
+                        plugin.logger.log(Level.SEVERE, "Failed while removing portal resource blocks or hologram", ex)
+                    } catch (_: Throwable) {
+                        java.util.logging.Logger.getLogger("vanilife").log(Level.SEVERE, "Failed while removing portal resource blocks or hologram", ex)
+                    }
                 }
 
                 portal.id?.let { portalsById.remove(it) }
@@ -187,7 +191,11 @@ internal class PortalManager(
             try {
                 ResourcePortals.createWithAnimation(plugin, resourceDetected)
             } catch (ex: Exception) {
-                plugin.logger.log(Level.SEVERE, "Failed to create resource portal with animation", ex)
+                try {
+                    plugin.logger.log(Level.SEVERE, "Failed to create resource portal with animation", ex)
+                } catch (_: Throwable) {
+                    java.util.logging.Logger.getLogger("vanilife").log(Level.SEVERE, "Failed to create resource portal with animation", ex)
+                }
             }
 
             // Spawn a hologram via the injectable HologramSpawner (runs on region dispatcher internally)
@@ -202,7 +210,11 @@ internal class PortalManager(
                         }
                     }
                 } catch (e: Exception) {
-                    plugin.logger.log(Level.SEVERE, "Hologram spawn failed", e)
+                    try {
+                        plugin.logger.log(Level.SEVERE, "Hologram spawn failed", e)
+                    } catch (_: Throwable) {
+                        java.util.logging.Logger.getLogger("vanilife").log(Level.SEVERE, "Hologram spawn failed", e)
+                    }
                 }
             }
         }

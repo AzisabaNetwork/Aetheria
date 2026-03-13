@@ -4,7 +4,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
 import kotlin.coroutines.CoroutineContext
 import java.util.logging.Level
-import net.azisaba.vanilife.islands.IslandsFonts
 import net.kyori.adventure.text.Component
 import org.bukkit.Color
 import org.bukkit.plugin.Plugin
@@ -40,6 +39,14 @@ internal class DefaultHologramSpawner(
     private val entityLibSpawner: EntityLibHologramSpawner? = null,
     private val textDisplaySpawner: TextDisplayHologramSpawner? = null
 ) : HologramSpawner {
+    private fun safeLog(level: Level, msg: String, t: Throwable? = null) {
+        try {
+            plugin.logger.log(level, msg, t)
+        } catch (_: Throwable) {
+            if (t != null) java.util.logging.Logger.getLogger("vanilife").log(level, msg, t)
+            else java.util.logging.Logger.getLogger("vanilife").log(level, msg)
+        }
+    }
     override suspend fun spawnHologram(stored: Portal, resourceDetected: net.azisaba.vanilife.islands.portal.finder.DetectedPortal): java.util.UUID? {
         var resultUuid: java.util.UUID? = null
         val id = stored.id ?: return null
@@ -62,7 +69,7 @@ internal class DefaultHologramSpawner(
             }
             resultUuid
         } catch (e: Exception) {
-            plugin.logger.log(Level.SEVERE, "Hologram spawn failed", e)
+            safeLog(Level.SEVERE, "Hologram spawn failed", e)
             resultUuid
         }
     }
@@ -74,7 +81,7 @@ internal class DefaultHologramSpawner(
         centerY: Double,
         centerZ: Double
     ): java.util.UUID? {
-        val textComp = Component.text("Resource Portal").font(IslandsFonts.WAVES.key())
+        val textComp = Component.text("Resource Portal")
 
         // user-provided spawner takes precedence
         if (entityLibSpawner != null) {
@@ -82,9 +89,9 @@ internal class DefaultHologramSpawner(
                 val uuid = entityLibSpawner.invoke(id, textComp, resourceDetected, loc, centerX, centerY, centerZ)
                 if (uuid != null) repository.updateHologram(id, uuid)
                 return uuid
-            } catch (e: Exception) {
-                plugin.logger.log(Level.FINE, "EntityLib custom spawner failed, falling back", e)
-            }
+                } catch (e: Exception) {
+                    safeLog(Level.FINE, "EntityLib custom spawner failed, falling back", e)
+                }
         }
 
         try {
@@ -101,7 +108,7 @@ internal class DefaultHologramSpawner(
             }
         } catch (e: Throwable) {
             // fall through to TextDisplay fallback
-            plugin.logger.log(Level.FINE, "EntityLib hologram spawn failed, falling back to TextDisplay", e)
+            safeLog(Level.FINE, "EntityLib hologram spawn failed, falling back to TextDisplay", e)
         }
         return null
     }
@@ -111,7 +118,7 @@ internal class DefaultHologramSpawner(
         resourceDetected: net.azisaba.vanilife.islands.portal.finder.DetectedPortal,
         loc: org.bukkit.Location
     ): java.util.UUID? {
-        val textComp = Component.text("Resource Portal").font(IslandsFonts.WAVES.key())
+        val textComp = Component.text("Resource Portal")
 
         // user-provided spawner takes precedence
         if (textDisplaySpawner != null) {
@@ -120,7 +127,7 @@ internal class DefaultHologramSpawner(
                 if (uuid != null) repository.updateHologram(id, uuid)
                 return uuid
             } catch (e: Exception) {
-                plugin.logger.log(Level.FINE, "TextDisplay custom spawner failed", e)
+                safeLog(Level.FINE, "TextDisplay custom spawner failed", e)
             }
         }
 
@@ -137,7 +144,7 @@ internal class DefaultHologramSpawner(
             repository.updateHologram(id, textDisplay.uniqueId)
             textDisplay.uniqueId
         } catch (ex: Exception) {
-            plugin.logger.log(Level.SEVERE, "TextDisplay hologram spawn failed", ex)
+            safeLog(Level.SEVERE, "TextDisplay hologram spawn failed", ex)
             null
         }
     }
