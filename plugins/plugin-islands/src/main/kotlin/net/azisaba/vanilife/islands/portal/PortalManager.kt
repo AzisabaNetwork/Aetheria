@@ -35,43 +35,45 @@ internal class PortalManager(
                 repository.delete(it)
                 // remove resource blocks and hologram if present
                 try {
-                    // obtain world safely and remove portal blocks
-                    val world = Bukkit.getWorld(portal.resourceWorldName) ?: return@launch
-                    val detected = DetectedPortal(
-                        world,
-                        portal.innerWidth,
-                        portal.innerHeight,
-                        portal.resourceMin,
-                        portal.resourceMax,
-                        portal.orientation
-                    )
-                    val minX = detected.minBound.blockX()
-                    val maxX = detected.maxBound.blockX()
-                    val minY = detected.minBound.blockY()
-                    val maxY = detected.maxBound.blockY()
-                    val minZ = detected.minBound.blockZ()
-                    val maxZ = detected.maxBound.blockZ()
+                    // obtain world safely and remove portal blocks if world exists
+                    val world = Bukkit.getWorld(portal.resourceWorldName)
+                    if (world != null) {
+                        val detected = DetectedPortal(
+                            world,
+                            portal.innerWidth,
+                            portal.innerHeight,
+                            portal.resourceMin,
+                            portal.resourceMax,
+                            portal.orientation
+                        )
+                        val minX = detected.minBound.blockX()
+                        val maxX = detected.maxBound.blockX()
+                        val minY = detected.minBound.blockY()
+                        val maxY = detected.maxBound.blockY()
+                        val minZ = detected.minBound.blockZ()
+                        val maxZ = detected.maxBound.blockZ()
 
-                    val centerX = (minX + maxX + 1) / 2.0
-                    val centerY = (minY + maxY + 1) / 2.0
-                    val centerZ = (minZ + maxZ + 1) / 2.0
-                    val loc = org.bukkit.Location(world, centerX, centerY, centerZ)
+                        val centerX = (minX + maxX + 1) / 2.0
+                        val centerY = (minY + maxY + 1) / 2.0
+                        val centerZ = (minZ + maxZ + 1) / 2.0
+                        val loc = org.bukkit.Location(world, centerX, centerY, centerZ)
 
-                    // run block and entity removal on region dispatcher
-                    plugin.launch(plugin.regionDispatcher(loc)) {
-                        for (x in minX..maxX) {
-                            for (y in minY..maxY) {
-                                for (z in minZ..maxZ) {
-                                    val b = world.getBlockAt(x, y, z)
-                                    if (b.type == org.bukkit.Material.NETHER_PORTAL) b.type = org.bukkit.Material.AIR
+                        // run block and entity removal on region dispatcher
+                        plugin.launch(plugin.regionDispatcher(loc)) {
+                            for (x in minX..maxX) {
+                                for (y in minY..maxY) {
+                                    for (z in minZ..maxZ) {
+                                        val b = world.getBlockAt(x, y, z)
+                                        if (b.type == org.bukkit.Material.NETHER_PORTAL) b.type = org.bukkit.Material.AIR
+                                    }
                                 }
                             }
-                        }
 
-                        // remove hologram if present
-                        portal.hologramUuid?.let { uuid ->
-                            val entity = world.entities.find { it.uniqueId == uuid }
-                            entity?.remove()
+                            // remove hologram if present
+                            portal.hologramUuid?.let { uuid ->
+                                val entity = world.entities.find { it.uniqueId == uuid }
+                                entity?.remove()
+                            }
                         }
                     }
 
