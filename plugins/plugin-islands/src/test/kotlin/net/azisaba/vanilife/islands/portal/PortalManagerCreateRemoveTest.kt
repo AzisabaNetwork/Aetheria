@@ -47,11 +47,7 @@ class PortalManagerCreateRemoveTest : StringSpec({
             val spawner = mockk<HologramSpawner>()
             coEvery { spawner.spawnHologram(any(), any()) } returns expectedUuid
 
-            // avoid animation side-effects
-            mockkObject(ResourcePortals)
-            every { ResourcePortals.createWithAnimation(any(), any()) } returns Unit
-
-            val manager = PortalManager(mockPlugin, mockRepo, mockIslandRepo, this, spawner)
+            val manager = PortalManager(mockPlugin, mockRepo, mockIslandRepo, this, spawner, resourcePortalsCreator = { _, _ -> Unit })
 
             val originWorld = mockk<org.bukkit.World>(relaxed = true)
             every { originWorld.name } returns "origin"
@@ -77,7 +73,7 @@ class PortalManagerCreateRemoveTest : StringSpec({
             stored.shouldNotBe(null)
             stored!!.hologramUuid shouldBe expectedUuid
 
-            unmockkObject(ResourcePortals)
+            // animation stubbed via resourcePortalsCreator argument
         }
     }
 
