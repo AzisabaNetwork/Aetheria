@@ -14,3 +14,9 @@ build
 /paper-api-generator
 
 .idea/
+
+# ignore jdt-ls
+**/.classpath
+**/.project
+**/.settings
+**/bin
