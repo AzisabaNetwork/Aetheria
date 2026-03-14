@@ -17,7 +17,6 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 
 @ApiStatus.Experimental
@@ -33,38 +32,38 @@ public interface ServerItemTypeRegistryEntry {
     Set<Season.Sub> peakSeason();
 
     @Contract(pure = true)
-    <T> @Nullable T component(final @NotNull DataComponentType.Valued<T> type);
+    <T> @Nullable T component(final DataComponentType.Valued<T> type);
 
     @Contract(pure = true)
-    boolean hasComponent(final @NotNull DataComponentType type);
+    boolean hasComponent(final DataComponentType type);
 
-    void applyComponents(final @NotNull ItemStack itemStack);
+    void applyComponents(final ItemStack itemStack);
 
     @ApiStatus.Experimental
     @ApiStatus.NonExtendable
     interface Builder extends RegistryBuilder<ServerItemType> {
         @Contract(value = "_ -> this", mutates = "this")
-        Builder displayName(final @NotNull Component displayName);
+        Builder displayName(final Component displayName);
 
         @Contract(value = "_ -> this", mutates = "this")
-        Builder flavorText(final @NotNull Component flavorText);
+        Builder flavorText(final Component flavorText);
 
         @Contract(value = "_ -> this", mutates = "this")
-        Builder peakSeason(final @NotNull Season.Sub... subSeasons);
+        Builder peakSeason(final Season.Sub... subSeasons);
 
         @Contract(value = "_, _ -> this", mutates = "this")
-        <T> Builder withComponent(final @NotNull DataComponentType.Valued<T> type, final @NotNull T value);
+        <T> Builder withComponent(final DataComponentType.Valued<T> type, T value);
 
         @Contract(value = "_ -> this", mutates = "this")
-        Builder withComponent(final @NotNull DataComponentType.NonValued type);
+        Builder withComponent(final DataComponentType.NonValued type);
 
         @Contract(value = "_ -> this", mutates = "this")
-        default Builder itemModel(final @NotNull Key itemModel) {
+        default Builder itemModel(final Key itemModel) {
             return this.withComponent(DataComponentTypes.ITEM_MODEL, itemModel);
         }
 
         @Contract(value = "_ -> this", mutates = "this")
-        default Builder food(final @NotNull FoodProperties food) {
+        default Builder food(final FoodProperties food) {
             return this.food(
                     food,
                     Consumable.consumable()
@@ -77,12 +76,12 @@ public interface ServerItemTypeRegistryEntry {
         }
 
         @Contract(value = "_, _ -> this", mutates = "this")
-        default Builder food(final @NotNull FoodProperties food, final @NotNull Consumable consumable) {
+        default Builder food(final FoodProperties food, final Consumable consumable) {
             return this.withComponent(DataComponentTypes.FOOD, food).withComponent(DataComponentTypes.CONSUMABLE, consumable);
         }
 
         @Contract(value = "_ -> this", mutates = "this")
-        default Builder usingConvertsTo(final @NotNull ItemStack usingConvertsTo) {
+        default Builder usingConvertsTo(final ItemStack usingConvertsTo) {
             return this.withComponent(DataComponentTypes.USE_REMAINDER, UseRemainder.useRemainder(usingConvertsTo));
         }
 
@@ -110,7 +109,7 @@ public interface ServerItemTypeRegistryEntry {
         }
 
         @Contract(value = "_ -> this", mutates = "this")
-        default Builder jukeboxPlayable(final @NotNull JukeboxSong song) {
+        default Builder jukeboxPlayable(final JukeboxSong song) {
             return this.withComponent(DataComponentTypes.JUKEBOX_PLAYABLE, JukeboxPlayable.jukeboxPlayable(song).build());
         }
 
@@ -120,12 +119,12 @@ public interface ServerItemTypeRegistryEntry {
         }
 
         @Contract(value = "_ -> this", mutates = "this")
-        default Builder equippable(final @NotNull EquipmentSlot slot) {
+        default Builder equippable(final EquipmentSlot slot) {
             return this.withComponent(DataComponentTypes.EQUIPPABLE, Equippable.equippable(slot).build());
         }
 
         @Contract(value = "_ -> this", mutates = "this")
-        default Builder equippableUnswappable(final @NotNull EquipmentSlot slot) {
+        default Builder equippableUnswappable(final EquipmentSlot slot) {
             return this.withComponent(DataComponentTypes.EQUIPPABLE, Equippable.equippable(slot).swappable(false).build());
         }
     }
