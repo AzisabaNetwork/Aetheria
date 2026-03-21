@@ -15,6 +15,9 @@ class Main : JavaPlugin() {
                 single<Plugin> { this@Main }
             })
         }
+
+        // register cooking recipes
+        CookingRecipes.bootstrap(server)
     }
 
     override fun onDisable() {
