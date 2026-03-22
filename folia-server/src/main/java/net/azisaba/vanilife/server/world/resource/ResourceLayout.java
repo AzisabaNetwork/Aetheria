@@ -1,5 +1,7 @@
 package net.azisaba.vanilife.server.world.resource;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.azisaba.vanilife.server.world.height.HeightContext;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -14,6 +16,14 @@ public record ResourceLayout(
         int minY,
         List<ResourceLayer.Type> layersTypes
 ) implements Iterable<ResourceLayer.Type> {
+    public static final Codec<ResourceLayout> CODEC = RecordCodecBuilder.create(
+            instance -> instance.group(
+                            Codec.INT.fieldOf("min_y").forGetter(ResourceLayout::minY),
+                            ResourceLayer.Type.CODEC.listOf().fieldOf("layers").forGetter(ResourceLayout::layersTypes)
+                    )
+                    .apply(instance, ResourceLayout::new)
+    );
+
     public int height() {
         return this.layersTypes.stream()
                 .mapToInt(ResourceLayer.Type::height)

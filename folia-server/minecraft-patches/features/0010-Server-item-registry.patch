@@ -328,6 +328,27 @@ index 1ee7b32ae9dc579337520edfbf337ffaeaeebf00..ca31b8952ed1d7ecdd708f734e7aa621
          return this.withDifferentSource((quartX, quartY, quartZ) -> {
              final int layerY = QuartPos.toBlock(quartY);
              final int blockY = layout.toBlockY(type, layerY);
+diff --git a/net/minecraft/world/level/biome/BiomeSources.java b/net/minecraft/world/level/biome/BiomeSources.java
+index dc28c1d1425d2ff73efa3cf849193e4c4925f206..5fd13559c6d18b40ca65c2cd4adc6ea76c7c51f3 100644
+--- a/net/minecraft/world/level/biome/BiomeSources.java
++++ b/net/minecraft/world/level/biome/BiomeSources.java
+@@ -1,6 +1,7 @@
+ package net.minecraft.world.level.biome;
+ 
+ import com.mojang.serialization.MapCodec;
++import net.azisaba.vanilife.server.VanilifeBiomeSources;
+ import net.minecraft.core.Registry;
+ 
+ public class BiomeSources {
+@@ -8,6 +9,7 @@ public class BiomeSources {
+         Registry.register(registry, "fixed", FixedBiomeSource.CODEC);
+         Registry.register(registry, "multi_noise", MultiNoiseBiomeSource.CODEC);
+         Registry.register(registry, "checkerboard", CheckerboardColumnBiomeSource.CODEC);
+-        return Registry.register(registry, "the_end", TheEndBiomeSource.CODEC);
++        Registry.register(registry, "the_end", TheEndBiomeSource.CODEC);
++        return VanilifeBiomeSources.bootstrap(registry);
+     }
+ }
 diff --git a/net/minecraft/world/level/block/Block.java b/net/minecraft/world/level/block/Block.java
 index 492b1615d96133c5082e0f16015f114299f8082f..37045ec700915896c924d159075aa58fd2aceff1 100644
 --- a/net/minecraft/world/level/block/Block.java
@@ -450,6 +471,27 @@ index fd92282bb1cbe7051258f6d239e8dc0ce191baba..5d0d04f21e46d58c20badd2127fcd95c
  import net.minecraft.CrashReport;
  import net.minecraft.CrashReportCategory;
  import net.minecraft.ReportedException;
+diff --git a/net/minecraft/world/level/chunk/ChunkGenerators.java b/net/minecraft/world/level/chunk/ChunkGenerators.java
+index 440163ab5bb56771dc6cf7bd4fa4dbcfa4511d99..cd2832bc1bff07f87deca236434f3e824b8e2d48 100644
+--- a/net/minecraft/world/level/chunk/ChunkGenerators.java
++++ b/net/minecraft/world/level/chunk/ChunkGenerators.java
+@@ -1,6 +1,7 @@
+ package net.minecraft.world.level.chunk;
+ 
+ import com.mojang.serialization.MapCodec;
++import net.azisaba.vanilife.server.VanilifeChunkGenerators;
+ import net.minecraft.core.Registry;
+ import net.minecraft.world.level.levelgen.DebugLevelSource;
+ import net.minecraft.world.level.levelgen.FlatLevelSource;
+@@ -10,6 +11,7 @@ public class ChunkGenerators {
+     public static MapCodec<? extends ChunkGenerator> bootstrap(Registry<MapCodec<? extends ChunkGenerator>> registry) {
+         Registry.register(registry, "noise", NoiseBasedChunkGenerator.CODEC);
+         Registry.register(registry, "flat", FlatLevelSource.CODEC);
+-        return Registry.register(registry, "debug", DebugLevelSource.CODEC);
++        Registry.register(registry, "debug", DebugLevelSource.CODEC);
++        return VanilifeChunkGenerators.bootstrap(registry);
+     }
+ }
 diff --git a/net/minecraft/world/level/chunk/status/ChunkStatus.java b/net/minecraft/world/level/chunk/status/ChunkStatus.java
 index a04f20297c984a31216cbeb1c8d049728c9b6a65..202d7f1c6a2c37c75b586d9edfa89fa9975e39a5 100644
 --- a/net/minecraft/world/level/chunk/status/ChunkStatus.java

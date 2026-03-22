@@ -1,6 +1,7 @@
 package net.azisaba.vanilife.server.world.islands;
 
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.articdive.jnoise.core.api.functions.Interpolation;
 import de.articdive.jnoise.generators.noise_parameters.fade_functions.FadeFunction;
 import de.articdive.jnoise.modules.octavation.fractal_functions.FractalFunction;
@@ -37,6 +38,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @NullMarked
 public class IslandsChunkGenerator extends ChunkGenerator {
+    public static final MapCodec<IslandsChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(
+        instance -> instance.group(
+                IslandsGeneratorSettings.CODEC.fieldOf("settings").forGetter(generator -> generator.settings),
+                BiomeSource.CODEC.fieldOf("biome_source").forGetter(ChunkGenerator::getBiomeSource)
+            )
+            .apply(instance, IslandsChunkGenerator::new)
+    );
+
     private static final int DEEP_OCEAN_VARIATION = 2;
     private static final int SURFACE_LAYER_THICKNESS = 3;
     private static final int WATERFALL_DROP_THRESHOLD = 2;
@@ -68,7 +77,7 @@ public class IslandsChunkGenerator extends ChunkGenerator {
 
     @Override
     protected MapCodec<? extends ChunkGenerator> codec() {
-        return MapCodec.unit(this);
+        return CODEC;
     }
 
     @Override
@@ -105,8 +114,8 @@ public class IslandsChunkGenerator extends ChunkGenerator {
         final int highestY = this.resolveHighestY(0L, x, z, sample.highestY());
         final int riverSurfaceY = this.riverSurfaceY(sample, highestY);
         final int riverWallSurfaceY = !sample.hasRiver() && highestY > this.settings.seaLevel()
-                ? this.resolveRiverWallSurfaceY(0L, x, z, highestY)
-                : Integer.MIN_VALUE;
+            ? this.resolveRiverWallSurfaceY(0L, x, z, highestY)
+            : Integer.MIN_VALUE;
         final int minY = height.getMinY();
         final int maxY = height.getMaxY();
         final BlockState[] column = new BlockState[height.getHeight()];
@@ -144,8 +153,8 @@ public class IslandsChunkGenerator extends ChunkGenerator {
                 final int highestY = this.resolveHighestY(levelSeed, blockX, blockZ, sample.highestY());
                 final int riverSurfaceY = this.riverSurfaceY(sample, highestY);
                 final int riverWallSurfaceY = !sample.hasRiver() && highestY > this.settings.seaLevel()
-                        ? this.resolveRiverWallSurfaceY(levelSeed, blockX, blockZ, highestY)
-                        : Integer.MIN_VALUE;
+                    ? this.resolveRiverWallSurfaceY(levelSeed, blockX, blockZ, highestY)
+                    : Integer.MIN_VALUE;
 
                 pos.set(blockX, 0, blockZ);
                 for (int y = chunk.getMinY(); y < this.settings.airTopY(); y++) {
@@ -171,8 +180,8 @@ public class IslandsChunkGenerator extends ChunkGenerator {
                     continue;
                 }
                 final BlockState water = y == protrusion.toY()
-                        ? Blocks.WATER.defaultBlockState()
-                        : Blocks.WATER.defaultBlockState().setValue(BlockStateProperties.LEVEL, FALLING_WATER_LEVEL);
+                    ? Blocks.WATER.defaultBlockState()
+                    : Blocks.WATER.defaultBlockState().setValue(BlockStateProperties.LEVEL, FALLING_WATER_LEVEL);
                 chunk.setBlockState(pos, water, Block.UPDATE_NONE);
             }
         }
@@ -218,10 +227,10 @@ public class IslandsChunkGenerator extends ChunkGenerator {
 
     private JNoise getDeepOceanNoise(final long levelSeed) {
         return this.deepOceanNoiseCache.computeIfAbsent(levelSeed, seed -> JNoise.newBuilder()
-                .perlin(seed ^ 0xD1342543DE82EF95L, Interpolation.COSINE, FadeFunction.CUBIC_POLY)
-                .scale(1.0 / 16.0)
-                .octavate(3, 0.55, 2.1, FractalFunction.FBM, false)
-                .build());
+            .perlin(seed ^ 0xD1342543DE82EF95L, Interpolation.COSINE, FadeFunction.CUBIC_POLY)
+            .scale(1.0 / 16.0)
+            .octavate(3, 0.55, 2.1, FractalFunction.FBM, false)
+            .build());
     }
 
     private TerrainSample sampleIslandPoint(final long levelSeed, final int blockX, final int blockZ) {
@@ -236,11 +245,11 @@ public class IslandsChunkGenerator extends ChunkGenerator {
         }
         final int highestY = Math.max(this.settings.seaLevel() - 1, carvedHighestY);
         return new TerrainSample(
-                baseSample.signedDistance(),
-                baseSample.baseHighestY(),
-                baseSample.riverSurfaceBaseY(),
-                highestY,
-                riverDepth
+            baseSample.signedDistance(),
+            baseSample.baseHighestY(),
+            baseSample.riverSurfaceBaseY(),
+            highestY,
+            riverDepth
         );
     }
 
@@ -370,8 +379,8 @@ public class IslandsChunkGenerator extends ChunkGenerator {
 
     private BlockState blockStateAtY(final int highestY, final int riverSurfaceY, final int riverWallSurfaceY, final int y) {
         return highestY > this.settings.seaLevel()
-                ? this.landBlockStateAtY(highestY, riverSurfaceY, riverWallSurfaceY, y)
-                : this.oceanBlockStateAtY(highestY, y);
+            ? this.landBlockStateAtY(highestY, riverSurfaceY, riverWallSurfaceY, y)
+            : this.oceanBlockStateAtY(highestY, y);
     }
 
     private BlockState landBlockStateAtY(final int highestY, final int riverSurfaceY, final int riverWallSurfaceY, final int y) {

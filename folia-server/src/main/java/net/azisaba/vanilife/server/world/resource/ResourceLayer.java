@@ -1,11 +1,14 @@
 package net.azisaba.vanilife.server.world.resource;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.azisaba.vanilife.server.VanilifeBiomes;
 import net.azisaba.vanilife.server.world.height.HeightmapSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -113,6 +116,15 @@ public class ResourceLayer extends ProtoChunk {
 
     @NullMarked
     public record Type(int height, HeightmapSet heightmapSet, ChunkGenerator generator) {
+        public static final Codec<ResourceLayer.Type> CODEC = RecordCodecBuilder.create(
+                instance -> instance.group(
+                                Kind.CODEC.fieldOf("kind").forGetter(Type::kind),
+                                Codec.INT.fieldOf("height").forGetter(Type::height),
+                                ChunkGenerator.CODEC.fieldOf("generator").forGetter(Type::generator)
+                        )
+                        .apply(instance, (kind, height, generator) -> new Type(height, kind.heightmapSet, generator))
+        );
+
         public static ResourceLayer.Type overworld(final RegistryOps.RegistryInfoLookup lookup) {
             final Holder<NoiseGeneratorSettings> noiseGeneratorSettings = Holder.direct(ResourceNoiseGeneratorSettings.overworld(lookup));
             return new ResourceLayer.Type(
@@ -169,6 +181,48 @@ public class ResourceLayer extends ProtoChunk {
 
         public LevelHeightAccessor createHeightAccessor() {
             return LevelHeightAccessor.create(this.minY(), this.height);
+        }
+
+        private Kind kind() {
+            if (this.heightmapSet.equals(HeightmapSet.RESOURCE_OVERWORLD)) {
+                return Kind.OVERWORLD;
+            }
+            if (this.heightmapSet.equals(HeightmapSet.RESOURCE_NETHER)) {
+                return Kind.NETHER;
+            }
+            if (this.heightmapSet.equals(HeightmapSet.RESOURCE_END)) {
+                return Kind.END;
+            }
+            throw new IllegalStateException("Unknown resource layer heightmap set: " + this.heightmapSet);
+        }
+
+        private enum Kind {
+            OVERWORLD(Identifier.withDefaultNamespace("overworld"), HeightmapSet.RESOURCE_OVERWORLD),
+            NETHER(Identifier.withDefaultNamespace("the_nether"), HeightmapSet.RESOURCE_NETHER),
+            END(Identifier.withDefaultNamespace("the_end"), HeightmapSet.RESOURCE_END);
+
+            private static final Codec<Kind> CODEC = Identifier.CODEC.xmap(Kind::fromId, Kind::id);
+
+            private final Identifier id;
+            private final HeightmapSet heightmapSet;
+
+            Kind(final Identifier id, final HeightmapSet heightmapSet) {
+                this.id = id;
+                this.heightmapSet = heightmapSet;
+            }
+
+            private Identifier id() {
+                return this.id;
+            }
+
+            private static Kind fromId(final Identifier id) {
+                for (final Kind kind : values()) {
+                    if (kind.id.equals(id)) {
+                        return kind;
+                    }
+                }
+                throw new IllegalArgumentException("Unknown resource layer kind: " + id);
+            }
         }
     }
 }

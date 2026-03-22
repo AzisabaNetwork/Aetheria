@@ -1,6 +1,7 @@
 package net.azisaba.vanilife.server.world.resource;
 
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -25,6 +26,13 @@ import java.util.stream.Stream;
 
 @NullMarked
 public class ResourceBiomeSource extends BiomeSource {
+    public static final MapCodec<ResourceBiomeSource> CODEC = RecordCodecBuilder.mapCodec(
+            instance -> instance.group(
+                            ResourceLayout.CODEC.fieldOf("layout").forGetter(source -> source.layout)
+                    )
+                    .apply(instance, ResourceBiomeSource::new)
+    );
+
     private final ResourceLayout layout;
     private final ResourceRandomStateProvider randomStateSource = new ResourceRandomStateProvider();
 
@@ -34,7 +42,7 @@ public class ResourceBiomeSource extends BiomeSource {
 
     @Override
     protected MapCodec<? extends BiomeSource> codec() {
-        return MapCodec.unit(this);
+        return CODEC;
     }
 
     @Override
