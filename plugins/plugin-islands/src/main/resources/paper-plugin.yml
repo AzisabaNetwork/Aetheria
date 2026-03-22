@@ -9,3 +9,9 @@ dependencies:
       load: BEFORE
     packetevents:
       load: BEFORE
+commands:
+  island:
+    description: Island management commands (subcommands)
+    usage: /island <subcommand>
+    permission: vanilife.island.use
+    permission-message: You do not have permission to use island commands.

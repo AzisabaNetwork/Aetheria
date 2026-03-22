@@ -42,6 +42,9 @@ class Main : JavaPlugin() {
         }
 
         setupEventListeners(koinApp.koin)
+
+        // Register commands
+        getCommand("island")?.setExecutor(net.azisaba.vanilife.islands.IslandCommand())
     }
 
     override fun onDisable() {
