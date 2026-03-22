@@ -32,6 +32,15 @@ internal interface IslandRepository : IslandInfoLookup {
     suspend fun updateSpawnOffset(where: IslandPos, offset: Vector3dc)
 
     suspend fun updateSpawnRotation(where: IslandPos, rotation: Vector2fc)
+
+    // Dragon metadata helpers
+    suspend fun updateDragonInstalled(where: IslandPos, installed: Boolean)
+
+    suspend fun updateDragonPresetAir(where: IslandPos, presetKey: String?)
+
+    suspend fun updateDragonPresetWater(where: IslandPos, presetKey: String?)
+
+    suspend fun updateDragonLegacy(where: IslandPos, exists: Boolean, boostCredit: Int, lastPresetAir: String?)
 }
 
 internal class DatabaseIslandRepository(private val database: Database) : IslandRepository {
@@ -44,8 +53,14 @@ internal class DatabaseIslandRepository(private val database: Database) : Island
             it[IslandsTable.spawnOffsetZ] = primaryData.spawnOffset.z()
             it[IslandsTable.spawnRotationYaw] = primaryData.spawnRotation.x()
             it[IslandsTable.spawnRotationPitch] = primaryData.spawnRotation.y()
+            it[IslandsTable.dragonInstalled] = false
+            it[IslandsTable.dragonPresetAir] = null
+            it[IslandsTable.dragonPresetWater] = null
+            it[IslandsTable.dragonLegacyExists] = false
+            it[IslandsTable.dragonLegacyBoostCredit] = 0
+            it[IslandsTable.dragonLegacyLastPresetAir] = null
         }.value
-        IslandSummary(deserializePos(islandPos), ownerUuid, primaryData)
+        IslandSummary(deserializePos(islandPos), ownerUuid, primaryData, DragonMetadata.Snapshot())
     }
 
     override suspend fun lookupByPos(islandPos: IslandPos): IslandSummary? = suspendTransaction(database) {
@@ -125,11 +140,49 @@ internal class DatabaseIslandRepository(private val database: Database) : Island
                 get(IslandsTable.spawnRotationYaw),
                 get(IslandsTable.spawnRotationPitch),
             )
+        ),
+        DragonMetadata.Snapshot(
+            installed = get(IslandsTable.dragonInstalled),
+            presetAir = get(IslandsTable.dragonPresetAir),
+            presetWater = get(IslandsTable.dragonPresetWater),
+            legacyExists = get(IslandsTable.dragonLegacyExists),
+            legacyBoostCredit = get(IslandsTable.dragonLegacyBoostCredit),
+            legacyLastPresetAir = get(IslandsTable.dragonLegacyLastPresetAir),
         )
     )
 
     private companion object {
         const val POS_WIDTH: Long = 4096L
+    }
+
+    override suspend fun updateDragonInstalled(where: IslandPos, installed: Boolean) = suspendTransaction(database) {
+        IslandsTable.update(where = { IslandsTable.id eq serializePos(where) }) {
+            it[IslandsTable.dragonInstalled] = installed
+        }
+        Unit
+    }
+
+    override suspend fun updateDragonPresetAir(where: IslandPos, presetKey: String?) = suspendTransaction(database) {
+        IslandsTable.update(where = { IslandsTable.id eq serializePos(where) }) {
+            it[IslandsTable.dragonPresetAir] = presetKey
+        }
+        Unit
+    }
+
+    override suspend fun updateDragonPresetWater(where: IslandPos, presetKey: String?) = suspendTransaction(database) {
+        IslandsTable.update(where = { IslandsTable.id eq serializePos(where) }) {
+            it[IslandsTable.dragonPresetWater] = presetKey
+        }
+        Unit
+    }
+
+    override suspend fun updateDragonLegacy(where: IslandPos, exists: Boolean, boostCredit: Int, lastPresetAir: String?) = suspendTransaction(database) {
+        IslandsTable.update(where = { IslandsTable.id eq serializePos(where) }) {
+            it[IslandsTable.dragonLegacyExists] = exists
+            it[IslandsTable.dragonLegacyBoostCredit] = boostCredit
+            it[IslandsTable.dragonLegacyLastPresetAir] = lastPresetAir
+        }
+        Unit
     }
 
     object IslandsTable : LongIdTable(name = "islands", columnName = "pos") {
@@ -140,5 +193,13 @@ internal class DatabaseIslandRepository(private val database: Database) : Island
         val spawnOffsetZ: Column<Double> = double("spawn_offset_z").default(0.0)
         val spawnRotationYaw: Column<Float> = float("spawn_rotation_yaw").default(0f)
         val spawnRotationPitch: Column<Float> = float("spawn_rotation_pitch").default(0f)
+
+        // Dragon metadata
+        val dragonInstalled: Column<Boolean> = bool("dragon_installed").default(false)
+        val dragonPresetAir: Column<String?> = varchar("dragon_preset_air", length = 128).nullable()
+        val dragonPresetWater: Column<String?> = varchar("dragon_preset_water", length = 128).nullable()
+        val dragonLegacyExists: Column<Boolean> = bool("dragon_legacy_exists").default(false)
+        val dragonLegacyBoostCredit: Column<Int> = integer("dragon_legacy_boost_credit").default(0)
+        val dragonLegacyLastPresetAir: Column<String?> = varchar("dragon_legacy_last_preset_air", length = 128).nullable()
     }
 }
