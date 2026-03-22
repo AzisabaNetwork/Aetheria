@@ -43,11 +43,26 @@ internal class IslandManager(
                 is PrimaryIslandData.Writable -> summary.primaryData
             }
 
+            val dragonData = when (summary.dragonData) {
+                is DragonMetadata.Snapshot -> DragonMetadata.Writable(
+                    summary.dragonData.installed,
+                    summary.dragonData.presetAir,
+                    summary.dragonData.presetWater,
+                    summary.dragonData.legacyExists,
+                    summary.dragonData.legacyBoostCredit,
+                    summary.dragonData.legacyLastPresetAir,
+                    islandPos,
+                    repository
+                )
+                is DragonMetadata.Writable -> summary.dragonData
+            }
+
             Island(
                 islandPos,
                 world,
                 summary.ownerUuid,
                 primaryData,
+                dragonData,
                 plugin,
             )
         }

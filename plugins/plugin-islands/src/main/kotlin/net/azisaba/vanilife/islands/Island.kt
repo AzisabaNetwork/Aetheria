@@ -27,6 +27,7 @@ class Island internal constructor(
     val world: World,
     override val ownerUuid: UUID,
     override val primaryData: PrimaryIslandData.Writable,
+    override val dragonData: DragonMetadata,
     private val plugin: Plugin,
 ) : IslandInfo, ForwardingAudience,
     WaveAccessor by IslandWaveAccessor(pos),
