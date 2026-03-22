@@ -1,8 +1,9 @@
 package net.azisaba.vanilife.islands.repository
 
+import net.azisaba.exposed.component
 import net.azisaba.vanilife.islands.IslandInfoLookup
-import net.azisaba.vanilife.world.IslandPos
 import net.azisaba.vanilife.islands.IslandSummary
+import net.azisaba.vanilife.world.IslandPos
 import net.kyori.adventure.text.Component
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.ResultRow
@@ -45,13 +46,13 @@ internal class DatabaseIslandRepository(private val database: Database) : Island
             it[IslandsTable.spawnRotationYaw] = primaryData.spawnRotation.x()
             it[IslandsTable.spawnRotationPitch] = primaryData.spawnRotation.y()
         }.value
-        IslandSummary(deserializePos(islandPos), ownerUuid, primaryData)
+        IslandSummary(IslandPos.fromLong(islandPos), ownerUuid, primaryData)
     }
 
     override suspend fun lookupByPos(islandPos: IslandPos): IslandSummary? = suspendTransaction(database) {
         IslandsTable
             .selectAll()
-            .where { IslandsTable.id eq serializePos(islandPos) }
+            .where { IslandsTable.id eq islandPos.toLong() }
             .firstOrNull()
             ?.toIslandInfo()
     }
@@ -65,14 +66,14 @@ internal class DatabaseIslandRepository(private val database: Database) : Island
     }
 
     override suspend fun updateDisplayName(where: IslandPos, displayName: Component?) = suspendTransaction(database) {
-        IslandsTable.update(where = { IslandsTable.id eq serializePos(where) }) {
+        IslandsTable.update(where = { IslandsTable.id eq where.toLong() }) {
             it[IslandsTable.displayName] = displayName
         }
         Unit
     }
 
     override suspend fun updateSpawnOffset(where: IslandPos, offset: Vector3dc) = suspendTransaction(database) {
-        IslandsTable.update(where = { IslandsTable.id eq serializePos(where) }) {
+        IslandsTable.update(where = { IslandsTable.id eq where.toLong() }) {
             it[IslandsTable.spawnOffsetX] = offset.x()
             it[IslandsTable.spawnOffsetY] = offset.y()
             it[IslandsTable.spawnOffsetZ] = offset.z()
@@ -81,38 +82,15 @@ internal class DatabaseIslandRepository(private val database: Database) : Island
     }
 
     override suspend fun updateSpawnRotation(where: IslandPos, rotation: Vector2fc) = suspendTransaction(database) {
-        IslandsTable.update(where = { IslandsTable.id eq serializePos(where) }) {
+        IslandsTable.update(where = { IslandsTable.id eq where.toLong() }) {
             it[IslandsTable.spawnRotationYaw] = rotation.x()
             it[IslandsTable.spawnRotationPitch] = rotation.y()
         }
         Unit
     }
 
-    private fun serializePos(islandPos: IslandPos): Long {
-        val x = islandPos.x().toLong()
-        val z = islandPos.z().toLong()
-
-        require(x in 0 until POS_WIDTH) { "x out of range: $x (expected 0..${POS_WIDTH - 1})" }
-        require(z >= 0) { "z must be >= 0: $z" }
-
-        return z * POS_WIDTH + x + 1L
-    }
-
-    private fun deserializePos(long: Long): IslandPos {
-        require(long >= 1L) { "value must be >= 1: $long" }
-
-        val id0 = long - 1L
-        val x = (id0 % POS_WIDTH).toInt()
-        val zLong = id0 / POS_WIDTH
-
-        require(zLong <= Int.MAX_VALUE.toLong()) { "z out of Int range: $zLong" }
-        val z = zLong.toInt()
-
-        return IslandPos(x, z)
-    }
-
     private fun ResultRow.toIslandInfo(): IslandSummary = IslandSummary(
-        deserializePos(get(IslandsTable.id).value),
+        IslandPos.fromLong(get(IslandsTable.id).value),
         get(IslandsTable.owner),
         PrimaryIslandData.Snapshot(
             get(IslandsTable.displayName),
@@ -127,10 +105,6 @@ internal class DatabaseIslandRepository(private val database: Database) : Island
             )
         )
     )
-
-    private companion object {
-        const val POS_WIDTH: Long = 4096L
-    }
 
     object IslandsTable : LongIdTable(name = "islands", columnName = "pos") {
         val owner: Column<UUID> = javaUUID("owner").uniqueIndex()

@@ -10,6 +10,7 @@ dependencies {
     implementation(libs.koin.core)
     implementation(libs.mccoroutine.folia.api)
     implementation(libs.mccoroutine.folia.core)
+    implementation(libs.minecraftexposed.adventure)
     implementation(libs.postgresql)
     implementation(libs.tomlkt)
 }

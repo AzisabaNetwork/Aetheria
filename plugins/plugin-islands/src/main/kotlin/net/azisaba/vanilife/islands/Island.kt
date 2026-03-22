@@ -7,7 +7,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.isActive
-import net.azisaba.vanilife.Vanilife
+import net.azisaba.vanilife.islands.enchantment.EnchantmentAccessor
+import net.azisaba.vanilife.islands.enchantment.IslandEnchantmentAccessor
+import net.azisaba.vanilife.islands.enchantment.IslandEnchantmentRepository
 import net.azisaba.vanilife.islands.repository.PrimaryIslandData
 import net.azisaba.vanilife.islands.waves.IslandWaveAccessor
 import net.azisaba.vanilife.islands.waves.WaveAccessor
@@ -27,8 +29,10 @@ class Island internal constructor(
     val world: World,
     override val ownerUuid: UUID,
     override val primaryData: PrimaryIslandData.Writable,
+    private val enchantmentRepository: IslandEnchantmentRepository,
     private val plugin: Plugin,
 ) : IslandInfo, ForwardingAudience,
+    EnchantmentAccessor by IslandEnchantmentAccessor(pos, enchantmentRepository),
     WaveAccessor by IslandWaveAccessor(pos),
     WrackAccessor by IslandWrackAccessor(pos, world, plugin) {
     private val players: MutableSet<Player> = mutableSetOf()

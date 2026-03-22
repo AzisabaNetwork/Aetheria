@@ -1,5 +1,6 @@
 package net.azisaba.vanilife.islands
 
+import net.azisaba.vanilife.islands.enchantment.IslandEnchantmentRepository
 import net.azisaba.vanilife.islands.repository.IslandRepository
 import net.azisaba.vanilife.islands.repository.PrimaryIslandData
 import net.azisaba.vanilife.world.IslandPos
@@ -10,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 internal class IslandManager(
     private val repository: IslandRepository,
+    private val enchantmentRepository: IslandEnchantmentRepository,
     private val world: World,
     private val plugin: Plugin,
 ) : IslandInfoLookup {
@@ -48,6 +50,7 @@ internal class IslandManager(
                 world,
                 summary.ownerUuid,
                 primaryData,
+                enchantmentRepository,
                 plugin,
             )
         }

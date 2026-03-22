@@ -3,6 +3,8 @@ package net.azisaba.vanilife.islands.enchantment
 import io.papermc.paper.registry.RegistryAccess
 import io.papermc.paper.registry.RegistryKey
 import io.papermc.paper.registry.TypedKey
+import kotlinx.coroutines.runBlocking
+import net.azisaba.vanilife.world.IslandPos
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemStack
 import kotlin.random.Random
@@ -16,7 +18,11 @@ interface EnchantmentAccessor {
 
     suspend fun clearEnchantments()
 
-    fun rollEnchantments(itemStack: ItemStack, random: Random = Random.Default, maxCount: Int = 3): List<TypedKey<Enchantment>> = buildList {
+    fun rollEnchantments(
+        itemStack: ItemStack,
+        random: Random = Random.Default,
+        maxCount: Int = 3,
+    ): List<TypedKey<Enchantment>> = buildList {
         if (maxCount <= 0) return@buildList
 
         val itemKey = RegistryKey.ITEM.typedKey(itemStack.type.key)
@@ -47,5 +53,32 @@ interface EnchantmentAccessor {
                 add(weighted.removeAt(index).first)
             }
         }
+    }
+}
+
+internal class IslandEnchantmentAccessor(
+    private val islandPos: IslandPos,
+    private val repository: IslandEnchantmentRepository,
+) : EnchantmentAccessor {
+    override val enchantments: Set<TypedKey<Enchantment>>
+        get() = enchantmentsMutable
+
+    private val enchantmentsMutable = runBlocking {
+        repository.lookupByPos(islandPos).toMutableSet()
+    }
+
+    override suspend fun addEnchantment(enchantment: TypedKey<Enchantment>) {
+        repository.addEnchantment(islandPos, enchantment)
+        enchantmentsMutable += enchantment
+    }
+
+    override suspend fun removeEnchantment(enchantment: TypedKey<Enchantment>) {
+        repository.removeEnchantment(islandPos, enchantment)
+        enchantmentsMutable -= enchantment
+    }
+
+    override suspend fun clearEnchantments() {
+        repository.clearEnchantments(islandPos)
+        enchantmentsMutable.clear()
     }
 }

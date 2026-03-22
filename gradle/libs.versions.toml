@@ -12,6 +12,7 @@ koin = "4.1.1"
 kotlin = "2.3.0"
 kotlinx-coroutines = "1.10.2"
 mccoroutine = "2.22.0"
+minecraftexposed = "1.0.0-R0.1-SNAPSHOT"
 minecraftserialization = "1.0.0-R0.4-SNAPSHOT"
 packed = "1.0.0-R0.5-SNAPSHOT"
 packetevents = "2.11.2"
@@ -42,6 +43,7 @@ coreprotect = { module = "net.coreprotect:coreprotect", version.ref = "coreprote
 entitylib = { module = "io.github.tofaa2:spigot", version.ref = "entitylib" }
 mccoroutine-folia-api = { module = "com.github.shynixn.mccoroutine:mccoroutine-folia-api", version.ref = "mccoroutine" }
 mccoroutine-folia-core = { module = "com.github.shynixn.mccoroutine:mccoroutine-folia-core", version.ref = "mccoroutine" }
+minecraftexposed-adventure = { module = "net.azisaba.exposed:adventure", version.ref = "minecraftexposed" }
 minecraftserialization-adventure = { module = "net.azisaba.serialization:adventure", version.ref = "minecraftserialization" }
 minecraftserialization-joml = { module = "net.azisaba.serialization:joml", version.ref = "minecraftserialization" }
 packed-core = { module = "net.azisaba.packed:core", version.ref = "packed" }
