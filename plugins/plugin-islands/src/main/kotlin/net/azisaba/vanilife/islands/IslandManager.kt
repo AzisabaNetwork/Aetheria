@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap
 internal class IslandManager(
     private val repository: IslandRepository,
     private val world: World,
+    private val config: Config,
     private val plugin: Plugin,
 ) : IslandInfoLookup {
     private val islandsByPos: MutableMap<IslandPos, Island> = ConcurrentHashMap()
@@ -63,6 +64,7 @@ internal class IslandManager(
                 summary.ownerUuid,
                 primaryData,
                 dragonData,
+                config,
                 plugin,
             )
         }

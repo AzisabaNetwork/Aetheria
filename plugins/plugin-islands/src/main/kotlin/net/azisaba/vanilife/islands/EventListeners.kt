@@ -2,6 +2,7 @@ package net.azisaba.vanilife.islands
 
 import net.azisaba.vanilife.islands.listener.IslandPlayerListener
 import net.azisaba.vanilife.islands.listener.DragonKillListener
+import net.azisaba.vanilife.islands.listener.DefaultDragonBuffProvider
 import org.koin.core.Koin
 
 internal fun Main.setupEventListeners(koin: Koin) {

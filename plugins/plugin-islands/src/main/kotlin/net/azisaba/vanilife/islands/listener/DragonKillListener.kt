@@ -1,7 +1,6 @@
 package net.azisaba.vanilife.islands.listener
 
-import kotlinx.coroutines.launch
-import net.azisaba.vanilife.Vanilife
+import com.github.shynixn.mccoroutine.folia.launch
 import net.azisaba.vanilife.islands.IslandManager
 import net.azisaba.vanilife.islands.DragonMetadata
 import net.azisaba.vanilife.event.DragonInstalledEvent
@@ -11,7 +10,6 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.plugin.Plugin
-import org.koin.core.context.GlobalContext
 import java.time.Instant
 
 internal class DragonKillListener(private val plugin: Plugin, private val service: IslandManager) : Listener {
@@ -36,11 +34,11 @@ internal class DragonKillListener(private val plugin: Plugin, private val servic
 
                 // Fire event
                 val islandId = island.pos.toLong().toString()
-                server.pluginManager.callEvent(DragonInstalledEvent(islandId, island.ownerUuid, Instant.now()))
+                plugin.server.pluginManager.callEvent(DragonInstalledEvent(islandId, island.ownerUuid, Instant.now()))
 
                 // Notify owner if online
                 val owner = plugin.server.getPlayer(island.ownerUuid)
-                owner?.sendMessage(Vanilife.translations().getTranslation("island.dragon.granted").replace("%player%", owner.name))
+                owner?.sendMessage("${owner.name} has welcomed a dragon to this island.")
             }
         }
     }

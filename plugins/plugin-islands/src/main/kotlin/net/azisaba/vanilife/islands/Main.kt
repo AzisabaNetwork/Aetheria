@@ -36,7 +36,7 @@ class Main : JavaPlugin() {
                     single { config }
                     single { database }
                     single<IslandRepository> { DatabaseIslandRepository(get()) }
-                    single<IslandManager> { IslandManager(get(), Vanilife.getIslandsWorld(), get()) }
+                    single<IslandManager> { IslandManager(get(), Vanilife.getIslandsWorld(), get(), get()) }
                 },
             )
         }
@@ -44,7 +44,7 @@ class Main : JavaPlugin() {
         setupEventListeners(koinApp.koin)
 
         // Register commands
-        getCommand("island")?.setExecutor(net.azisaba.vanilife.islands.IslandCommand())
+        getCommand("island")?.setExecutor(net.azisaba.vanilife.islands.command.IslandCommand())
     }
 
     override fun onDisable() {

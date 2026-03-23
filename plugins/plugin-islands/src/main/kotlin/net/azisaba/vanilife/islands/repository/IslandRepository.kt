@@ -1,6 +1,7 @@
 package net.azisaba.vanilife.islands.repository
 
 import net.azisaba.vanilife.islands.IslandInfoLookup
+import net.azisaba.vanilife.islands.DragonMetadata
 import net.azisaba.vanilife.world.IslandPos
 import net.azisaba.vanilife.islands.IslandSummary
 import net.kyori.adventure.text.Component

@@ -28,6 +28,7 @@ class Island internal constructor(
     override val ownerUuid: UUID,
     override val primaryData: PrimaryIslandData.Writable,
     override val dragonData: DragonMetadata,
+    private val config: Config,
     private val plugin: Plugin,
 ) : IslandInfo, ForwardingAudience,
     WaveAccessor by IslandWaveAccessor(pos),
@@ -56,8 +57,6 @@ class Island internal constructor(
     override fun audiences(): Iterable<Audience> = players.toSet()
 
     private var dragonTickCounter: Long = 0L
-    private val DRAGON_BUFF_INTERVAL_SECONDS: Long = 30L
-
     private suspend fun tick(time: Long) {
         waveTick(time)
         wrackTick(time)
@@ -77,10 +76,12 @@ class Island internal constructor(
     }
 
     private suspend fun dragonTick(time: Long) {
+        if (!dragonData.installed) return
         // Only run when players present and owner is among them
         if (players.isEmpty()) return
         dragonTickCounter++
-        val ticksPerInterval = DRAGON_BUFF_INTERVAL_SECONDS * 20L
+        val intervalSeconds = config.dragon.buff.tickIntervalSeconds.coerceAtLeast(1L)
+        val ticksPerInterval = intervalSeconds * 20L
         if (dragonTickCounter % ticksPerInterval != 0L) return
 
         val owner = players.firstOrNull { it.uniqueId == ownerUuid } ?: return
@@ -95,7 +96,7 @@ class Island internal constructor(
         for ((type, list) in byType) {
             val best = list.maxByOrNull { it.amplifier } ?: continue
             // choose duration slightly longer than interval
-            val durationTicks = (DRAGON_BUFF_INTERVAL_SECONDS * 20 + 100).toInt()
+            val durationTicks = (intervalSeconds * 20 + 100).toInt()
             val potion = org.bukkit.potion.PotionEffect(type, durationTicks, best.amplifier, false, false, true)
             owner.addPotionEffect(potion)
         }

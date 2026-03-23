@@ -1,7 +1,7 @@
 package net.azisaba.vanilife.islands.command
 
 import kotlinx.coroutines.runBlocking
-import net.azisaba.vanilife.islands.DragonMetadata
+import net.azisaba.vanilife.islands.Config
 import net.azisaba.vanilife.islands.IslandManager
 import net.azisaba.vanilife.islands.repository.IslandRepository
 import net.azisaba.vanilife.world.IslandPos
@@ -12,6 +12,9 @@ import org.bukkit.command.TabCompleter
 import org.koin.core.context.GlobalContext
 
 class IslandCommand : CommandExecutor, TabCompleter {
+    private val config: Config
+        get() = GlobalContext.get().get()
+
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isEmpty()) return false
         if (args[0] != "dragon") return false
@@ -94,6 +97,10 @@ class IslandCommand : CommandExecutor, TabCompleter {
         val pos = parseIslandPos(args[2]) ?: run { sender.sendMessage("Invalid islandId"); return }
         val field = args[3]
         val preset = args[4]
+        if (!config.dragon.customPresets.containsKey(preset)) {
+            sender.sendMessage("Unknown preset '$preset'. Available: ${config.dragon.customPresets.keys.joinToString(", ")}")
+            return
+        }
         val repo = GlobalContext.get().get<IslandRepository>()
         org.bukkit.Bukkit.getScheduler().runTaskAsynchronously(GlobalContext.get().get(), Runnable {
             when (field) {

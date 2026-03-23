@@ -32,6 +32,7 @@ internal fun Main.tomlConfig(toml: Toml = defaultToml): Config {
 data class Config(
     val database: DatabaseConfig = DatabaseConfig(),
     val portal: PortalConfig = PortalConfig(),
+    val dragon: DragonConfig = DragonConfig(),
 )
 
 @Serializable
@@ -48,4 +49,26 @@ data class PortalConfig(
     @SerialName("base-radius") val baseRadius: Int = 8,
     @SerialName("radius-variance") val radiusVariance: Int = 56,
     @SerialName("safe-search-radius") val safeSearchRadius: Int = 8,
+)
+
+@Serializable
+data class DragonConfig(
+    val legacy: DragonLegacyConfig = DragonLegacyConfig(),
+    val buff: DragonBuffConfig = DragonBuffConfig(),
+    @SerialName("custom-presets") val customPresets: Map<String, String> = mapOf(
+        "sky_blue" to "#87CEEB",
+        "aqua" to "#00FFFF",
+        "purple" to "#800080",
+    ),
+    @SerialName("apply-to-visitors") val applyToVisitors: Boolean = false,
+)
+
+@Serializable
+data class DragonLegacyConfig(
+    val enabled: Boolean = true,
+)
+
+@Serializable
+data class DragonBuffConfig(
+    @SerialName("tick-interval-seconds") val tickIntervalSeconds: Long = 30L,
 )
