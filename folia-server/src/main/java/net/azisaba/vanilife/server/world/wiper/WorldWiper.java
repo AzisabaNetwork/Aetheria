@@ -21,6 +21,7 @@ public class WorldWiper {
 
     /**
      * Check or change season
+     * This method can be usable for command force season apply.
      *
      * @param nowSeason now season
      * @return is changed
@@ -32,14 +33,24 @@ public class WorldWiper {
         var oldSeason = currentSeason;
         currentSeason = nowSeason;
 
+        // call pre-change event
+        Bukkit.getPluginManager().callEvent(new PreSeasonChangeEvent(oldSeason, currentSeason));
+
+        // unload & load new resource world
+        plugin.getSLF4JLogger().info("Changing season...");
         Bukkit.getGlobalRegionScheduler().execute(plugin, () -> {
             var players = Bukkit.getOnlinePlayers();
             Bukkit.broadcast(Component.text("季節変わるよー!"));
 //            players.forEach(p -> ); Todo: teleport to each island
             Bukkit.unloadWorld("", true);
         });
+        plugin.getSLF4JLogger().info("Season was changed to {}", currentSeason.name());
+
+        // call post-change event
+        Bukkit.getPluginManager().callEvent(new PostSeasonChangeEvent(oldSeason, currentSeason));
 
         // broadcast player to change season
+        Bukkit.broadcast(Component.text(String.format("季節が%sに変わりました。", currentSeason.name())));
         // Todo: broadcast to player that season was changed
         return true;
     }
