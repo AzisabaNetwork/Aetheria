@@ -9,9 +9,10 @@ import org.koin.java.KoinJavaComponent.inject
 
 class CookingListener : Listener {
     private val plugin: Plugin by inject(Plugin::class.java)
+
     @EventHandler
     fun onPlayerConsume(event: PlayerItemConsumeEvent) {
-        val item = event.item ?: return
+        val item = event.item
         val itemKey = item.serverItemKey() ?: return
 
         val effects = CookingEffects.getEffectsForKey(itemKey) ?: run {
