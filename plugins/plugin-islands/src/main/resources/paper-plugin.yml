@@ -15,3 +15,26 @@ commands:
     usage: /island <subcommand>
     permission: vanilife.island.use
     permission-message: You do not have permission to use island commands.
+permissions:
+  vanilife.dragon.admin.*:
+    description: Allows all dragon admin operations
+    default: op
+    children:
+      vanilife.dragon.admin.grant: true
+      vanilife.dragon.admin.revoke: true
+      vanilife.dragon.admin.status: true
+  vanilife.dragon.admin.grant:
+    description: Allows /island dragon grant
+    default: op
+  vanilife.dragon.admin.revoke:
+    description: Allows /island dragon revoke
+    default: op
+  vanilife.dragon.admin.status:
+    description: Allows /island dragon status
+    default: op
+  vanilife.dragon.use:
+    description: Allows owner dragon operations (/island dragon setcolor)
+    default: true
+  vanilife.dragon.redeem:
+    description: Allows redeeming legacy dragon tickets
+    default: true

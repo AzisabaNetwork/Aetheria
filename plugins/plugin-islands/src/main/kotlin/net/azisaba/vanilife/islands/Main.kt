@@ -6,6 +6,7 @@ import me.tofaa.entitylib.APIConfig
 import me.tofaa.entitylib.EntityLib
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform
 import net.azisaba.vanilife.Vanilife
+import net.azisaba.vanilife.islands.command.IslandCommand
 import net.azisaba.vanilife.islands.repository.DatabaseIslandRepository
 import net.azisaba.vanilife.islands.repository.IslandRepository
 import org.bukkit.plugin.Plugin
@@ -44,7 +45,7 @@ class Main : JavaPlugin() {
         setupEventListeners(koinApp.koin)
 
         // Register commands
-        getCommand("island")?.setExecutor(net.azisaba.vanilife.islands.command.IslandCommand())
+        getCommand("island")?.setExecutor(IslandCommand(this))
     }
 
     override fun onDisable() {
