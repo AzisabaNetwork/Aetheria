@@ -18,6 +18,10 @@ class Main : JavaPlugin() {
 
         // register cooking recipes
         CookingRecipes.bootstrap(server)
+
+        // setup listeners and BetterHud placeholders
+        setupEventListeners()
+        setupCookingBetterHudPlaceholders()
     }
 
     override fun onDisable() {

@@ -85,3 +85,50 @@ Notes:
 - "Ingredients" group includes items categorized as `VEGETABLE`, `FRUIT`, `FISH`, or `MATERIAL` in the registry entry — these are typically raw components for recipes.
 - "Other" contains prepared dishes, desserts, drinks, and tools (categories like `FOOD`, `DESSERT`, `DRINK`, `TOOL`).
 - Use this as a quick reference when designing recipes or ingredient lists. For full definitions and food values, see `plugins/plugin-cooking/src/main/kotlin/net/azisaba/vanilife/cooking/CookingItems.kt`.
+
+## Effect map (proposed)
+
+The following is a proposed mapping of non-ingredient cooking items to gameplay effects (PotionEffect types, durations in seconds, amplifier) and a short BetterHud status key. These are suggestions for the initial implementation and can be tuned later.
+
+- BAMBOO_SHOOT_RICE (`bamboo_shoot_rice`) — Effects: SATURATION (8s, amp 1); HUD: "Satiated"
+- COFFEE (`coffee`) — Effects: SPEED (60s, amp 0), FAST_DIGGING (30s, amp 0); HUD: "Caffeinated"
+- COTTON_CANDY (`cotton_candy`) — Effects: SATURATION (6s, amp 1), SPEED (20s, amp 0); HUD: "Sugar Rush"
+- CURRY_RICE (`curry_rice`) — Effects: FIRE_RESISTANCE (90s, amp 0), INCREASE_DAMAGE (30s, amp 0); HUD: "Spicy Power"
+- EEL_RICE_BOWL (`eel_rice_bowl`) — Effects: SATURATION (10s, amp 1), REGENERATION (8s, amp 0); HUD: "Hearty"
+- FRIED_HORSE_MACKEREL (`fried_horse_mackerel`) — Effects: SATURATION (10s, amp 1), ABSORPTION (12s, amp 0); HUD: "Crunchy"
+- GRILLED_AYU (`grilled_ayu`) — Effects: SATURATION (8s, amp 1), REGENERATION (6s, amp 0); HUD: "Grilled"
+- GRILLED_MACKEREL (`grilled_mackerel`) — Effects: SATURATION (8s, amp 1), REGENERATION (6s, amp 0); HUD: "Grilled"
+- GRILLED_PACIFIC_SAURY (`grilled_pacific_saury`) — Effects: SATURATION (8s, amp 1), REGENERATION (6s, amp 0); HUD: "Grilled"
+- GRILLED_SQUID (`grilled_squid`) — Effects: SATURATION (8s, amp 1), WATER_BREATHING (20s, amp 0); HUD: "Sea Fresh"
+- HAMBURG_STEAK (`hamburg_steak`) — Effects: INCREASE_DAMAGE (40s, amp 0), SATURATION (10s, amp 1); HUD: "Energized"
+- MARINATED_EGGPLANT (`marinated_eggplant`) — Effects: SATURATION (6s, amp 1), RESISTANCE (20s, amp 0); HUD: "Preserved"
+- MISO_MACKEREL (`miso_mackerel`) — Effects: SATURATION (9s, amp 1), REGENERATION (6s, amp 0); HUD: "Comfort"
+- MISO_SOUP (`miso_soup`) — Effects: FIRE_RESISTANCE (60s, amp 0), SATURATION (6s, amp 1); HUD: "Warmth"
+- NIKUJAGA (`nikujaga`) — Effects: SATURATION (10s, amp 1), REGENERATION (8s, amp 0); HUD: "Home Cooked"
+- ODEN (`oden`) — Effects: SATURATION (10s, amp 1), RESISTANCE (30s, amp 0); HUD: "Hearty Stew"
+- PAPER_FAN (`paper_fan`) — Effects: SLOW_FALL (10s, amp 0) — treated as a cooling/utility effect when consumed; HUD: "Cool Breeze"
+- PARFAIT (`parfait`) — Effects: SATURATION (6s, amp 1), SPEED (15s, amp 0); HUD: "Delight"
+- SALAD (`salad`) — Effects: SATURATION (6s, amp 1), REGENERATION (5s, amp 0); HUD: "Fresh"
+- SALMON_ROE_SUSHI (`salmon_roe_sushi`) — Effects: SATURATION (6s, amp 1), ABSORPTION (10s, amp 0); HUD: "Luxurious"
+- SAUSAGE (`sausage`) — Effects: INCREASE_DAMAGE (30s, amp 0), SATURATION (8s, amp 1); HUD: "Hearty"
+- SEA_URCHIN_SUSHI (`sea_urchin_sushi`) — Effects: SATURATION (6s, amp 1), NIGHT_VISION (20s, amp 0); HUD: "Umami"
+- SEAFOOD_RICE_FOWL (`seafood_rice_fowl`) — Effects: SATURATION (10s, amp 1), REGENERATION (8s, amp 0); HUD: "Sea Feast"
+- SHAVED_ICE (`shaved_ice`) — Effects: SLOW (10s, amp 0) — "cooling" side-effect; HUD: "Chilled"
+- SOBA (`soba`) — Effects: SATURATION (8s, amp 1), REGENERATION (6s, amp 0); HUD: "Comfort"
+- SOFT_SERVE_ICE_CREAM (`soft_serve_ice_cream`) — Effects: SATURATION (6s, amp 1), SPEED (10s, amp 0); HUD: "Sweet"
+- SQUID_SUSHI (`squid_sushi`) — Effects: SATURATION (6s, amp 1), ABSORPTION (8s, amp 0); HUD: "Fresh Catch"
+- STEAMED_RICE (`steamed_rice`) — Effects: SATURATION (6s, amp 1); HUD: "Plain"
+- TAKOYAKI (`takoyaki`) — Effects: SATURATION (8s, amp 1), SPEED (10s, amp 0); HUD: "Street Food"
+- TAMAGO_SUSHI (`tamago_sushi`) — Effects: SATURATION (6s, amp 1), REGENERATION (5s, amp 0); HUD: "Comfort"
+- TERIYAKI_YELLOWTAIL (`teriyaki_yellowtail`) — Effects: SATURATION (9s, amp 1), INCREASE_DAMAGE (20s, amp 0); HUD: "Teriyaki Boost"
+- TONKATSU (`tonkatsu`) — Effects: INCREASE_DAMAGE (40s, amp 0), SATURATION (12s, amp 1); HUD: "Power Meal"
+- TUNA_SUSHI (`tuna_sushi`) — Effects: SATURATION (6s, amp 1), ABSORPTION (8s, amp 0); HUD: "Fresh"
+- UDON (`udon`) — Effects: SATURATION (10s, amp 1), REGENERATION (8s, amp 0); HUD: "Warm Bowl"
+- YAKISOBA (`yakisoba`) — Effects: SATURATION (10s, amp 1), SPEED (15s, amp 0); HUD: "Stir-Fried"
+
+Notes:
+- Durations are given in seconds for readability; the implementation should convert to game ticks (1s = 20 ticks) and may tune durations/amplifiers for balance.
+- HUD keys are suggested short labels to display via BetterHud; the integration should use a consistent namespace (e.g., "cooking:<key>").
+- Some items are given utility or non-standard effects for thematic purposes (e.g., PAPER_FAN -> SLOW_FALL). These can be adjusted or removed.
+- This mapping is a starting point; other effects (attribute modifiers, custom status icons) can be added later.
+
