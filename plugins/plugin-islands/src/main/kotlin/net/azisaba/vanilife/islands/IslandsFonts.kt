@@ -9,8 +9,8 @@ import net.azisaba.vanilife.Vanilife
 import net.kyori.adventure.key.Key
 
 object IslandsFonts {
-    private const val WAVE_ASCENT: Int = 559
-    private const val WAVE_HEIGHT: Int = 560
+    private const val WAVE_ASCENT: Int = 511
+    private const val WAVE_HEIGHT: Int = 512
 
     val WAVES: PackedKey<PackFont> = PackedKey.font(Vanilife.NAMESPACE, "waves")
 

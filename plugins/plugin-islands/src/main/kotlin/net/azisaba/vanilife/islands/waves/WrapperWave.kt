@@ -30,6 +30,7 @@ internal class WrapperWave(val pos: WavePos) : WrapperEntity(EntityTypes.TEXT_DI
             meta.backgroundColor = 0
             meta.brightnessOverride = 0x00f000f0
             meta.leftRotation = pos.coastSide.rotation
+            meta.textOpacity = cycleRandom.textOpacity
             meta.transformationInterpolationDuration = 5
         }
         refresh()
@@ -59,6 +60,7 @@ internal class WrapperWave(val pos: WavePos) : WrapperEntity(EntityTypes.TEXT_DI
             meta.text = Component.text(currentFrame).font(IslandsFonts.WAVES)
             meta.translation = Vector3f()
             meta.scale = Vector3f(cycleRandom.scale, cycleRandom.scale, cycleRandom.scale)
+            meta.textOpacity = cycleRandom.textOpacity
             meta.isInvisible = false
         }
         refresh()
@@ -138,7 +140,7 @@ internal class WrapperWave(val pos: WavePos) : WrapperEntity(EntityTypes.TEXT_DI
         val x = if (pos.coastSide.axisX) fixed + bob else lateral
         val z = if (pos.coastSide.axisX) lateral else fixed + bob
 
-        return Location(x, IslandDefaults.SEA_LEVEL + 0.92, z, pos.coastSide.yaw, 0f)
+        return Location(x, IslandDefaults.SEA_LEVEL + 0.88, z, pos.coastSide.yaw, 0f)
     }
 
     companion object {
@@ -164,6 +166,7 @@ internal class WrapperWave(val pos: WavePos) : WrapperEntity(EntityTypes.TEXT_DI
         val forwardOffset: Double,
         val lateralOffset: Double,
         val movementProgressEnd: Double,
+        val textOpacity: Byte,
     ) {
         companion object {
             fun roll(random: Random): CycleRandom {
@@ -171,7 +174,8 @@ internal class WrapperWave(val pos: WavePos) : WrapperEntity(EntityTypes.TEXT_DI
                 val forwardOffset = random.nextDouble(-5.5, 5.5)
                 val lateralOffset = random.nextDouble(-8.0, 8.0)
                 val movementProgressEnd = random.nextDouble(0.66, 0.80)
-                return CycleRandom(scale, forwardOffset, lateralOffset, movementProgressEnd)
+                val textOpacity = random.nextInt(96, 256).toByte()
+                return CycleRandom(scale, forwardOffset, lateralOffset, movementProgressEnd, textOpacity)
             }
         }
     }
