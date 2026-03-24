@@ -21,11 +21,12 @@ internal class WrapperWave(val pos: WavePos) : WrapperEntity(EntityTypes.TEXT_DI
     private val random: Random = Random(pos.computeSeed())
     private var cycleRandom: CycleRandom = CycleRandom.roll(random)
     private val ticksOffset: Long = random.nextLong(0L, CYCLE_TICKS)
+    private var currentFrame: Char = IslandsFonts.Waves.FRAME0
 
     override fun spawn(location: Location, parent: EntityContainer): Boolean {
         if (!super.spawn(location, parent)) return false
         consumeEntityMeta(TextDisplayMeta::class.java) { meta ->
-            meta.text = Component.text(IslandsFonts.Waves.LARGE_0).font(IslandsFonts.WAVES)
+            meta.text = Component.text(IslandsFonts.Waves.FRAME0).font(IslandsFonts.WAVES)
             meta.backgroundColor = 0
             meta.brightnessOverride = 0x00f000f0
             meta.leftRotation = pos.coastSide.rotation
@@ -37,6 +38,7 @@ internal class WrapperWave(val pos: WavePos) : WrapperEntity(EntityTypes.TEXT_DI
 
     override fun tick(time: Long) {
         val progress = progressAt(time)
+        frameTick(progress)
         if ((time + ticksOffset) % CYCLE_TICKS == 0L) {
             startCycleTick()
         } else if (progress < cycleRandom.movementProgressEnd) {
@@ -46,9 +48,15 @@ internal class WrapperWave(val pos: WavePos) : WrapperEntity(EntityTypes.TEXT_DI
         }
     }
 
+    private fun frameTick(progress: Double) {
+        val frameIndex = (progress.coerceIn(0.0, 0.999999) * FRAMES.size).toInt()
+        currentFrame = FRAMES[frameIndex]
+    }
+
     private fun startCycleTick() {
         cycleRandom = CycleRandom.roll(random)
         consumeEntityMeta(TextDisplayMeta::class.java) { meta ->
+            meta.text = Component.text(currentFrame).font(IslandsFonts.WAVES)
             meta.translation = Vector3f()
             meta.scale = Vector3f(cycleRandom.scale, cycleRandom.scale, cycleRandom.scale)
             meta.isInvisible = false
@@ -70,6 +78,7 @@ internal class WrapperWave(val pos: WavePos) : WrapperEntity(EntityTypes.TEXT_DI
         val translation = Vector3f(lx.toFloat(), dy.toFloat(), lz.toFloat())
 
         consumeEntityMeta(TextDisplayMeta::class.java) { meta ->
+            meta.text = Component.text(currentFrame).font(IslandsFonts.WAVES)
             meta.translation = translation
         }
         refresh()
@@ -88,6 +97,7 @@ internal class WrapperWave(val pos: WavePos) : WrapperEntity(EntityTypes.TEXT_DI
         sendPacketsToViewers(particlePacket)
 
         consumeEntityMeta(TextDisplayMeta::class.java) { meta ->
+            meta.text = Component.text(currentFrame).font(IslandsFonts.WAVES)
             meta.isInvisible = true
         }
         refresh()
@@ -128,11 +138,25 @@ internal class WrapperWave(val pos: WavePos) : WrapperEntity(EntityTypes.TEXT_DI
         val x = if (pos.coastSide.axisX) fixed + bob else lateral
         val z = if (pos.coastSide.axisX) lateral else fixed + bob
 
-        return Location(x, IslandDefaults.SEA_LEVEL + 0.15, z, pos.coastSide.yaw, 0f)
+        return Location(x, IslandDefaults.SEA_LEVEL + 0.92, z, pos.coastSide.yaw, 0f)
     }
 
     companion object {
         const val CYCLE_TICKS: Long = 20L * 5
+
+        private val FRAMES: List<Char> = listOf(
+            IslandsFonts.Waves.FRAME0,
+            IslandsFonts.Waves.FRAME1,
+            IslandsFonts.Waves.FRAME2,
+            IslandsFonts.Waves.FRAME3,
+            IslandsFonts.Waves.FRAME4,
+            IslandsFonts.Waves.FRAME5,
+            IslandsFonts.Waves.FRAME6,
+            IslandsFonts.Waves.FRAME7,
+            IslandsFonts.Waves.FRAME8,
+            IslandsFonts.Waves.FRAME9,
+            IslandsFonts.Waves.FRAME10,
+        )
     }
 
     private data class CycleRandom(
