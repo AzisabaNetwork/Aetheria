@@ -8,14 +8,13 @@ import net.azisaba.vanilife.islands.boundaryBlock
 import org.bukkit.World
 import org.bukkit.plugin.Plugin
 import kotlin.math.PI
-import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.sin
 import kotlin.random.Random
 
 internal data class DriftPath(val startPos: Position, val endPos: Position, val random: Random) {
-    private val horizontalAmplitude: Double = 6.0
-    private val verticalAmplitude: Double = 2.0
+    private val horizontalAmplitude: Double = HORIZONTAL_AMPLITUDE
+    private val verticalAmplitude: Double = VERTICAL_AMPLITUDE
 
     private val frequency: Double = 2.0
 
@@ -25,7 +24,6 @@ internal data class DriftPath(val startPos: Position, val endPos: Position, val 
         val t = progress.coerceIn(0.0, 1.0)
 
         val baseX = lerp(startPos.x(), endPos.x(), t)
-        val baseY = lerp(startPos.y(), endPos.y(), t)
         val baseZ = lerp(startPos.z(), endPos.z(), t)
 
         val dirX = endPos.x() - startPos.x()
@@ -46,11 +44,15 @@ internal data class DriftPath(val startPos: Position, val endPos: Position, val 
         val horizontalOffset = horizontalWave * horizontalAmplitude * envelope
 
         val verticalWave = sin(t * PI * (frequency * 0.7) + phase * 0.5)
-        val verticalOffset = -abs(verticalWave) * verticalAmplitude * envelope
+        val verticalCenter = IslandDefaults.SEA_LEVEL.toDouble() + BASE_Y_OFFSET + verticalAmplitude * 0.5
+        val verticalOffset = verticalWave * verticalAmplitude * envelope
 
         val finalX = baseX + orthoX * horizontalOffset
         val finalZ = baseZ + orthoZ * horizontalOffset
-        val finalY = (baseY + verticalOffset).coerceAtMost(IslandDefaults.SEA_LEVEL.toDouble() + 0.05)
+        val finalY = (verticalCenter + verticalOffset).coerceIn(
+            IslandDefaults.SEA_LEVEL.toDouble(),
+            verticalCenter + verticalAmplitude,
+        )
 
         return Position.fine(finalX, finalY, finalZ)
     }
@@ -60,13 +62,17 @@ internal data class DriftPath(val startPos: Position, val endPos: Position, val 
     }
 
     companion object {
+        private const val BASE_Y_OFFSET: Double = 1.0
+        private const val HORIZONTAL_AMPLITUDE: Double = 6.0
+        private const val VERTICAL_AMPLITUDE: Double = 2.0
+
         suspend fun random(islandPos: IslandPos, coastSide: CoastSide, world: World, plugin: Plugin): DriftPath {
             val salt = System.nanoTime()
             val random = Random(islandPos.computeSeed(world.seed) xor coastSide.ordinal.toLong() xor salt)
 
             val landFinder = LandFinder(random)
 
-            val seaLevel = IslandDefaults.SEA_LEVEL.toDouble()
+            val seaLevel = IslandDefaults.SEA_LEVEL.toDouble() + BASE_Y_OFFSET + VERTICAL_AMPLITUDE * 0.5
 
             val minX = islandPos.minBlockX().toDouble()
             val maxX = islandPos.maxBlockX().toDouble()
