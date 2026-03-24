@@ -12,6 +12,7 @@ import net.azisaba.vanilife.npc.spawn
 import org.bukkit.plugin.Plugin
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.random.Random
 
 internal object SummonNpcCommand : KoinComponent {
     private val plugin: Plugin by inject()
@@ -23,7 +24,7 @@ internal object SummonNpcCommand : KoinComponent {
     private fun summon(context: CommandContext<CommandSourceStack>): Int {
         val spawnLocation = context.source.location
         plugin.launch(plugin.regionDispatcher(spawnLocation)) {
-            spawnLocation.world.spawn(spawnLocation, NpcType.NEKO)
+            spawnLocation.world.spawn(spawnLocation, if (Random.nextBoolean()) NpcType.CAVEMAN else NpcType.NEKO)
         }
         return Command.SINGLE_SUCCESS
     }

@@ -15,5 +15,11 @@ data class NpcType(val icon: Char, val modelName: String, val offers: NpcOffers)
             "npc",
             NpcOffer.NEKO_OFFERS,
         )
+
+        val CAVEMAN: NpcType = NpcType(
+            NpcFonts.NpcIcons.NEKO,
+            "caveman",
+            NpcOffer.NEKO_OFFERS,
+        )
     }
 }
