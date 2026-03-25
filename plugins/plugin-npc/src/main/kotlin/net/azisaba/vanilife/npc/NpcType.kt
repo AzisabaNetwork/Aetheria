@@ -7,15 +7,25 @@ import net.kyori.adventure.key.Key
 import net.kyori.adventure.key.Keyed
 
 enum class NpcType(val key: Key, val icon: Char, val modelName: String) : Keyed {
-    NEKO(
-        key = Key.key(Vanilife.NAMESPACE, "neko"),
-        icon = NpcFonts.NpcIcons.NEKO,
-        modelName = "npc",
-    ),
     CAVEMAN(
         key = Key.key(Vanilife.NAMESPACE, "caveman"),
         icon = NpcFonts.NpcIcons.NEKO,
-        modelName = "caveman",
+        modelName = "npc_caveman",
+    ),
+    CREEPER(
+        key = Key.key(Vanilife.NAMESPACE, "creeper"),
+        icon = NpcFonts.NpcIcons.NEKO,
+        modelName = "npc_creeper",
+    ),
+    ENDER(
+      key = Key.key(Vanilife.NAMESPACE, "ender"),
+        icon = NpcFonts.NpcIcons.NEKO,
+        modelName = "npc_ender",
+    ),
+    NEKO(
+        key = Key.key(Vanilife.NAMESPACE, "neko"),
+        icon = NpcFonts.NpcIcons.NEKO,
+        modelName = "npc_neko",
     );
 
     override fun key(): Key = key
