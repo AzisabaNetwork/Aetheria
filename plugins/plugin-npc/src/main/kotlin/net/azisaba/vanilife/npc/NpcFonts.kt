@@ -14,15 +14,36 @@ object NpcFonts {
     fun npcIcons(): PackFont = PackFont(
         listOf(
             PackBitmapFontProvider(
+                file = Key.key(Vanilife.NAMESPACE, "icon/npc/caveman.png"),
+                chars = listOf("${NpcIcons.CAVEMAN}"),
+                ascent = 8,
+                height = 9,
+            ),
+            PackBitmapFontProvider(
+                file = Key.key(Vanilife.NAMESPACE, "icon/npc/creeper.png"),
+                chars = listOf("${NpcIcons.CREEPER}"),
+                ascent = 8,
+                height = 9,
+            ),
+            PackBitmapFontProvider(
+                file = Key.key(Vanilife.NAMESPACE, "icon/npc/ender.png"),
+                chars = listOf("${NpcIcons.ENDER}"),
+                ascent = 8,
+                height = 9,
+            ),
+            PackBitmapFontProvider(
                 file = Key.key(Vanilife.NAMESPACE, "icon/npc/neko.png"),
                 chars = listOf("${NpcIcons.NEKO}"),
                 ascent = 8,
                 height = 9,
-            )
+            ),
         )
     )
 
     object NpcIcons : CharCodeFactory() {
+        val CAVEMAN: Char = nextChar()
+        val CREEPER: Char = nextChar()
+        val ENDER: Char = nextChar()
         val NEKO: Char = nextChar()
     }
 }

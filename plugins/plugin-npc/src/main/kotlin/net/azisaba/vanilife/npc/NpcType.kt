@@ -9,17 +9,17 @@ import net.kyori.adventure.key.Keyed
 enum class NpcType(val key: Key, val icon: Char, val modelName: String) : Keyed {
     CAVEMAN(
         key = Key.key(Vanilife.NAMESPACE, "caveman"),
-        icon = NpcFonts.NpcIcons.NEKO,
+        icon = NpcFonts.NpcIcons.CAVEMAN,
         modelName = "npc_caveman",
     ),
     CREEPER(
         key = Key.key(Vanilife.NAMESPACE, "creeper"),
-        icon = NpcFonts.NpcIcons.NEKO,
+        icon = NpcFonts.NpcIcons.CREEPER,
         modelName = "npc_creeper",
     ),
     ENDER(
       key = Key.key(Vanilife.NAMESPACE, "ender"),
-        icon = NpcFonts.NpcIcons.NEKO,
+        icon = NpcFonts.NpcIcons.ENDER,
         modelName = "npc_ender",
     ),
     NEKO(
