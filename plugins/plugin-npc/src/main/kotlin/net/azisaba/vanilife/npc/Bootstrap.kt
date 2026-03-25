@@ -10,5 +10,9 @@ class Bootstrap : PluginBootstrap {
         context.lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS.newHandler { event ->
             event.registrar().register(NpcCommand.create(), listOf("vanilife:npc"))
         })
+
+        context.lifecycleManager.registerEventHandler(
+            RegistryEvents.SERVER_ITEM.compose().newHandler(NpcItems::bootstrap)
+        )
     }
 }
