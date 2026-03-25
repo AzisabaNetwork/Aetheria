@@ -4,12 +4,14 @@ import io.papermc.paper.plugin.bootstrap.BootstrapContext
 import io.papermc.paper.plugin.bootstrap.PluginBootstrap
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import io.papermc.paper.registry.event.RegistryEvents
+import net.azisaba.vanilife.npc.commands.ReloadNpcOffersCommand
 import net.azisaba.vanilife.npc.commands.SummonNpcCommand
 
 class Bootstrap : PluginBootstrap {
     override fun bootstrap(context: BootstrapContext) {
         context.lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS.newHandler { event ->
             event.registrar().register(SummonNpcCommand.create())
+            event.registrar().register(ReloadNpcOffersCommand.create())
         })
 
         context.lifecycleManager.registerEventHandler(

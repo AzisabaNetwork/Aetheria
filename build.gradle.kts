@@ -7,7 +7,7 @@ plugins {
     java // ToDo java launcher tasks
     alias(libs.plugins.kotlin)
     alias(libs.plugins.paperweight.patcher)
-    alias(libs.plugins.serialization) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.shadow) apply false
 }
 

@@ -6,7 +6,9 @@ dependencies {
     compileOnly(libs.bettermodel.bukkit.api)
     compileOnly(libs.packed.core)
     compileOnly(libs.packed.resource)
+    implementation(libs.kaml)
     implementation(libs.koin.core)
     implementation(libs.mccoroutine.folia.api)
     implementation(libs.mccoroutine.folia.core)
+    implementation(libs.minecraftserialization.adventure)
 }

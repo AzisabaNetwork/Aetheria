@@ -72,7 +72,7 @@ internal class ReadRecipeGoal(private val npc: Npc, private val mob: Mob, privat
         mob.world.spawnParticle(Particle.ENCHANT, mob.location, (2..5).random())
 
         if (remainingReadTime <= 0) {
-            npc.readRecipe(recipe)
+            // npc.readRecipe(recipe)
             player.playSound(
                 Sound.sound(NpcSoundEvents.NPC_READ_RECIPE, Sound.Source.PLAYER, 0.4f, 1f),
                 mob.x,

@@ -1,113 +1,91 @@
 package net.azisaba.vanilife.npc.trading
 
-import io.papermc.paper.registry.RegistryAccess
-import io.papermc.paper.registry.RegistryKey
-import io.papermc.paper.registry.TypedKey
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import net.azisaba.vanilife.Season
-import net.azisaba.vanilife.item.ServerItem
-import net.azisaba.vanilife.npc.NpcItems
-import net.azisaba.vanilife.npc.UnreadableRecipe
-import org.bukkit.Material
-import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MerchantRecipe
 import kotlin.random.Random
 
-fun interface NpcOffer {
+@Serializable
+sealed interface NpcOffer {
     fun offer(random: Random): MerchantRecipe?
 
-    companion object Builtins {
-        @JvmName("materialToMaterial")
-        fun item(
-            result: Pair<Material, IntRange>,
-            cost: Pair<Material, IntRange>,
-            maxUses: Int = 8,
-        ): NpcOffer = NpcOffer { random ->
-            MerchantRecipe(ItemStack.of(result.first, result.second.random(random)), maxUses).apply {
-                addIngredient(ItemStack.of(cost.first, cost.second.random(random)))
-            }
+    @Serializable
+    @SerialName("Item")
+    data class Item(
+        val result: ItemStackProvider,
+        val cost: ItemStackProvider,
+        val secondaryCost: ItemStackProvider?,
+        val maxUses: Int = 8,
+    ) : NpcOffer {
+        override fun offer(random: Random): MerchantRecipe = MerchantRecipe(result.provide(random), maxUses).apply {
+            addIngredient(cost.provide(random))
+            secondaryCost?.provide(random)?.let(::addIngredient)
         }
+    }
 
-        @JvmName("serverItemToMaterial")
-        fun item(
-            result: Pair<TypedKey<ServerItem>, IntRange>,
-            cost: Pair<Material, IntRange>,
-            maxUses: Int = 8,
-        ): NpcOffer = NpcOffer { random ->
-            MerchantRecipe(ItemStack.of(result.first, result.second.random(random)), maxUses).apply {
-                addIngredient(ItemStack.of(cost.first, cost.second.random(random)))
-            }
-        }
+    @Serializable
+    @SerialName("RandomChoice")
+    data class RandomChoice(val entries: List<NpcOffer>) : NpcOffer {
+        override fun offer(random: Random): MerchantRecipe? =
+            if (entries.isNotEmpty()) entries.random(random).offer(random) else null
+    }
 
-        @JvmName("materialToServerItem")
-        fun item(
-            result: Pair<Material, IntRange>,
-            cost: Pair<TypedKey<ServerItem>, IntRange>,
-            maxUses: Int = 8,
-        ): NpcOffer = NpcOffer { random ->
-            MerchantRecipe(ItemStack.of(result.first, result.second.random(random)), maxUses).apply {
-                addIngredient(ItemStack.of(cost.first, cost.second.random(random)))
-            }
-        }
+    @Serializable
+    @SerialName("WeightedRandomChoice")
+    data class WeightedRandomChoice(val entries: List<Entry>) : NpcOffer {
+        override fun offer(random: Random): MerchantRecipe? {
+            if (entries.isEmpty()) return null
 
-        @JvmName("serverItemToMaterialWithSeasonalDiscount")
-        fun itemWithSeasonalDiscount(
-            result: Pair<TypedKey<ServerItem>, IntRange>,
-            cost: Pair<Material, IntRange>,
-            maxUses: Int = 8,
-        ): NpcOffer = NpcOffer { random ->
-            MerchantRecipe(ItemStack.of(result.first, result.second.random(random)), maxUses).apply {
-                val costAmount = cost.second.random(random)
-                addIngredient(ItemStack.of(cost.first, costAmount))
+            val totalWeight = entries.sumOf(Entry::weight)
+            if (totalWeight <= 0) return null
 
-                val targetPeriod = RegistryAccess.registryAccess()
-                    .getRegistry(RegistryKey.SERVER_ITEM)
-                    .getOrThrow(result.first)
-                    .peakSeason()
-
-                if (Season.Sub.now() in targetPeriod) {
-                    specialPrice = -(costAmount * 0.5).toInt()
-                }
-            }
-        }
-
-        fun recipe(recipe: UnreadableRecipe, maxUses: Int = 8): NpcOffer = NpcOffer { random ->
-            MerchantRecipe(recipe.result, 4).apply {
-                addIngredient(recipe.rollCost(random))
-
-                val requiredExperience = recipe.rollExperienceCost(random)
-                addIngredient(ItemStack.of(NpcItems.EXPERIENCE, requiredExperience))
-            }
-        }
-
-        fun randomChoice(vararg offers: NpcOffer): NpcOffer = NpcOffer { random ->
-            if (offers.isNotEmpty()) offers.random(random).offer(random) else null
-        }
-
-        fun weightRandom(map: Map<NpcOffer, Int>): NpcOffer = NpcOffer { random ->
-            if (map.isEmpty()) return@NpcOffer null
-
-            val totalWeight = map.values.sum()
-            if (totalWeight <= 0) return@NpcOffer null
-
-            val r = random.nextInt(totalWeight)
-
-            var acc = 0
-            for ((offer, weight) in map) {
-                acc += weight
-                if (r < acc) {
-                    return@NpcOffer offer.offer(random)
+            val roll = random.nextInt(totalWeight)
+            var accumulatedWeight = 0
+            for (entry in entries) {
+                accumulatedWeight += entry.weight
+                if (roll < accumulatedWeight) {
+                    return entry.offer.offer(random)
                 }
             }
 
-            null
+            return null
         }
 
-        fun withProbability(offer: NpcOffer, chance: Double): NpcOffer = NpcOffer { random ->
+        @Serializable
+        data class Entry(val offer: NpcOffer, val weight: Int)
+    }
+
+    @Serializable
+    @SerialName("WithProbability")
+    data class WithProbability(val offer: NpcOffer, val chance: Double) : NpcOffer {
+        override fun offer(random: Random): MerchantRecipe? =
             if (random.nextDouble() <= chance) offer.offer(random) else null
-        }
+    }
 
-        fun withSeasons(offer: NpcOffer, vararg seasons: Season.Sub) = NpcOffer { random ->
+    @Serializable
+    @SerialName("WithSeasons")
+    data class WithSeasons(
+        val offer: NpcOffer,
+        val seasons: Set<@Serializable(with = SubSeasonSerializer::class) Season.Sub>,
+    ) : NpcOffer {
+        override fun offer(random: Random): MerchantRecipe? =
             if (Season.Sub.now() in seasons) offer.offer(random) else null
+    }
+
+    @Serializable
+    @SerialName("WithSeasonalDiscount")
+    data class WithSeasonalDiscount(val offer: NpcOffer, val discountRate: Double = 0.5) : NpcOffer {
+        override fun offer(random: Random): MerchantRecipe? {
+            val base = offer.offer(random) ?: return null
+            val primaryCost = base.ingredients.firstOrNull() ?: return base
+
+            val targetPeriod = base.result.serverItem()?.peakSeason() ?: return base
+            if (Season.Sub.now() in targetPeriod) {
+                base.specialPrice = -(primaryCost.amount * discountRate).toInt()
+            }
+
+            return base
         }
     }
 }
