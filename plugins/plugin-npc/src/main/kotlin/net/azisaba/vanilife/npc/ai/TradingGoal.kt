@@ -6,7 +6,7 @@ import com.destroystokyo.paper.entity.ai.GoalType
 import kr.toxicity.model.api.bukkit.platform.BukkitPlayer
 import kr.toxicity.model.api.event.hitbox.HitBoxInteractEvent
 import kr.toxicity.model.api.tracker.Tracker
-import net.azisaba.vanilife.npc.Npc
+import net.azisaba.vanilife.npc.NpcWrapper
 import net.azisaba.vanilife.npc.NpcFonts
 import net.azisaba.vanilife.npc.UnreadableRecipe
 import net.kyori.adventure.text.Component
@@ -18,7 +18,7 @@ import org.bukkit.inventory.MenuType
 import java.util.*
 
 internal class TradingGoal(
-    private val npc: Npc,
+    private val npc: NpcWrapper,
     private val mob: Mob,
     tracker: Tracker,
 ) : Goal<Mob> {

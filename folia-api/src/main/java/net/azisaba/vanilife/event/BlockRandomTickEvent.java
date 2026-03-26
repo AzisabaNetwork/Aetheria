@@ -1,6 +1,7 @@
 package net.azisaba.vanilife.event;
 
 import java.util.Random;
+import net.azisaba.vanilife.annotations.VanilifoliaApi;
 import org.bukkit.block.Block;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
@@ -9,6 +10,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
+@VanilifoliaApi
 public class BlockRandomTickEvent extends BlockEvent implements Cancellable {
     private static final HandlerList HANDLER_LIST = new HandlerList();
 

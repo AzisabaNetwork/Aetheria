@@ -6,11 +6,11 @@ import com.destroystokyo.paper.entity.ai.GoalType
 import kr.toxicity.model.api.bukkit.platform.BukkitPlayer
 import kr.toxicity.model.api.event.hitbox.HitBoxInteractEvent
 import kr.toxicity.model.api.tracker.Tracker
-import net.azisaba.vanilife.npc.Npc
+import net.azisaba.vanilife.npc.NpcWrapper
 import org.bukkit.entity.Mob
 import java.util.*
 
-internal class SitGoal(private val npc: Npc, private val mob: Mob, tracker: Tracker) : Goal<Mob> {
+internal class SitGoal(private val npc: NpcWrapper, private val mob: Mob, tracker: Tracker) : Goal<Mob> {
     private var sit: Boolean = false
 
     init {

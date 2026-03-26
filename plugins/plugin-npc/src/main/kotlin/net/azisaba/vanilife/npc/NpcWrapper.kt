@@ -4,7 +4,6 @@ import kr.toxicity.model.api.animation.AnimationIterator
 import kr.toxicity.model.api.animation.AnimationModifier
 import kr.toxicity.model.api.bukkit.platform.BukkitEntity
 import kr.toxicity.model.api.tracker.Tracker
-import net.azisaba.vanilife.npc.ai.ReadRecipeGoal
 import net.azisaba.vanilife.npc.ai.SitGoal
 import net.azisaba.vanilife.npc.ai.TradingGoal
 import net.azisaba.vanilife.npc.trading.NpcOffersLoader
@@ -17,8 +16,11 @@ import org.bukkit.util.Vector
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class Npc internal constructor(val npcType: NpcType, internal val delegate: Chicken) : Audience, KoinComponent {
+class NpcWrapper internal constructor(
+    val npcType: NpcType, internal val delegate: Chicken,
+) : Audience, KoinComponent, NpcOwnerAccessor by NpcOwnerAccessorImpl(delegate) {
     val merchant: Merchant = Bukkit.createMerchant()
+
     private val offersLoader: NpcOffersLoader by inject()
 
     val location: Location
@@ -33,7 +35,6 @@ class Npc internal constructor(val npcType: NpcType, internal val delegate: Chic
     private val tracker: Tracker = npcType.modelOrThrow().create(BukkitEntity(delegate))
 
     init {
-        Bukkit.getMobGoals().addGoal(delegate, 1, ReadRecipeGoal(this, delegate, tracker))
         Bukkit.getMobGoals().addGoal(delegate, 3, TradingGoal(this, delegate, tracker))
         Bukkit.getMobGoals().addGoal(delegate, 2, SitGoal(this, delegate, tracker))
         rollMerchantRecipes()

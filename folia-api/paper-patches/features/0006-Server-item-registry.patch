@@ -65,25 +65,27 @@ index b409620d9724e064fd12b1a5456574e3e3aad025..36f1834b0077e5facdc5b3c06819635d
   * <p>
   * Your bootstrap class will be on the same classloader as your JavaPlugin.
 diff --git a/src/main/java/io/papermc/paper/registry/RegistryKey.java b/src/main/java/io/papermc/paper/registry/RegistryKey.java
-index dcee3d88f5b77cdd5c7cbc07f73f54cc548d2f94..572b91fddcecf27c2a1b34ca27765d3173261f58 100644
+index dcee3d88f5b77cdd5c7cbc07f73f54cc548d2f94..ad4015760c5d7dea86171a2ee246a91fac2da04e 100644
 --- a/src/main/java/io/papermc/paper/registry/RegistryKey.java
 +++ b/src/main/java/io/papermc/paper/registry/RegistryKey.java
-@@ -3,6 +3,10 @@ package io.papermc.paper.registry;
+@@ -3,6 +3,11 @@ package io.papermc.paper.registry;
  import io.papermc.paper.datacomponent.DataComponentType;
  import io.papermc.paper.dialog.Dialog;
  import io.papermc.paper.registry.tag.TagKey;
 +import net.azisaba.vanilife.Vanilife;
 +import net.azisaba.vanilife.annotations.Modified;
 +import net.azisaba.vanilife.annotations.Op;
++import net.azisaba.vanilife.annotations.VanilifoliaApi;
 +import net.azisaba.vanilife.item.ServerItem;
  import net.kyori.adventure.key.Key;
  import net.kyori.adventure.key.KeyPattern;
  import net.kyori.adventure.key.Keyed;
-@@ -241,6 +245,9 @@ public sealed interface RegistryKey<T> extends Keyed permits RegistryKeyImpl {
+@@ -241,6 +246,10 @@ public sealed interface RegistryKey<T> extends Keyed permits RegistryKeyImpl {
      RegistryKey<PotionType> POTION = create("potion");
      RegistryKey<MemoryKey<?>> MEMORY_MODULE_TYPE = create("memory_module_type");
  
 +    @Modified(Op.ADD_FIELD)
++    @VanilifoliaApi
 +    RegistryKey<ServerItem> SERVER_ITEM = create(Key.key(Vanilife.NAMESPACE, "server_item"));
 +
      /**
@@ -180,25 +182,20 @@ index 72fd32341a1efbe48997c951d9a00ca721dc4b00..b9d34c0b80a5d0c26f43e4959c3a8256
       * Create a new virtual {@link WorldBorder}.
       *
 diff --git a/src/main/java/org/bukkit/HeightMap.java b/src/main/java/org/bukkit/HeightMap.java
-index f334296d103415b8435a3e046e665d11a723a92d..95ac0306d56b836f054dc44c75dac3f98bcedf66 100644
+index f334296d103415b8435a3e046e665d11a723a92d..1e68b590479fa7f737cdf15461c613741090d6e9 100644
 --- a/src/main/java/org/bukkit/HeightMap.java
 +++ b/src/main/java/org/bukkit/HeightMap.java
-@@ -1,10 +1,14 @@
+@@ -1,5 +1,9 @@
  package org.bukkit;
  
 +import net.azisaba.vanilife.annotations.Modified;
 +import net.azisaba.vanilife.annotations.Op;
++import net.azisaba.vanilife.annotations.VanilifoliaApi;
 +
  /**
   * Further information regarding heightmaps.
   *
-  * @see <a href="https://minecraft.wiki/w/Chunk_format">Minecraft Wiki</a>
-  */
-+@Modified(Op.ADD_ENUM)
- public enum HeightMap {
- 
-     /**
-@@ -32,26 +36,26 @@ public enum HeightMap {
+@@ -32,26 +36,60 @@ public enum HeightMap {
       */
      WORLD_SURFACE_WG,
  
@@ -209,12 +206,23 @@ index f334296d103415b8435a3e046e665d11a723a92d..95ac0306d56b836f054dc44c75dac3f9
 -    AETHERIA_OVERWORLD_OCEAN_FLOOR_WG,
 -    AETHERIA_OVERWORLD_WORLD_SURFACE,
 -    AETHERIA_OVERWORLD_WORLD_SURFACE_WG,
-+    // Vanilife start - Custom heightmap types by resource layer
++    @Modified(Op.ADD_ENUM)
++    @VanilifoliaApi
 +    RESOURCE_OVERWORLD_MOTION_BLOCKING,
++    @Modified(Op.ADD_ENUM)
++    @VanilifoliaApi
 +    RESOURCE_OVERWORLD_MOTION_BLOCKING_NO_LEAVES,
++    @Modified(Op.ADD_ENUM)
++    @VanilifoliaApi
 +    RESOURCE_OVERWORLD_OCEAN_FLOOR,
++    @Modified(Op.ADD_ENUM)
++    @VanilifoliaApi
 +    RESOURCE_OVERWORLD_OCEAN_FLOOR_WG,
++    @Modified(Op.ADD_ENUM)
++    @VanilifoliaApi
 +    RESOURCE_OVERWORLD_WORLD_SURFACE,
++    @Modified(Op.ADD_ENUM)
++    @VanilifoliaApi
 +    RESOURCE_OVERWORLD_WORLD_SURFACE_WG,
  
 -    AETHERIA_NETHER_MOTION_BLOCKING,
@@ -223,11 +231,23 @@ index f334296d103415b8435a3e046e665d11a723a92d..95ac0306d56b836f054dc44c75dac3f9
 -    AETHERIA_NETHER_OCEAN_FLOOR_WG,
 -    AETHERIA_NETHER_WORLD_SURFACE,
 -    AETHERIA_NETHER_WORLD_SURFACE_WG,
++    @Modified(Op.ADD_ENUM)
++    @VanilifoliaApi
 +    RESOURCE_NETHER_MOTION_BLOCKING,
++    @Modified(Op.ADD_ENUM)
++    @VanilifoliaApi
 +    RESOURCE_NETHER_MOTION_BLOCKING_NO_LEAVES,
++    @Modified(Op.ADD_ENUM)
++    @VanilifoliaApi
 +    RESOURCE_NETHER_OCEAN_FLOOR,
++    @Modified(Op.ADD_ENUM)
++    @VanilifoliaApi
 +    RESOURCE_NETHER_OCEAN_FLOOR_WG,
++    @Modified(Op.ADD_ENUM)
++    @VanilifoliaApi
 +    RESOURCE_NETHER_WORLD_SURFACE,
++    @Modified(Op.ADD_ENUM)
++    @VanilifoliaApi
 +    RESOURCE_NETHER_WORLD_SURFACE_WG,
  
 -    AETHERIA_END_MOTION_BLOCKING,
@@ -237,13 +257,24 @@ index f334296d103415b8435a3e046e665d11a723a92d..95ac0306d56b836f054dc44c75dac3f9
 -    AETHERIA_END_WORLD_SURFACE,
 -    AETHERIA_END_WORLD_SURFACE_WG,
 -    // Aetheria end - Custom heightmap types by Aetheria layer
++    @Modified(Op.ADD_ENUM)
++    @VanilifoliaApi
 +    RESOURCE_END_MOTION_BLOCKING,
++    @Modified(Op.ADD_ENUM)
++    @VanilifoliaApi
 +    RESOURCE_END_MOTION_BLOCKING_NO_LEAVES,
++    @Modified(Op.ADD_ENUM)
++    @VanilifoliaApi
 +    RESOURCE_END_OCEAN_FLOOR,
++    @Modified(Op.ADD_ENUM)
++    @VanilifoliaApi
 +    RESOURCE_END_OCEAN_FLOOR_WG,
++    @Modified(Op.ADD_ENUM)
++    @VanilifoliaApi
 +    RESOURCE_END_WORLD_SURFACE,
++    @Modified(Op.ADD_ENUM)
++    @VanilifoliaApi
 +    RESOURCE_END_WORLD_SURFACE_WG,
-+    // Vanilife end - Custom heightmap types by resource layer
  }
 diff --git a/src/main/java/org/bukkit/block/Biome.java b/src/main/java/org/bukkit/block/Biome.java
 index 572f917374f871b0feab3fffc1a3c7b9e6fb0bfc..83876fbd9ecfcb054a6bebf8cef204db91d47ad8 100644
@@ -349,10 +380,10 @@ index 2151e3bac040b0dd47c67ffe3a9de6dc45e9d62c..c1046afcd37805ed0853ecb0ed6f6adb
      @NotNull
      public Set<ComplexEntityPart> getParts();
 diff --git a/src/main/java/org/bukkit/inventory/ItemStack.java b/src/main/java/org/bukkit/inventory/ItemStack.java
-index f20f072b0978b3ef4b3f36c952d469e0d8d5cd22..1f4a49614820967e28b04631c17f31de6a030a26 100644
+index f20f072b0978b3ef4b3f36c952d469e0d8d5cd22..c5c2c92eb32b3457c72d89b02c6a5aa827c8bdb4 100644
 --- a/src/main/java/org/bukkit/inventory/ItemStack.java
 +++ b/src/main/java/org/bukkit/inventory/ItemStack.java
-@@ -2,14 +2,17 @@ package org.bukkit.inventory;
+@@ -2,14 +2,18 @@ package org.bukkit.inventory;
  
  import com.google.common.base.Preconditions;
  import io.papermc.paper.datacomponent.DataComponentHolder;
@@ -366,13 +397,14 @@ index f20f072b0978b3ef4b3f36c952d469e0d8d5cd22..1f4a49614820967e28b04631c17f31de
  import java.util.function.Predicate;
 +import net.azisaba.vanilife.annotations.Modified;
 +import net.azisaba.vanilife.annotations.Op;
++import net.azisaba.vanilife.annotations.VanilifoliaApi;
 +import net.azisaba.vanilife.item.ServerItem;
  import net.kyori.adventure.text.Component;
 -import net.kyori.adventure.text.event.HoverEvent;
  import org.bukkit.Bukkit;
  import org.bukkit.Material;
  import org.bukkit.NamespacedKey;
-@@ -22,6 +25,7 @@ import org.bukkit.inventory.meta.Damageable;
+@@ -22,6 +26,7 @@ import org.bukkit.inventory.meta.Damageable;
  import org.bukkit.inventory.meta.ItemMeta;
  import org.bukkit.material.MaterialData;
  import org.bukkit.persistence.PersistentDataContainer;
@@ -380,26 +412,30 @@ index f20f072b0978b3ef4b3f36c952d469e0d8d5cd22..1f4a49614820967e28b04631c17f31de
  import org.jetbrains.annotations.NotNull;
  import org.jetbrains.annotations.Nullable;
  
-@@ -66,6 +70,36 @@ public class ItemStack implements Cloneable, ConfigurationSerializable, Translat
+@@ -66,6 +71,40 @@ public class ItemStack implements Cloneable, ConfigurationSerializable, Translat
      }
      // Paper end
  
 +    @Modified(Op.ADD_METHOD)
++    @VanilifoliaApi
 +    public static @NotNull ItemStack of(final @NotNull TypedKey<ServerItem> type) {
 +        return of(RegistryAccess.registryAccess().getRegistry(RegistryKey.SERVER_ITEM).getOrThrow(type), 1);
 +    }
 +
 +    @Modified(Op.ADD_METHOD)
++    @VanilifoliaApi
 +    public static @NotNull ItemStack of(final @NotNull TypedKey<ServerItem> type, final int amount) {
 +        return of(RegistryAccess.registryAccess().getRegistry(RegistryKey.SERVER_ITEM).getOrThrow(type), amount);
 +    }
 +
 +    @Modified(Op.ADD_METHOD)
++    @VanilifoliaApi
 +    public static @NotNull ItemStack of(final @NotNull ServerItem type) {
 +        return of(type, 1);
 +    }
 +
 +    @Modified(Op.ADD_METHOD)
++    @VanilifoliaApi
 +    public static @NotNull ItemStack of(final @NotNull ServerItem type, final int amount) {
 +        final ItemStack itemStack = of(ServerItem.NATIVE_ITEM, amount);
 +
@@ -417,30 +453,60 @@ index f20f072b0978b3ef4b3f36c952d469e0d8d5cd22..1f4a49614820967e28b04631c17f31de
      // Paper start - pdc
      /**
       * @see #editPersistentDataContainer(Consumer)
-@@ -233,6 +267,26 @@ public class ItemStack implements Cloneable, ConfigurationSerializable, Translat
+@@ -233,6 +272,30 @@ public class ItemStack implements Cloneable, ConfigurationSerializable, Translat
      }
      // Paper end
  
 +    @Modified(Op.ADD_METHOD)
++    @VanilifoliaApi
 +    public @Nullable ServerItem serverItem() {
 +        return this.craftDelegate.serverItem();
 +    }
 +
 +    @Modified(Op.ADD_METHOD)
++    @VanilifoliaApi
 +    public @Nullable TypedKey<ServerItem> serverItemKey() {
 +        return this.craftDelegate.serverItemKey();
 +    }
 +
 +    @Modified(Op.ADD_METHOD)
++    @VanilifoliaApi
 +    public boolean isOf(final @NotNull ServerItem type) {
 +        return this.craftDelegate.isOf(type);
 +    }
 +
 +    @Modified(Op.ADD_METHOD)
++    @VanilifoliaApi
 +    public boolean isOf(final @NotNull TypedKey<ServerItem> type) {
 +        return this.craftDelegate.isOf(type);
 +    }
 +
      /**
       * Gets the amount of items in this stack
+      *
+diff --git a/src/main/java/org/bukkit/persistence/PersistentDataType.java b/src/main/java/org/bukkit/persistence/PersistentDataType.java
+index 709e0eb08f08bcad15812ab01c81e043d8147a8a..1ba0cf3d21c193a7743ee4bc8516e629df696858 100644
+--- a/src/main/java/org/bukkit/persistence/PersistentDataType.java
++++ b/src/main/java/org/bukkit/persistence/PersistentDataType.java
+@@ -1,5 +1,10 @@
+ package org.bukkit.persistence;
+ 
++import java.util.UUID;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
++import net.azisaba.vanilife.annotations.VanilifoliaApi;
++import net.azisaba.vanilife.persistence.UuidPersistentDataType;
+ import org.jetbrains.annotations.NotNull;
+ 
+ /**
+@@ -114,6 +119,10 @@ public interface PersistentDataType<P, C> {
+      */
+     ListPersistentDataTypeProvider LIST = new ListPersistentDataTypeProvider();
+ 
++    @Modified(Op.ADD_FIELD)
++    @VanilifoliaApi
++    PersistentDataType<byte[], UUID> UUID = new UuidPersistentDataType();
++
+     /**
+      * Returns the primitive data type of this tag.
       *
