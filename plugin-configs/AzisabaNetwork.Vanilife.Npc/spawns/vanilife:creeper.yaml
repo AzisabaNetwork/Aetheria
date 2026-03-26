@@ -1,0 +1,20 @@
+biomes:
+  - "minecraft:swamp"
+  - "minecraft:dark_forest"
+  - "minecraft:windswept_hills"
+  - "minecraft:forest"
+  - "minecraft:birch_forest"
+  - "minecraft:old_growth_birch_forest"
+  - "minecraft:taiga"
+  - "minecraft:old_growth_pine_taiga"
+  - "minecraft:old_growth_spruce_taiga"
+  - "minecraft:plains"
+  - "minecraft:savanna"
+  - "minecraft:jungle"
+  - "minecraft:sparse_jungle"
+  - "minecraft:bamboo_jungle"
+
+distribution:
+  spacing: 112.0
+  minDistance: 56
+  jitter: 24.0

@@ -1,0 +1,11 @@
+naturalSpawner:
+  activeChunkRadius: 8
+  focusedChunkRadius: 4
+  chunkShift: 4
+  chunkSize: 16
+  maxSpawnsPerTick: 4
+  searchYRadius: 24.0
+  xzSamplesPerCell: 8
+  positionFinder:
+    surfaceScanUp: 8
+    surfaceScanDown: 96

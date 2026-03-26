@@ -1,0 +1,19 @@
+biomes:
+  - "minecraft:dripstone_caves"
+  - "minecraft:lush_caves"
+  - "minecraft:caves"
+  - "minecraft:stony_peaks"
+  - "minecraft:jagged_peaks"
+  - "minecraft:frozen_peaks"
+  - "minecraft:windswept_hills"
+  - "minecraft:windswept_gravelly_hills"
+  - "minecraft:taiga"
+  - "minecraft:old_growth_pine_taiga"
+  - "minecraft:old_growth_spruce_taiga"
+  - "minecraft:grove"
+  - "minecraft:meadow"
+
+distribution:
+  spacing: 96.0
+  minDistance: 48
+  jitter: 20.0

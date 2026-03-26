@@ -1,0 +1,18 @@
+biomes:
+  - "minecraft:deep_dark"
+  - "minecraft:jagged_peaks"
+  - "minecraft:windswept_forest"
+  - "minecraft:stony_peaks"
+  - "minecraft:frozen_peaks"
+  - "minecraft:windswept_hills"
+  - "minecraft:windswept_gravelly_hills"
+  - "minecraft:old_growth_pine_taiga"
+  - "minecraft:old_growth_spruce_taiga"
+  - "minecraft:dark_forest"
+  - "minecraft:soul_sand_valley"
+  - "minecraft:warped_forest"
+
+distribution:
+  spacing: 144.0
+  minDistance: 72
+  jitter: 28.0
