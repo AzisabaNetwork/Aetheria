@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 import net.azisaba.vanilife.npc.spawn.NpcNaturalSpawner
 import java.nio.file.Files
 import java.nio.file.StandardOpenOption
+import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
@@ -15,7 +16,7 @@ internal fun Main.yamlConfig(yaml: Yaml = defaultYaml): Configuration {
     val path = dataFolder.toPath().resolve("config.yaml")
     if (!path.exists()) {
         val content = yaml.encodeToString(Configuration.serializer(), Configuration())
-        path.parent?.let(Files::createDirectory)
+        path.parent?.createDirectories()
         path.writeText(
             content,
             options = arrayOf(

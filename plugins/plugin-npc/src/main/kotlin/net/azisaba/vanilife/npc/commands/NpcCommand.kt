@@ -14,11 +14,9 @@ import io.papermc.paper.command.brigadier.Commands
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes
 import io.papermc.paper.command.brigadier.argument.resolvers.FinePositionResolver
 import io.papermc.paper.math.Position
-import net.azisaba.vanilife.npc.NpcFonts
-import net.azisaba.vanilife.npc.NpcTranslations
-import net.azisaba.vanilife.npc.NpcType
+import net.azisaba.vanilife.npc.*
+import net.azisaba.vanilife.npc.spawn.NpcNaturalSpawner
 import net.azisaba.vanilife.npc.spawn.NpcSpawnRuleLoader
-import net.azisaba.vanilife.npc.spawn
 import net.azisaba.vanilife.npc.trading.NpcOffersLoader
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
@@ -29,9 +27,13 @@ import org.bukkit.plugin.Plugin
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.atomic.AtomicReference
 
 internal object NpcCommand : KoinComponent {
     private val plugin: Plugin by inject()
+
+    private val config: AtomicReference<Configuration> by inject()
+    private val naturalSpawner: AtomicReference<NpcNaturalSpawner> by inject()
 
     private val offersLoader: NpcOffersLoader by inject()
     private val spawnRuleLoader: NpcSpawnRuleLoader by inject()
@@ -65,41 +67,110 @@ internal object NpcCommand : KoinComponent {
         .build()
 
     private fun reloadAll(context: CommandContext<CommandSourceStack>): Int {
+        val sender = context.source.sender
+
+        sender.sendMessage(Component.translatable(NpcTranslations.COMMANDS_VANILIFE_NPC_RELOADING, NamedTextColor.GRAY))
+
+        (plugin as? Main)?.let { plugin ->
+            val newConfig = plugin.yamlConfig()
+            config.set(newConfig)
+            naturalSpawner.set(NpcNaturalSpawner(newConfig.naturalSpawner, spawnRuleLoader))
+            sender.sendMessage(
+                Component.text("#")
+                    .appendSpace()
+                    .append(
+                        Component.translatable(
+                            NpcTranslations.COMMANDS_VANILIFE_NPC_RELOAD_CONFIG,
+                            NamedTextColor.GREEN,
+                        )
+                    )
+            )
+        }
+
         offersLoader.loadAll()
+        sender.sendMessage(
+            Component.text("#")
+                .appendSpace()
+                .append(
+                    Component.translatable(
+                        NpcTranslations.COMMANDS_VANILIFE_NPC_RELOAD_OFFERS_ALL,
+                        NamedTextColor.GREEN,
+                    )
+                )
+        )
+
         spawnRuleLoader.loadAll()
-        context.source.sender.sendMessage(Component.translatable(NpcTranslations.COMMANDS_VANILIFE_NPC_RELOAD_ALL))
+        sender.sendMessage(
+            Component.text("#")
+                .appendSpace()
+                .append(
+                    Component.translatable(
+                        NpcTranslations.COMMANDS_VANILIFE_NPC_RELOAD_SPAWN_RULES_ALL,
+                        NamedTextColor.GREEN,
+                    )
+                )
+        )
+
         return Command.SINGLE_SUCCESS
     }
 
     private fun reloadOne(context: CommandContext<CommandSourceStack>): Int {
+        val sender = context.source.sender
+        sender.sendMessage(Component.translatable(NpcTranslations.COMMANDS_VANILIFE_NPC_RELOADING, NamedTextColor.GRAY))
+
         val npcType = ensureNpcType(context)
-        offersLoader.reloadOne(npcType)
-        spawnRuleLoader.loadOne(npcType)
-        context.source.sender.sendMessage(
-            Component.translatable(
-                NpcTranslations.COMMANDS_VANILIFE_NPC_RELOAD_ONE,
-                Component.text()
-                    .append(Component.text(npcType.icon).font(NpcFonts.NPC_ICONS).shadowColor(ShadowColor.none()))
-                    .append(Component.text(npcType.key.asString(), NamedTextColor.GRAY))
-                    .build(),
+
+        val npcIcon = Component.text()
+            .append(
+                Component.text(npcType.icon, NamedTextColor.WHITE)
+                    .font(NpcFonts.NPC_ICONS)
+                    .shadowColor(ShadowColor.none())
             )
+            .append(Component.text(npcType.key.asString(), NamedTextColor.GRAY))
+            .build()
+
+        offersLoader.reloadOne(npcType)
+        sender.sendMessage(
+            Component.text("#")
+                .appendSpace()
+                .append(
+                    Component.translatable(
+                        NpcTranslations.COMMANDS_VANILIFE_NPC_RELOAD_OFFERS_ONE,
+                        NamedTextColor.GREEN,
+                        npcIcon
+                    )
+                )
         )
+
+        spawnRuleLoader.loadOne(npcType)
+        sender.sendMessage(
+            Component.text("#")
+                .appendSpace()
+                .append(
+                    Component.translatable(
+                        NpcTranslations.COMMANDS_VANILIFE_NPC_RELOAD_SPAWN_RULE_ONE,
+                        NamedTextColor.GREEN,
+                        npcIcon
+                    )
+                )
+        )
+
         return Command.SINGLE_SUCCESS
     }
 
     private fun summon(context: CommandContext<CommandSourceStack>): Int {
         val npcType = ensureNpcType(context)
-        return summon(context, npcType, context.source.location)
+        return summonNpc(context, npcType, context.source.location)
     }
 
     private fun summonWithPosition(context: CommandContext<CommandSourceStack>): Int {
         val npcType = ensureNpcType(context)
         val positionResolver = context.getArgument("pos", FinePositionResolver::class.java)
         val position = positionResolver.resolve(context.source)
-        return summon(context, npcType, position)
+        return summonNpc(context, npcType, position)
     }
 
-    private fun summon(context: CommandContext<CommandSourceStack>, npcType: NpcType, position: Position): Int {
+    private fun summonNpc(context: CommandContext<CommandSourceStack>, npcType: NpcType, position: Position): Int {
         val world = context.source.location.world
         val location = Location(world, position.x(), position.y(), position.z())
         plugin.launch(plugin.regionDispatcher(location)) {

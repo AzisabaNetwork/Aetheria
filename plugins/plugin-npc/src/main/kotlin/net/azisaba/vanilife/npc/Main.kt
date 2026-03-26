@@ -8,6 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
+import java.util.concurrent.atomic.AtomicReference
 
 class Main : JavaPlugin() {
     private lateinit var koinApp: KoinApplication
@@ -17,14 +18,14 @@ class Main : JavaPlugin() {
 
         val npcOffersLoader = NpcOffersLoader(this).also(NpcOffersLoader::loadAll)
         val npcSpawnRuleLoader = NpcSpawnRuleLoader(this).also(NpcSpawnRuleLoader::loadAll)
+        val configurationReference = AtomicReference(config)
+        val npcNaturalSpawnerReference = AtomicReference(NpcNaturalSpawner(config.naturalSpawner, npcSpawnRuleLoader))
 
         koinApp = startKoin {
             modules(module {
-                single<Configuration> { config }
                 single<Plugin> { this@Main }
-                single<NpcNaturalSpawner> {
-                    NpcNaturalSpawner(get<Configuration>().naturalSpawner, npcSpawnRuleLoader)
-                }
+                single<AtomicReference<Configuration>> { configurationReference }
+                single<AtomicReference<NpcNaturalSpawner>> { npcNaturalSpawnerReference }
                 single<NpcOffersLoader> { npcOffersLoader }
                 single<NpcSpawnRuleLoader> { npcSpawnRuleLoader }
                 single<NpcContainer> { NpcContainer() }

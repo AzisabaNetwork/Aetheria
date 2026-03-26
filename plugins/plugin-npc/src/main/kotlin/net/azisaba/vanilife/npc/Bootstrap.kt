@@ -9,7 +9,7 @@ import net.azisaba.vanilife.npc.commands.NpcCommand
 class Bootstrap : PluginBootstrap {
     override fun bootstrap(context: BootstrapContext) {
         context.lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS.newHandler { event ->
-            event.registrar().register(NpcCommand.create())
+            event.registrar().register(NpcCommand.create(), listOf("vanilife:npc"))
         })
 
         context.lifecycleManager.registerEventHandler(
