@@ -11,34 +11,31 @@ import net.azisaba.vanilife.npc.trading.NpcOffersLoader
 import net.kyori.adventure.audience.Audience
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.RegionAccessor
 import org.bukkit.entity.Chicken
-import org.bukkit.entity.Mob
 import org.bukkit.inventory.Merchant
+import org.bukkit.util.Vector
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-fun RegionAccessor.spawn(location: Location, npcType: NpcType): Npc {
-    val chicken = spawn(location, Chicken::class.java) { spawned ->
-        spawned.isSilent = true
-        spawned.isPersistent = false
-    }
-    return Npc(npcType, chicken)
-}
-
-class Npc internal constructor(val npcType: NpcType, val mob: Mob) : Audience, KoinComponent {
+class Npc internal constructor(val npcType: NpcType, internal val delegate: Chicken) : Audience, KoinComponent {
     val merchant: Merchant = Bukkit.createMerchant()
     private val offersLoader: NpcOffersLoader by inject()
+
+    val location: Location
+        get() = delegate.location
+
+    val velocity: Vector
+        get() = delegate.velocity
 
     val isSitting: Boolean
         get() = tracker.bones().any { bone -> bone.runningAnimation()?.name == "sit" }
 
-    private val tracker: Tracker = npcType.modelOrThrow().create(BukkitEntity(mob))
+    private val tracker: Tracker = npcType.modelOrThrow().create(BukkitEntity(delegate))
 
     init {
-        Bukkit.getMobGoals().addGoal(mob, 1, ReadRecipeGoal(this, mob, tracker))
-        Bukkit.getMobGoals().addGoal(mob, 3, TradingGoal(this, mob, tracker))
-        Bukkit.getMobGoals().addGoal(mob, 2, SitGoal(this, mob, tracker))
+        Bukkit.getMobGoals().addGoal(delegate, 1, ReadRecipeGoal(this, delegate, tracker))
+        Bukkit.getMobGoals().addGoal(delegate, 3, TradingGoal(this, delegate, tracker))
+        Bukkit.getMobGoals().addGoal(delegate, 2, SitGoal(this, delegate, tracker))
         rollMerchantRecipes()
     }
 
@@ -60,7 +57,9 @@ class Npc internal constructor(val npcType: NpcType, val mob: Mob) : Audience, K
     }
 
     fun remove() {
-        mob.remove()
+        if (delegate.isValid) {
+            delegate.remove()
+        }
         tracker.close()
     }
 }

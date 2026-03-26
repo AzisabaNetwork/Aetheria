@@ -9,17 +9,20 @@ import org.koin.dsl.module
 
 class Main : JavaPlugin() {
     private lateinit var koinApp: KoinApplication
-    internal lateinit var npcOffersLoader: NpcOffersLoader
-        private set
 
     override fun onEnable() {
-        npcOffersLoader = NpcOffersLoader(this).also { it.loadAll() }
+        val npcOffersLoader = NpcOffersLoader(this).also(NpcOffersLoader::loadAll)
+        val npcContainer = NpcContainer()
+
         koinApp = startKoin {
             modules(module {
                 single<Plugin> { this@Main }
-                single<NpcOffersLoader> { npcOffersLoader }
+                single { npcOffersLoader }
+                single { npcContainer }
             })
         }
+
+        setupEventListeners(koinApp.koin)
     }
 
     override fun onDisable() {
