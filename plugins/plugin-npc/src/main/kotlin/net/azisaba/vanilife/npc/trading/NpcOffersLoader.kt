@@ -33,7 +33,7 @@ internal class NpcOffersLoader(private val plugin: Plugin) {
         val offersDirectory = plugin.dataFolder
             .toPath()
             .resolve("offers")
-            .resolve(type.key.asString())
+            .resolve(type.key.value())
 
         if (!offersDirectory.exists()) {
             offersDirectory.createDirectories()

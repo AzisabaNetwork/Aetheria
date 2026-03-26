@@ -32,7 +32,7 @@ internal class NpcSpawnRuleLoader(private val plugin: Plugin) {
             spawnsDirectory.createDirectories()
         }
 
-        val rulePath = spawnsDirectory.resolve("${type.key.asString()}.$EXTENSION")
+        val rulePath = spawnsDirectory.resolve("${type.key.value()}.$EXTENSION")
         if (!rulePath.exists()) {
             return null
         }
