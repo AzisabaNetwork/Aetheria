@@ -11,7 +11,7 @@ internal class NpcDelegateListener(private val container: NpcContainer) : Listen
     fun onEntityRemove(event: EntityRemoveEvent) {
         val delegate = event.entity as? Chicken ?: return
         val npc = container.getByDelegate(delegate) ?: return
-        npc.remove()
         container.remove(npc)
+        npc.dispose()
     }
 }

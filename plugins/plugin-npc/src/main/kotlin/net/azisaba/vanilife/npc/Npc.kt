@@ -60,6 +60,10 @@ class Npc internal constructor(val npcType: NpcType, internal val delegate: Chic
         if (delegate.isValid) {
             delegate.remove()
         }
+        dispose()
+    }
+
+    fun dispose() {
         tracker.close()
     }
 }

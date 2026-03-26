@@ -1,10 +1,12 @@
 package net.azisaba.vanilife.npc
 
 import io.papermc.paper.math.Position
+import org.bukkit.NamespacedKey
 import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.Chicken
+import org.bukkit.persistence.PersistentDataType
 import org.koin.core.context.GlobalContext
 
 fun World.spawn(position: Position, npcType: NpcType): Npc {
@@ -12,6 +14,7 @@ fun World.spawn(position: Position, npcType: NpcType): Npc {
     val chicken = spawn(location, Chicken::class.java) { spawned ->
         spawned.isSilent = true
         spawned.isPersistent = false
+        spawned.persistentDataContainer.set(NpcPersistentKeys.NPC_MARKER, PersistentDataType.BYTE, 1)
     }
     return Npc(npcType, chicken).apply(npcContainer()::put)
 }
@@ -61,3 +64,7 @@ fun Chunk.collectNPCs(): Collection<Npc> = entities.filterIsInstance<Chicken>()
     .mapNotNull(npcContainer()::getByDelegate)
 
 private fun npcContainer(): NpcContainer = GlobalContext.get().get<NpcContainer>()
+
+internal object NpcPersistentKeys {
+    val NPC_MARKER: NamespacedKey = NamespacedKey("vanilife", "npc")
+}

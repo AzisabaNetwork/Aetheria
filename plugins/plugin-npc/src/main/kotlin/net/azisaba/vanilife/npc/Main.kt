@@ -1,5 +1,6 @@
 package net.azisaba.vanilife.npc
 
+import net.azisaba.vanilife.npc.spawn.NpcNaturalSpawner
 import net.azisaba.vanilife.npc.spawn.NpcSpawnRuleLoader
 import net.azisaba.vanilife.npc.trading.NpcOffersLoader
 import org.bukkit.plugin.Plugin
@@ -12,16 +13,21 @@ class Main : JavaPlugin() {
     private lateinit var koinApp: KoinApplication
 
     override fun onEnable() {
+        val config = yamlConfig()
+
         val npcOffersLoader = NpcOffersLoader(this).also(NpcOffersLoader::loadAll)
         val npcSpawnRuleLoader = NpcSpawnRuleLoader(this).also(NpcSpawnRuleLoader::loadAll)
-        val npcContainer = NpcContainer()
 
         koinApp = startKoin {
             modules(module {
+                single<Configuration> { config }
                 single<Plugin> { this@Main }
-                single { npcOffersLoader }
-                single { npcSpawnRuleLoader }
-                single { npcContainer }
+                single<NpcNaturalSpawner> {
+                    NpcNaturalSpawner(get<Configuration>().naturalSpawner, npcSpawnRuleLoader)
+                }
+                single<NpcOffersLoader> { npcOffersLoader }
+                single<NpcSpawnRuleLoader> { npcSpawnRuleLoader }
+                single<NpcContainer> { NpcContainer() }
             })
         }
 
