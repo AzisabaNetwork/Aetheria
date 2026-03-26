@@ -5,9 +5,11 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
 internal class NpcWrapperMap(private val map: ConcurrentMap<Int, NpcWrapper> = ConcurrentHashMap()) {
-    fun byEntityId(delegateId: Int): NpcWrapper? = map[delegateId]
+    fun byEntityId(entityId: Int): NpcWrapper? = map[entityId]
 
-    fun byDelegate(delegate: Chicken): NpcWrapper? = byEntityId(delegate.entityId)
+    fun byDelegate(chicken: Chicken): NpcWrapper? = byEntityId(chicken.entityId)
+
+    fun isDelegate(chicken: Chicken): Boolean = chicken.entityId in map
 
     fun register(npc: NpcWrapper) {
         val delegateId = npc.delegate.entityId

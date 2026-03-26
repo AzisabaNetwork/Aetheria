@@ -5,11 +5,21 @@ import net.azisaba.vanilife.npc.wrapper.NpcWrapperMap
 import org.bukkit.entity.Chicken
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.entity.EntityRemoveEvent
 import org.bukkit.event.world.EntitiesLoadEvent
 import org.bukkit.event.world.EntitiesUnloadEvent
 
 internal class NpcDelegateListener(private val map: NpcWrapperMap) : Listener {
+    @EventHandler
+    fun onEntityDeath(event: EntityDeathEvent) {
+        val chicken = event.entity as? Chicken ?: return
+        if (map.isDelegate(chicken)) {
+            event.drops.clear()
+            event.droppedExp = 0
+        }
+    }
+
     @EventHandler
     fun onEntityRemove(event: EntityRemoveEvent) {
         val delegate = event.entity as? Chicken ?: return
