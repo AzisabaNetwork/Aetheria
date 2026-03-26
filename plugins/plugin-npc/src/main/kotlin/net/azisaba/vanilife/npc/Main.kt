@@ -1,5 +1,6 @@
 package net.azisaba.vanilife.npc
 
+import net.azisaba.vanilife.npc.wrapper.NpcWrapperMap
 import net.azisaba.vanilife.npc.spawn.NpcNaturalSpawner
 import net.azisaba.vanilife.npc.spawn.NpcSpawnRuleLoader
 import net.azisaba.vanilife.npc.trading.NpcOffersLoader
@@ -28,7 +29,7 @@ class Main : JavaPlugin() {
                 single<AtomicReference<NpcNaturalSpawner>> { npcNaturalSpawnerReference }
                 single<NpcOffersLoader> { npcOffersLoader }
                 single<NpcSpawnRuleLoader> { npcSpawnRuleLoader }
-                single<NpcContainer> { NpcContainer() }
+                single<NpcWrapperMap> { NpcWrapperMap() }
             })
         }
 

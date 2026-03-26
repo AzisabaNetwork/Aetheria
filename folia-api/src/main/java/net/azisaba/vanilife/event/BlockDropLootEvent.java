@@ -11,32 +11,31 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
-import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-@NullMarked
 @VanilifoliaApi
 public class BlockDropLootEvent extends BlockEvent {
     private static final HandlerList HANDLER_LIST = new HandlerList();
 
-    public static HandlerList getHandlerList() {
+    public static @NotNull HandlerList getHandlerList() {
         return HANDLER_LIST;
     }
 
     private final BlockState blockState;
 
-    private final @Nullable Entity entity;
-    private final @Nullable ItemStack tool;
+    private final Entity entity;
+    private final ItemStack tool;
 
     private final List<ItemStack> drops;
 
     @ApiStatus.Internal
     public BlockDropLootEvent(
-            final Block block,
-            final BlockState blockState,
-            final @Nullable Entity entity,
-            final @Nullable ItemStack tool,
-            final List<ItemStack> drops
+        final @NotNull Block block,
+        final @NotNull BlockState blockState,
+        final @Nullable Entity entity,
+        final @Nullable ItemStack tool,
+        final @NotNull List<@NotNull ItemStack> drops
     ) {
         super(block);
         this.blockState = blockState;
@@ -45,7 +44,7 @@ public class BlockDropLootEvent extends BlockEvent {
         this.drops = drops;
     }
 
-    public BlockState getBlockState() {
+    public @NotNull BlockState getBlockState() {
         return this.blockState;
     }
 
@@ -57,25 +56,25 @@ public class BlockDropLootEvent extends BlockEvent {
         return this.tool;
     }
 
-    public List<ItemStack> getDrops() {
+    public @NotNull List<@NotNull ItemStack> getDrops() {
         return this.drops.stream().map(ItemStack::clone).toList();
     }
 
-    public void setDrops(final List<ItemStack> drops) {
+    public void setDrops(final @NotNull List<@NotNull ItemStack> drops) {
         this.drops.clear();
         this.drops.addAll(drops);
     }
 
-    public void mapDrops(final UnaryOperator<ItemStack> mapper) {
+    public void mapDrops(final @NotNull UnaryOperator<@NotNull ItemStack> mapper) {
         this.setDrops(this.getDrops().stream().map(mapper).toList());
     }
 
-    public void filterDrops(final Predicate<ItemStack> predicate) {
+    public void filterDrops(final @NotNull Predicate<@NotNull ItemStack> predicate) {
         this.setDrops(this.getDrops().stream().filter(predicate).toList());
     }
 
     @Override
-    public HandlerList getHandlers() {
+    public @NotNull HandlerList getHandlers() {
         return HANDLER_LIST;
     }
 }

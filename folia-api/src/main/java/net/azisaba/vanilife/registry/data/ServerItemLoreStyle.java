@@ -12,51 +12,50 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.Contract;
-import org.jspecify.annotations.NullMarked;
+import org.jetbrains.annotations.NotNull;
 
-@NullMarked
 public record ServerItemLoreStyle(List<ConditionedPart> conditionedParts) {
     private static final ServerItemLoreStyle DEFAULT = loreStyle()
-            .then(ServerItemRegistryEntry::described, Part.description())
-            .then(Part.itemCategory())
-            .then(ServerItemRegistryEntry::hasPeakSeason, Part.peakSeason())
-            .build();
+        .then(ServerItemRegistryEntry::described, Part.description())
+        .then(Part.itemCategory())
+        .then(ServerItemRegistryEntry::hasPeakSeason, Part.peakSeason())
+        .build();
 
     private static final ServerItemLoreStyle EMPTY = new ServerItemLoreStyle(Collections.emptyList());
 
     private static final Style RESET_LORE_STYLE = Style.style()
-            .color(NamedTextColor.GRAY)
-            .decoration(TextDecoration.ITALIC, false)
-            .build();
+        .color(NamedTextColor.GRAY)
+        .decoration(TextDecoration.ITALIC, false)
+        .build();
 
     @Contract(value = "-> new", pure = true)
-    public static Builder loreStyle() {
+    public static @NotNull Builder loreStyle() {
         return new Builder();
     }
 
     @Contract(pure = true)
-    public static ServerItemLoreStyle defaultStyle() {
+    public static @NotNull ServerItemLoreStyle defaultStyle() {
         return DEFAULT;
     }
 
     @Contract(pure = true)
-    public static ServerItemLoreStyle emptyStyle() {
+    public static @NotNull ServerItemLoreStyle emptyStyle() {
         return EMPTY;
     }
 
-    public List<Part> parts(final ServerItemRegistryEntry item) {
+    public @NotNull List<@NotNull Part> parts(final ServerItemRegistryEntry item) {
         return this.conditionedParts.stream()
-                .filter((conditioned) -> conditioned.predicate().test(item))
-                .map(ConditionedPart::part)
-                .toList();
+            .filter((conditioned) -> conditioned.predicate().test(item))
+            .map(ConditionedPart::part)
+            .toList();
     }
 
-    public ItemLore itemLore(final ServerItemRegistryEntry item) {
+    public @NotNull ItemLore itemLore(final @NotNull ServerItemRegistryEntry item) {
         final List<Component> lines = this.buildLines(item).stream().map((line) -> line.applyFallbackStyle(RESET_LORE_STYLE)).toList();
         return ItemLore.lore(lines);
     }
 
-    private List<Component> buildLines(final ServerItemRegistryEntry item) {
+    private @NotNull List<Component> buildLines(final @NotNull ServerItemRegistryEntry item) {
         final List<Part> parts = this.parts(item);
         final ImmutableList.Builder<Component> builder = ImmutableList.builder();
         for (int i = 0; i < parts.size(); i++) {
@@ -70,21 +69,20 @@ public record ServerItemLoreStyle(List<ConditionedPart> conditionedParts) {
     }
 
     @FunctionalInterface
-    @NullMarked
     public interface Part {
-        static Part description() {
+        static @NotNull Part description() {
             return (item, builder) -> builder.add(Component.translatable(item.translationKey() + ".description"));
         }
 
-        static Part itemCategory() {
+        static @NotNull Part itemCategory() {
             return (item, builder) -> builder.add(Component.translatable("item.vanilife.category"))
-                    .add(Component.translatable(item.category(), item.category().color()));
+                .add(Component.translatable(item.category(), item.category().color()));
         }
 
-        static Part peakSeason() {
+        static @NotNull Part peakSeason() {
             return new Part() {
                 @Override
-                public void append(ServerItemRegistryEntry item, ImmutableList.Builder<Component> builder) {
+                public void append(@NotNull ServerItemRegistryEntry item, ImmutableList.@NotNull Builder<@NotNull Component> builder) {
                     final List<Season.Sub> peakSeason = item.peakSeason().stream().sorted().toList();
                     final List<Range> ranges = this.buildRanges(peakSeason);
 
@@ -130,14 +128,12 @@ public record ServerItemLoreStyle(List<ConditionedPart> conditionedParts) {
             };
         }
 
-        void append(final ServerItemRegistryEntry item, final ImmutableList.Builder<Component> builder);
+        void append(final @NotNull ServerItemRegistryEntry item, final ImmutableList.@NotNull Builder<@NotNull Component> builder);
     }
 
-    @NullMarked
-    public record ConditionedPart(Predicate<ServerItemRegistryEntry> predicate, Part part) {
+    public record ConditionedPart(@NotNull Predicate<@NotNull ServerItemRegistryEntry> predicate, @NotNull Part part) {
     }
 
-    @NullMarked
     public static final class Builder {
         private final List<ConditionedPart> conditionedParts = new ArrayList<>();
 
@@ -145,18 +141,18 @@ public record ServerItemLoreStyle(List<ConditionedPart> conditionedParts) {
         }
 
         @Contract(value = "_ -> this", mutates = "this")
-        public Builder then(final Part part) {
+        public Builder then(final @NotNull Part part) {
             return this.then((item) -> true, part);
         }
 
         @Contract(value = "_, _ -> this", mutates = "this")
-        public Builder then(final Predicate<ServerItemRegistryEntry> predicate, final Part part) {
+        public @NotNull Builder then(final @NotNull Predicate<@NotNull ServerItemRegistryEntry> predicate, final @NotNull Part part) {
             conditionedParts.add(new ConditionedPart(predicate, part));
             return this;
         }
 
         @Contract(value = "-> new", pure = true)
-        public ServerItemLoreStyle build() {
+        public @NotNull ServerItemLoreStyle build() {
             return new ServerItemLoreStyle(this.conditionedParts);
         }
     }

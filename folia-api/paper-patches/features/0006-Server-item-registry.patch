@@ -485,27 +485,33 @@ index f20f072b0978b3ef4b3f36c952d469e0d8d5cd22..c5c2c92eb32b3457c72d89b02c6a5aa8
       * Gets the amount of items in this stack
       *
 diff --git a/src/main/java/org/bukkit/persistence/PersistentDataType.java b/src/main/java/org/bukkit/persistence/PersistentDataType.java
-index 709e0eb08f08bcad15812ab01c81e043d8147a8a..1ba0cf3d21c193a7743ee4bc8516e629df696858 100644
+index 709e0eb08f08bcad15812ab01c81e043d8147a8a..0f65d8c142385a3e60d4f68d532bf5cafbeb7050 100644
 --- a/src/main/java/org/bukkit/persistence/PersistentDataType.java
 +++ b/src/main/java/org/bukkit/persistence/PersistentDataType.java
-@@ -1,5 +1,10 @@
+@@ -1,5 +1,12 @@
  package org.bukkit.persistence;
  
 +import java.util.UUID;
 +import net.azisaba.vanilife.annotations.Modified;
 +import net.azisaba.vanilife.annotations.Op;
 +import net.azisaba.vanilife.annotations.VanilifoliaApi;
++import net.azisaba.vanilife.persistence.KeyPersistentDataType;
 +import net.azisaba.vanilife.persistence.UuidPersistentDataType;
++import net.kyori.adventure.key.Key;
  import org.jetbrains.annotations.NotNull;
  
  /**
-@@ -114,6 +119,10 @@ public interface PersistentDataType<P, C> {
+@@ -114,6 +121,14 @@ public interface PersistentDataType<P, C> {
       */
      ListPersistentDataTypeProvider LIST = new ListPersistentDataTypeProvider();
  
 +    @Modified(Op.ADD_FIELD)
 +    @VanilifoliaApi
-+    PersistentDataType<byte[], UUID> UUID = new UuidPersistentDataType();
++    PersistentDataType<?, UUID> UUID = new UuidPersistentDataType();
++
++    @Modified(Op.ADD_FIELD)
++    @VanilifoliaApi
++    PersistentDataType<?, Key> KEY = new KeyPersistentDataType();
 +
      /**
       * Returns the primitive data type of this tag.

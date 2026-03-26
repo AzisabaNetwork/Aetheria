@@ -3,9 +3,8 @@ package net.azisaba.vanilife.registry.data;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.translation.Translatable;
-import org.jspecify.annotations.NullMarked;
+import org.jetbrains.annotations.NotNull;
 
-@NullMarked
 public enum ServerItemCategory implements Translatable {
     MATERIAL("item.vanilife.category.material", TextColor.color(255, 213, 79)),
     TOOL("item.vanilife.category.tool", TextColor.color(129, 212, 250)),
@@ -24,17 +23,17 @@ public enum ServerItemCategory implements Translatable {
     private final String translationKey;
     private final TextColor color;
 
-    ServerItemCategory(final String translationKey, final TextColor color) {
+    ServerItemCategory(final @NotNull String translationKey, final @NotNull TextColor color) {
         this.translationKey = translationKey;
         this.color = color;
     }
 
     @Override
-    public String translationKey() {
+    public @NotNull String translationKey() {
         return this.translationKey;
     }
 
-    public TextColor color() {
+    public @NotNull TextColor color() {
         return this.color;
     }
 }

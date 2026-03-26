@@ -18,67 +18,66 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NullMarked;
 
 @ApiStatus.NonExtendable
-@NullMarked
 public interface ServerItemRegistryEntry extends DataComponentView, Translatable {
     @Contract(pure = true)
     boolean described();
 
     @Contract(pure = true)
-    ServerItemCategory category();
+    @NotNull ServerItemCategory category();
 
     @Contract(pure = true)
-    Set<Season.Sub> peakSeason();
+    @NotNull Set<Season.@NotNull Sub> peakSeason();
 
     @Contract(pure = true)
-    ServerItemLoreStyle loreStyle();
+    @NotNull ServerItemLoreStyle loreStyle();
 
     @Contract(mutates = "param1")
-    void applyData(final ItemStack itemStack);
+    void applyData(final @NotNull ItemStack itemStack);
 
     @Contract(mutates = "param1")
-    void applyItemName(final ItemStack itemStack);
+    void applyItemName(final @NotNull ItemStack itemStack);
 
     @Contract(mutates = "param1")
-    void applyItemLore(final ItemStack itemStack);
+    void applyItemLore(final @NotNull ItemStack itemStack);
 
     default boolean hasPeakSeason() {
         return !peakSeason().isEmpty();
     }
 
     @ApiStatus.NonExtendable
-    @NullMarked
     interface Builder extends RegistryBuilder<ServerItem> {
         @Contract(value = "_ -> this", mutates = "this")
-        Builder translationKey(final String translationKey);
+        @NotNull Builder translationKey(final @NotNull String translationKey);
 
         @Contract(value = "-> this", mutates = "this")
-        Builder describe();
+        @NotNull Builder describe();
 
         @Contract(value = "_ -> this", mutates = "this")
-        Builder category(final ServerItemCategory category);
+        @NotNull Builder category(final @NotNull ServerItemCategory category);
 
         @Contract(value = "_ -> this", mutates = "this")
-        Builder peakSeason(final Season.Sub... peakSeason);
+        @NotNull Builder peakSeason(final Season.@NotNull Sub... peakSeason);
 
         @Contract(value = "_ -> this", mutates = "this")
-        Builder loreStyle(final ServerItemLoreStyle loreStyle);
+        @NotNull Builder loreStyle(final @NotNull ServerItemLoreStyle loreStyle);
 
         @Contract(value = "_, _ -> this", mutates = "this")
-        <T> Builder withComponent(final DataComponentType.Valued<T> type, T value);
+        @NotNull <T> Builder withComponent(final DataComponentType.@NotNull Valued<T> type, @NotNull T value);
 
         @Contract(value = "_ -> this", mutates = "this")
-        Builder withComponent(final DataComponentType.NonValued type);
+        Builder withComponent(final DataComponentType.@NotNull NonValued type);
 
         @Contract(value = "_ -> this", mutates = "this")
-        default Builder itemModel(final Key itemModel) {
+        default Builder itemModel(final @NotNull Key itemModel) {
             return this.withComponent(DataComponentTypes.ITEM_MODEL, itemModel);
         }
 
         @Contract(value = "_ -> this", mutates = "this")
-        default Builder food(final FoodProperties food) {
+        default Builder food(final @NotNull FoodProperties food) {
             return this.food(
                     food,
                     Consumable.consumable()
@@ -91,12 +90,12 @@ public interface ServerItemRegistryEntry extends DataComponentView, Translatable
         }
 
         @Contract(value = "_, _ -> this", mutates = "this")
-        default Builder food(final FoodProperties food, final Consumable consumable) {
+        default Builder food(final @NotNull FoodProperties food, final @NotNull Consumable consumable) {
             return this.withComponent(DataComponentTypes.FOOD, food).withComponent(DataComponentTypes.CONSUMABLE, consumable);
         }
 
         @Contract(value = "_ -> this", mutates = "this")
-        default Builder usingConvertsTo(final ItemStack usingConvertsTo) {
+        default Builder usingConvertsTo(final @NotNull ItemStack usingConvertsTo) {
             return this.withComponent(DataComponentTypes.USE_REMAINDER, UseRemainder.useRemainder(usingConvertsTo));
         }
 
@@ -124,7 +123,7 @@ public interface ServerItemRegistryEntry extends DataComponentView, Translatable
         }
 
         @Contract(value = "_ -> this", mutates = "this")
-        default Builder jukeboxPlayable(final JukeboxSong song) {
+        default Builder jukeboxPlayable(final @NotNull JukeboxSong song) {
             return this.withComponent(DataComponentTypes.JUKEBOX_PLAYABLE, JukeboxPlayable.jukeboxPlayable(song).build());
         }
 
@@ -134,12 +133,12 @@ public interface ServerItemRegistryEntry extends DataComponentView, Translatable
         }
 
         @Contract(value = "_ -> this", mutates = "this")
-        default Builder equippable(final EquipmentSlot slot) {
+        default Builder equippable(final @NotNull EquipmentSlot slot) {
             return this.withComponent(DataComponentTypes.EQUIPPABLE, Equippable.equippable(slot).build());
         }
 
         @Contract(value = "_ -> this", mutates = "this")
-        default Builder equippableUnswappable(final EquipmentSlot slot) {
+        default Builder equippableUnswappable(final @NotNull EquipmentSlot slot) {
             return this.withComponent(DataComponentTypes.EQUIPPABLE, Equippable.equippable(slot).swappable(false).build());
         }
     }

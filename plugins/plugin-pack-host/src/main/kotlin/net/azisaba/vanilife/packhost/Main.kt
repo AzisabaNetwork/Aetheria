@@ -150,9 +150,6 @@ internal class Main : JavaPlugin() {
                 MiningItemModels.FROZEN_RAW_GOLD to MiningItemModels.frozenRawGold()
                 MiningItemModels.FROZEN_RAW_IRON to MiningItemModels.frozenRawIron()
                 MiningItemModels.FROZEN_REDSTONE to MiningItemModels.frozenRedstone()
-
-                NpcItemModels.EXPERIENCE to NpcItemModels.experience()
-                NpcItemModels.UNREADABLE_RECIPE to NpcItemModels.unreadableRecipe()
             }
 
             lang {
@@ -270,9 +267,6 @@ internal class Main : JavaPlugin() {
                 MiningModels.FROZEN_RAW_GOLD to MiningModels.frozenRawGold()
                 MiningModels.FROZEN_RAW_IRON to MiningModels.frozenRawIron()
                 MiningModels.FROZEN_REDSTONE to MiningModels.frozenRedstone()
-
-                NpcModels.EXPERIENCE to NpcModels.experience()
-                NpcModels.UNREADABLE_RECIPE to NpcModels.unreadableRecipe()
             }
 
             sounds {

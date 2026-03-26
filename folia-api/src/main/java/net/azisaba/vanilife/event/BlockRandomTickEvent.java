@@ -7,27 +7,26 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.block.BlockEvent;
 import org.jetbrains.annotations.ApiStatus;
-import org.jspecify.annotations.NullMarked;
+import org.jetbrains.annotations.NotNull;
 
-@NullMarked
 @VanilifoliaApi
 public class BlockRandomTickEvent extends BlockEvent implements Cancellable {
-    private static final HandlerList HANDLER_LIST = new HandlerList();
+    private static final @NotNull HandlerList HANDLER_LIST = new HandlerList();
 
-    public static HandlerList getHandlerList() {
+    public static @NotNull HandlerList getHandlerList() {
         return HANDLER_LIST;
     }
 
-    private final Random random;
+    private final @NotNull Random random;
     private boolean cancelled = false;
 
     @ApiStatus.Internal
-    public BlockRandomTickEvent(final Block block, final Random random) {
+    public BlockRandomTickEvent(final @NotNull Block block, final @NotNull Random random) {
         super(block);
         this.random = random;
     }
 
-    public Random getRandom() {
+    public @NotNull Random getRandom() {
         return this.random;
     }
 
@@ -42,7 +41,7 @@ public class BlockRandomTickEvent extends BlockEvent implements Cancellable {
     }
 
     @Override
-    public HandlerList getHandlers() {
+    public @NotNull HandlerList getHandlers() {
         return HANDLER_LIST;
     }
 }

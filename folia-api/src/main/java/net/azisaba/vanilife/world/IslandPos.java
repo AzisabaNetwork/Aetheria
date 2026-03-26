@@ -1,17 +1,17 @@
 package net.azisaba.vanilife.world;
 
 import com.google.common.base.Preconditions;
+import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NullMarked;
 
-@NullMarked
 public record IslandPos(int x, int z) {
     private static final long SERIALIZED_WIDTH = 4096L;
 
-    public static IslandPos fromBlockPos(final int blockX, final int blockZ) {
+    public static @NotNull IslandPos fromBlockPos(final int blockX, final int blockZ) {
         return new IslandPos(gridOf(blockX), gridOf(blockZ));
     }
 
-    public static IslandPos fromLong(final long value) {
+    public static @NotNull IslandPos fromLong(final long value) {
         Preconditions.checkArgument(value >= 1L, "Value must be >= 1: %s", value);
 
         final long id0 = value - 1L;

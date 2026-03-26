@@ -6,9 +6,8 @@ import com.destroystokyo.paper.entity.ai.GoalType
 import kr.toxicity.model.api.bukkit.platform.BukkitPlayer
 import kr.toxicity.model.api.event.hitbox.HitBoxInteractEvent
 import kr.toxicity.model.api.tracker.Tracker
-import net.azisaba.vanilife.npc.NpcWrapper
 import net.azisaba.vanilife.npc.NpcFonts
-import net.azisaba.vanilife.npc.UnreadableRecipe
+import net.azisaba.vanilife.npc.wrapper.NpcWrapper
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Mob
@@ -17,11 +16,7 @@ import org.bukkit.event.inventory.InventoryType
 import org.bukkit.inventory.MenuType
 import java.util.*
 
-internal class TradingGoal(
-    private val npc: NpcWrapper,
-    private val mob: Mob,
-    tracker: Tracker,
-) : Goal<Mob> {
+internal class TradingGoal(private val npc: NpcWrapper, private val mob: Mob, tracker: Tracker) : Goal<Mob> {
     private var requestedTrader: Player? = null
     private var activeTrader: Player? = null
 
@@ -74,9 +69,7 @@ internal class TradingGoal(
 
     private fun handleHitBoxInteract(event: HitBoxInteractEvent) {
         val player = (event.who as? BukkitPlayer)?.source() ?: return
-        val itemStack = player.equipment.itemInMainHand
-        val serverItem = itemStack.serverItem()
-        if (!player.isSneaking && (serverItem == null || UnreadableRecipe.byItem(serverItem) == null)) {
+        if (!player.isSneaking) {
             requestedTrader = player
         }
     }

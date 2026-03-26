@@ -6,18 +6,17 @@ import net.azisaba.vanilife.world.IslandsWorld;
 import net.azisaba.vanilife.world.ResourceWorld;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Bukkit;
-import org.jspecify.annotations.NullMarked;
+import org.jetbrains.annotations.NotNull;
 
-@NullMarked
 public final class Vanilife {
     public static final String NAMESPACE = "vanilife";
 
-    public static IslandsWorld getIslandsWorld() {
+    public static @NotNull IslandsWorld getIslandsWorld() {
         return (IslandsWorld) Objects.requireNonNull(Bukkit.getWorld(IslandDefaults.WORLD_KEY));
     }
 
     // TODO: Implement auto wipe
-    public static ResourceWorld getResourceWorld() {
+    public static @NotNull ResourceWorld getResourceWorld() {
         return (ResourceWorld) Objects.requireNonNull(Bukkit.getWorld(Key.key(NAMESPACE, "2026/spring")));
     }
 

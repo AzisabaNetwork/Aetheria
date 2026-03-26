@@ -7,17 +7,16 @@ import java.util.List;
 import java.util.Locale;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.translation.Translatable;
-import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-@NullMarked
 public enum Season implements Translatable {
     SPRING(TextColor.color(242, 163, 179), Month.MARCH, Month.APRIL, Month.MAY),
     SUMMER(TextColor.color(126, 215, 193), Month.JUNE, Month.JULY, Month.AUGUST),
     FALL(TextColor.color(230, 126, 34), Month.SEPTEMBER, Month.OCTOBER, Month.NOVEMBER),
     WINTER(TextColor.color(143, 163, 191), Month.DECEMBER, Month.JANUARY, Month.FEBRUARY);
 
-    public static Season now() {
+    public static @NotNull Season now() {
         final Month month = LocalDate.now().getMonth();
         return Arrays.stream(Season.values())
                 .filter(season -> season.months().contains(month))
@@ -33,42 +32,41 @@ public enum Season implements Translatable {
         this.months = Arrays.asList(months);
     }
 
-    public TextColor color() {
+    public @NotNull TextColor color() {
         return this.color;
     }
 
-    public List<Month> months() {
+    public @NotNull List<@NotNull Month> months() {
         return this.months;
     }
 
-    public Season next() {
+    public @NotNull Season next() {
         return values()[(this.ordinal() + 1) % values().length];
     }
 
-    public Season previous() {
+    public @NotNull Season previous() {
         return values()[(this.ordinal() - 1 + values().length) % values().length];
     }
 
-    public Sub withStage(final Stage stage) {
+    public @NotNull Sub withStage(final Stage stage) {
         return new Sub(this, stage);
     }
 
-    public Sub[] subSeasons() {
+    public Sub @NotNull [] subSeasons() {
         return new Sub[]{withStage(Stage.EARLY), withStage(Stage.MID), withStage(Stage.LATE)};
     }
 
     @Override
-    public String translationKey() {
+    public @NotNull String translationKey() {
         return "season." + this.name().toLowerCase(Locale.ROOT);
     }
 
-    @NullMarked
-    public record Sub(Season season, Stage stage) implements Comparable<Sub>, Translatable {
-        public static Sub now() {
+    public record Sub(@NotNull Season season, @NotNull Stage stage) implements Comparable<Sub>, Translatable {
+        public static @NotNull Sub now() {
             return new Sub(Season.now(), Stage.now());
         }
 
-        public Sub next() {
+        public @NotNull Sub next() {
             final Stage nextStage = this.stage.next();
             if (nextStage != null) {
                 return this.season.withStage(nextStage);
@@ -77,7 +75,7 @@ public enum Season implements Translatable {
             }
         }
 
-        public Sub previous() {
+        public @NotNull Sub previous() {
             final Stage previousStage = this.stage.previous();
             if (previousStage != null) {
                 return this.season.withStage(previousStage);
@@ -90,12 +88,12 @@ public enum Season implements Translatable {
         }
 
         @Override
-        public String translationKey() {
+        public @NotNull String translationKey() {
             return this.season.translationKey() + "." + this.stage.name().toLowerCase(Locale.ROOT);
         }
 
         @Override
-        public int compareTo(final Season.Sub other) {
+        public int compareTo(final Season.@NotNull Sub other) {
             int seasonCompare = Integer.compare(this.season.ordinal(), other.season().ordinal());
             if (seasonCompare != 0) {
                 return seasonCompare;
@@ -105,11 +103,10 @@ public enum Season implements Translatable {
         }
     }
 
-    @NullMarked
     public enum Stage {
         EARLY, MID, LATE;
 
-        public static Stage now() {
+        public static @NotNull Stage now() {
             final Season season = Season.now();
             final Month month = LocalDate.now().getMonth();
             if (season.months().getFirst() == month) {

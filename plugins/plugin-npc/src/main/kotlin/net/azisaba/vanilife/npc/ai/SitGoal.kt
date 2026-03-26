@@ -6,7 +6,8 @@ import com.destroystokyo.paper.entity.ai.GoalType
 import kr.toxicity.model.api.bukkit.platform.BukkitPlayer
 import kr.toxicity.model.api.event.hitbox.HitBoxInteractEvent
 import kr.toxicity.model.api.tracker.Tracker
-import net.azisaba.vanilife.npc.NpcWrapper
+import net.azisaba.vanilife.npc.wrapper.NpcWrapper
+import org.bukkit.Bukkit
 import org.bukkit.entity.Mob
 import java.util.*
 
@@ -28,6 +29,7 @@ internal class SitGoal(private val npc: NpcWrapper, private val mob: Mob, tracke
     override fun start() {
         mob.pathfinder.stopPathfinding()
         npc.sitDown()
+        npc.tame(Bukkit.getOnlinePlayers().random())
     }
 
     override fun stop() {
