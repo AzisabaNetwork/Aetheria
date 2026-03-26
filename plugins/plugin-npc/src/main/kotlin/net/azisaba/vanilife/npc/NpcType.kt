@@ -36,10 +36,5 @@ enum class NpcType(val key: Key, val icon: Char, val modelName: String) : Keyed 
         val BY_KEY: Map<Key, NpcType> = entries.associateBy { it.key }
 
         fun byKey(key: Key): NpcType? = BY_KEY[key]
-
-        fun byInput(input: String): NpcType? {
-            val key = if (':' in input) Key.key(input) else Key.key(Vanilife.NAMESPACE, input)
-            return byKey(key)
-        }
     }
 }

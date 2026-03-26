@@ -21,3 +21,6 @@ dependencies:
       load: BEFORE
     BetterModel:
       load: BEFORE
+permissions:
+  vanilife.command.npc:
+    default: op
