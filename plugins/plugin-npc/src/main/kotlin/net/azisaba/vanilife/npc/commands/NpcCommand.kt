@@ -17,6 +17,7 @@ import io.papermc.paper.math.Position
 import net.azisaba.vanilife.npc.NpcFonts
 import net.azisaba.vanilife.npc.NpcTranslations
 import net.azisaba.vanilife.npc.NpcType
+import net.azisaba.vanilife.npc.spawn.NpcSpawnRuleLoader
 import net.azisaba.vanilife.npc.spawn
 import net.azisaba.vanilife.npc.trading.NpcOffersLoader
 import net.kyori.adventure.key.Key
@@ -33,6 +34,7 @@ internal object NpcCommand : KoinComponent {
     private val plugin: Plugin by inject()
 
     private val offersLoader: NpcOffersLoader by inject()
+    private val spawnRuleLoader: NpcSpawnRuleLoader by inject()
 
     private val INVALID_NPC_TYPE: SimpleCommandExceptionType =
         SimpleCommandExceptionType(LiteralMessage("Invalid NPC type"))
@@ -64,6 +66,7 @@ internal object NpcCommand : KoinComponent {
 
     private fun reloadAll(context: CommandContext<CommandSourceStack>): Int {
         offersLoader.loadAll()
+        spawnRuleLoader.loadAll()
         context.source.sender.sendMessage(Component.translatable(NpcTranslations.COMMANDS_VANILIFE_NPC_RELOAD_ALL))
         return Command.SINGLE_SUCCESS
     }
@@ -71,6 +74,7 @@ internal object NpcCommand : KoinComponent {
     private fun reloadOne(context: CommandContext<CommandSourceStack>): Int {
         val npcType = ensureNpcType(context)
         offersLoader.reloadOne(npcType)
+        spawnRuleLoader.loadOne(npcType)
         context.source.sender.sendMessage(
             Component.translatable(
                 NpcTranslations.COMMANDS_VANILIFE_NPC_RELOAD_ONE,
