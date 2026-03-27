@@ -1,4 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import io.papermc.paperweight.tasks.RebuildGitPatches
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
@@ -118,18 +117,6 @@ project(":folia-server") {
     }
 }
 
-configure(subprojects.filter { it.path.startsWith(":plugins:") }) {
-    apply(plugin = "com.gradleup.shadow")
-
-    dependencies {
-        compileOnly(project(":folia-api"))
-    }
-
-    tasks.named<ShadowJar>("shadowJar") {
-        archiveClassifier.set("")
-    }
-}
-
 tasks.register("printMinecraftVersion") {
     doLast {
         println(providers.gradleProperty("mcVersion").get().trim())
@@ -139,21 +126,5 @@ tasks.register("printMinecraftVersion") {
 tasks.register("printPaperVersion") {
     doLast {
         println(project.version)
-    }
-}
-
-gradle.projectsEvaluated {
-    val pluginProjects = subprojects.filter { it.path.startsWith(":plugins:") }
-    val pluginShadowJarTasks = pluginProjects.map { it.tasks.named<ShadowJar>("shadowJar") }
-
-    listOf("runServer", "runDevServer").forEach { taskName ->
-        (findProject(":folia-server")?.tasks?.findByName(taskName) as? JavaExec)?.apply {
-            dependsOn(pluginShadowJarTasks)
-            doFirst {
-                pluginShadowJarTasks.forEach { shadowJarTask ->
-                    args("--add-plugin", shadowJarTask.get().archiveFile.get().asFile.absolutePath)
-                }
-            }
-        }
     }
 }
