@@ -41,6 +41,7 @@ class NpcWrapper private constructor(
 
     init {
         delegate.isSilent = true
+        delegate.eggLayTime = Int.MAX_VALUE
         delegate.persistentDataContainer.set(NPC_TYPE_KEY, PersistentDataType.KEY, npcType.key)
         registerGoals()
         tracker.listenHitBox(HitBoxInteractEvent::class.java, ::handleHitBoxInteract)
