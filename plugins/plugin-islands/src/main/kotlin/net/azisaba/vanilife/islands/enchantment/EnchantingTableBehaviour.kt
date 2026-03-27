@@ -2,6 +2,7 @@ package net.azisaba.vanilife.islands.enchantment
 
 import io.github.retrooper.packetevents.util.SpigotConversionUtil
 import io.papermc.paper.registry.keys.SoundEventKeys
+import net.azisaba.vanilife.islands.dialog.EnchantingTableDialog
 import net.kyori.adventure.sound.Sound
 import org.bukkit.Material
 import org.bukkit.Particle
@@ -13,10 +14,13 @@ import java.util.concurrent.ConcurrentHashMap
 internal open class EnchantingTableBehaviour {
     private val instanceMap: MutableMap<Block, Instance> = ConcurrentHashMap()
 
-    fun use(player: Player, enchantingTable: Block,  itemStack: ItemStack) {
+    fun use(player: Player, enchantingTable: Block, itemStack: ItemStack) {
         require(enchantingTable.type == Material.ENCHANTING_TABLE) { "Block must be an enchanting table" }
 
-        if (enchantingTable in instanceMap) return
+        instanceMap[enchantingTable]?.let { instance ->
+            player.showDialog(EnchantingTableDialog.create(instance.itemStack))
+            return
+        }
 
         val placedItemStack = itemStack.clone().apply { amount = 1 }
         if (!player.gameMode.isInvulnerable) {

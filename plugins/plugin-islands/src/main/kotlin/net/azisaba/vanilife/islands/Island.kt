@@ -16,6 +16,7 @@ import net.azisaba.vanilife.islands.waves.WaveAccessor
 import net.azisaba.vanilife.islands.wrack.IslandWrackAccessor
 import net.azisaba.vanilife.islands.wrack.WrackAccessor
 import net.azisaba.vanilife.world.IslandPos
+import net.azisaba.vanilife.world.IslandsWorld
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.audience.ForwardingAudience
 import org.bukkit.World
@@ -26,7 +27,7 @@ import java.util.*
 @OptIn(ExperimentalCoroutinesApi::class)
 class Island internal constructor(
     override val pos: IslandPos,
-    val world: World,
+    val world: IslandsWorld,
     override val ownerUuid: UUID,
     override val primaryData: PrimaryIslandData.Writable,
     private val enchantmentRepository: IslandEnchantmentRepository,

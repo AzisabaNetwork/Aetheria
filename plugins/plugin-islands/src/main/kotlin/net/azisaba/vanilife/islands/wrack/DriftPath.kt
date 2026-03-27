@@ -12,7 +12,7 @@ import kotlin.math.hypot
 import kotlin.math.sin
 import kotlin.random.Random
 
-internal data class DriftPath(val startPos: Position, val endPos: Position, val random: Random) {
+data class DriftPath(val startPos: Position, val endPos: Position, val random: Random) {
     private val horizontalAmplitude: Double = HORIZONTAL_AMPLITUDE
     private val verticalAmplitude: Double = VERTICAL_AMPLITUDE
 

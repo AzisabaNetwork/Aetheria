@@ -22,7 +22,7 @@ internal class EnchantingTableListener(private val behaviour: EnchantingTableBeh
         if (event.action.isRightClick) {
             val itemStack = event.item ?: return
             behaviour.use(event.player, enchantingTable, itemStack)
-        } else if (event.action.isRightClick) {
+        } else if (event.action.isLeftClick) {
             behaviour.pickup(event.player, enchantingTable)
         }
     }

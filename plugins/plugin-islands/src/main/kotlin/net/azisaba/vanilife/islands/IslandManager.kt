@@ -4,6 +4,7 @@ import net.azisaba.vanilife.islands.enchantment.IslandEnchantmentRepository
 import net.azisaba.vanilife.islands.repository.IslandRepository
 import net.azisaba.vanilife.islands.repository.PrimaryIslandData
 import net.azisaba.vanilife.world.IslandPos
+import net.azisaba.vanilife.world.IslandsWorld
 import org.bukkit.World
 import org.bukkit.plugin.Plugin
 import java.util.*
@@ -12,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
 internal class IslandManager(
     private val repository: IslandRepository,
     private val enchantmentRepository: IslandEnchantmentRepository,
-    private val world: World,
+    private val world: IslandsWorld,
     private val plugin: Plugin,
 ) : IslandInfoLookup {
     private val islandsByPos: MutableMap<IslandPos, Island> = ConcurrentHashMap()

@@ -5,9 +5,9 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     java // ToDo java launcher tasks
-    alias(libs.plugins.kotlin)
-    alias(libs.plugins.paperweight.patcher)
+    alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.paperweight.patcher)
     alias(libs.plugins.shadow) apply false
 }
 

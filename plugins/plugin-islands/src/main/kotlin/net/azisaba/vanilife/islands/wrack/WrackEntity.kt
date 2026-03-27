@@ -6,27 +6,31 @@ import kr.toxicity.model.api.bukkit.platform.BukkitEntity
 import kr.toxicity.model.api.bukkit.platform.BukkitLocation
 import kr.toxicity.model.api.bukkit.platform.BukkitPlayer
 import kr.toxicity.model.api.entity.BaseEntity
-import kr.toxicity.model.api.event.hitbox.HitBoxDamagedEvent
-import kr.toxicity.model.api.event.hitbox.HitBoxEvent
 import kr.toxicity.model.api.event.hitbox.HitBoxInteractEvent
 import kr.toxicity.model.api.nms.HitBoxListener
 import kr.toxicity.model.api.tracker.DummyTracker
 import kr.toxicity.model.api.util.function.BonePredicate
+import net.azisaba.vanilife.islands.getIslandAt
+import net.azisaba.vanilife.world.IslandPos
+import net.azisaba.vanilife.world.IslandsWorld
 import org.bukkit.Location
-import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.entity.TextDisplay
 import org.bukkit.plugin.Plugin
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-internal class WrackEntity(
+class WrackEntity internal constructor(
     private val wrackType: WrackType,
-    private val world: World,
+    private val islandPos: IslandPos,
+    private val world: IslandsWorld,
     private val path: DriftPath,
     private val spawnTime: Long,
     private val onDestroyed: (WrackEntity) -> Unit,
 ) : KoinComponent {
+    val location: Location
+        get() = (tracker.location() as BukkitLocation).source
+
     private val plugin: Plugin by inject()
 
     private val totalTicks: Long = path.random.nextLong(20L * 15, 20L * 30)
@@ -68,23 +72,21 @@ internal class WrackEntity(
                 BaseEntity.of(BukkitEntity(textDisplay)),
                 HitBoxListener.builder()
                     .listen(HitBoxInteractEvent::class.java, ::interact)
-                    .listen(HitBoxDamagedEvent::class.java, ::interact)
                     .build(),
                 BonePredicate.TRUE,
             )
         }
     }
 
-    private fun interact(event: HitBoxEvent) {
+    private fun interact(event: HitBoxInteractEvent) {
+        val player = (event.who as? BukkitPlayer)?.source() ?: return
+
         val hitBoxSource = (event.hitBox.source() as? BukkitEntity)?.source()
         hitBoxSource?.remove()
 
         val dropLocation = Location(world, path.endPos.x(), path.endPos.y(), path.endPos.z())
         plugin.launch(plugin.regionDispatcher(dropLocation)) {
-            world.playSound(wrackType.dropSound, dropLocation.x(), dropLocation.y(), dropLocation.z())
-            wrackType.itemStacks.forEach {
-                world.dropItemNaturally(dropLocation, it)
-            }
+            wrackType.drop(path.random, player, world.getIslandAt(islandPos)!!, this@WrackEntity)
         }
 
         tracker.close()

@@ -4,6 +4,7 @@ import kotlinx.coroutines.channels.Channel
 import net.azisaba.vanilife.Vanilife
 import net.azisaba.vanilife.islands.CoastSide
 import net.azisaba.vanilife.world.IslandPos
+import net.azisaba.vanilife.world.IslandsWorld
 import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
@@ -18,7 +19,7 @@ interface WrackAccessor {
     suspend fun wrackTick(time: Long)
 }
 
-internal class IslandWrackAccessor(val islandPos: IslandPos, val world: World, val plugin: Plugin) : WrackAccessor {
+internal class IslandWrackAccessor(val islandPos: IslandPos, val world: IslandsWorld, val plugin: Plugin) : WrackAccessor {
     private val viewers: MutableSet<Player> = mutableSetOf()
     private val wrackEntities: MutableList<WrackEntity> = mutableListOf()
     private val tickingWrackEntities: MutableList<WrackEntity> = mutableListOf()
@@ -69,7 +70,7 @@ internal class IslandWrackAccessor(val islandPos: IslandPos, val world: World, v
 
     private suspend fun spawnWrackAction(action: Action.SpawnWrack, time: Long) {
         val driftPath = DriftPath.random(islandPos, action.coastSide, world, plugin)
-        val wrackEntity = WrackEntity(action.wrackType, world, driftPath, time) {
+        val wrackEntity = WrackEntity(action.wrackType, islandPos, world, driftPath, time) {
             wrackEntities.remove(it)
             tickingWrackEntities.remove(it)
         }

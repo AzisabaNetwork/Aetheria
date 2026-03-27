@@ -13,7 +13,7 @@ kotlin = "2.3.0"
 kotlinx-coroutines = "1.10.2"
 mccoroutine = "2.22.0"
 minecraftexposed = "1.0.0-R0.1-SNAPSHOT"
-minecraftserialization = "1.0.0-R0.4-SNAPSHOT"
+minecraftserialization = "1.0.0-R0.6-SNAPSHOT"
 packed = "1.0.0-R0.5-SNAPSHOT"
 packetevents = "2.11.2"
 paperweight = "2.0.0-beta.19"
@@ -22,7 +22,7 @@ shadow = "9.3.1"
 tomlkt = "0.6.0"
 
 [plugins]
-kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 paperweight-patcher = { id = "io.papermc.paperweight.patcher", version.ref = "paperweight" }
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
@@ -46,6 +46,7 @@ mccoroutine-folia-core = { module = "com.github.shynixn.mccoroutine:mccoroutine-
 minecraftexposed-adventure = { module = "net.azisaba.exposed:adventure", version.ref = "minecraftexposed" }
 minecraftserialization-adventure = { module = "net.azisaba.serialization:adventure", version.ref = "minecraftserialization" }
 minecraftserialization-joml = { module = "net.azisaba.serialization:joml", version.ref = "minecraftserialization" }
+minecraftserialization-valueproviders = { module = "net.azisaba.serialization:value-providers", version.ref = "minecraftserialization" }
 packed-core = { module = "net.azisaba.packed:core", version.ref = "packed" }
 packed-resource = { module = "net.azisaba.packed:resource", version.ref = "packed" }
 packed-server = { module = "net.azisaba.packed:server", version.ref = "packed" }

@@ -3,9 +3,13 @@ package net.azisaba.vanilife.islands.listener
 import com.github.shynixn.mccoroutine.folia.launch
 import io.papermc.paper.event.player.AsyncChatEvent
 import io.papermc.paper.event.player.AsyncPlayerSpawnLocationEvent
+import io.papermc.paper.registry.keys.EnchantmentKeys
+import io.papermc.paper.registry.keys.ItemTypeKeys
 import io.papermc.paper.registry.keys.SoundEventKeys
 import kotlinx.coroutines.runBlocking
+import net.azisaba.serialization.IntProvider
 import net.azisaba.vanilife.Vanilife
+import net.azisaba.vanilife.datadriven.ItemStackProvider
 import net.azisaba.vanilife.islands.IslandManager
 import net.azisaba.vanilife.islands.wrack.WrackType
 import net.kyori.adventure.sound.Sound
@@ -54,10 +58,8 @@ internal class IslandPlayerListener(private val plugin: Plugin, private val serv
             val message = PlainTextComponentSerializer.plainText().serialize(event.message())
             repeat(message.length) {
                 island?.spawnWrack(
-                    WrackType(
-                        "bottle",
-                        Sound.sound(SoundEventKeys.ENTITY_ITEM_PICKUP, Sound.Source.PLAYER, 0.5f, 0.1f),
-                        listOf(ItemStack.of(Material.COOKED_BEEF)).iterator(),
+                    WrackType.Enchantment(
+                        EnchantmentKeys.AQUA_AFFINITY
                     )
                 )
             }
