@@ -3,47 +3,43 @@ package net.azisaba.vanilife.npc.ai
 import com.destroystokyo.paper.entity.ai.Goal
 import com.destroystokyo.paper.entity.ai.GoalKey
 import com.destroystokyo.paper.entity.ai.GoalType
-import kr.toxicity.model.api.bukkit.platform.BukkitPlayer
-import kr.toxicity.model.api.event.hitbox.HitBoxInteractEvent
-import kr.toxicity.model.api.tracker.Tracker
+import net.azisaba.vanilife.npc.NpcMode
 import net.azisaba.vanilife.npc.wrapper.NpcWrapper
 import org.bukkit.Bukkit
-import org.bukkit.entity.Mob
+import org.bukkit.entity.Chicken
 import java.util.*
 
-internal class SitGoal(private val npc: NpcWrapper, private val mob: Mob, tracker: Tracker) : Goal<Mob> {
-    private var sit: Boolean = false
-
-    init {
-        tracker.listenHitBox(HitBoxInteractEvent::class.java, ::handleHitBoxInteract)
-    }
-
-    override fun getKey(): GoalKey<Mob> = NpcGoalKeys.SIT
+internal class SitGoal(private val npcWrapper: NpcWrapper) : Goal<Chicken> {
+    override fun getKey(): GoalKey<Chicken> = NpcGoalKeys.SIT
 
     override fun getTypes(): EnumSet<GoalType> = EnumSet.of(GoalType.MOVE, GoalType.JUMP)
 
-    override fun shouldActivate(): Boolean = sit && mob.isOnGround && !mob.isInWater
+    override fun shouldActivate(): Boolean = npcWrapper.mode == NpcMode.SIT
+            && npcWrapper.delegate.isOnGround
+            && !npcWrapper.delegate.isInWater
 
     override fun shouldStayActive(): Boolean = shouldActivate()
 
     override fun start() {
-        mob.pathfinder.stopPathfinding()
-        npc.sitDown()
-        npc.tame(Bukkit.getOnlinePlayers().random())
+        npcWrapper.delegate.pathfinder.stopPathfinding()
+        npcWrapper.sitDown()
     }
 
     override fun stop() {
-        npc.standUp()
+        npcWrapper.standUp()
     }
 
     override fun tick() {
-        mob.pathfinder.stopPathfinding()
+        npcWrapper.delegate.pathfinder.stopPathfinding()
+        val ownerId = npcWrapper.owner ?: return
+        val owner = Bukkit.getPlayer(ownerId) ?: return
+        if (!owner.isOnline || owner.isDead || !owner.isValid) return
+        if (owner.world != npcWrapper.delegate.world) return
+        if (npcWrapper.location.distanceSquared(owner.location) > OWNER_LOOK_DISTANCE_SQUARED) return
+        npcWrapper.delegate.lookAt(owner)
     }
 
-    private fun handleHitBoxInteract(event: HitBoxInteractEvent) {
-        val player = (event.who as? BukkitPlayer)?.source() ?: return
-        if (player.isSneaking && mob.isOnGround) {
-            sit = !sit
-        }
+    private companion object {
+        const val OWNER_LOOK_DISTANCE_SQUARED: Double = 64.0
     }
 }

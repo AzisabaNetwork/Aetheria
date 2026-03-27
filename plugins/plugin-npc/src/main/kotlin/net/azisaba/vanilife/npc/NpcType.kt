@@ -5,6 +5,9 @@ import kr.toxicity.model.api.data.renderer.ModelRenderer
 import net.azisaba.vanilife.Vanilife
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.key.Keyed
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.ShadowColor
 
 enum class NpcType(val key: Key, val icon: Char, val modelName: String) : Keyed {
     CAVEMAN(
@@ -31,6 +34,10 @@ enum class NpcType(val key: Key, val icon: Char, val modelName: String) : Keyed 
     override fun key(): Key = key
 
     fun modelOrThrow(): ModelRenderer = BetterModel.model(modelName).orElseThrow()
+
+    fun iconComponent(): Component = Component.text(icon, NamedTextColor.WHITE)
+        .font(NpcFonts.NPC_ICONS)
+        .shadowColor(ShadowColor.none())
 
     companion object {
         val BY_KEY: Map<Key, NpcType> = entries.associateBy { it.key }
