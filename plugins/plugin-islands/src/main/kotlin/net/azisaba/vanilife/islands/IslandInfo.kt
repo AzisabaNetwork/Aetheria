@@ -10,12 +10,15 @@ interface IslandInfo {
     val ownerUuid: UUID
 
     val primaryData: PrimaryIslandData
+
+    val dragonData: DragonMetadata
 }
 
 data class IslandSummary(
     override val pos: IslandPos,
     override val ownerUuid: UUID,
-    override val primaryData: PrimaryIslandData
+    override val primaryData: PrimaryIslandData,
+    override val dragonData: DragonMetadata = DragonMetadata.Snapshot()
 ) : IslandInfo
 
 internal interface IslandInfoLookup {

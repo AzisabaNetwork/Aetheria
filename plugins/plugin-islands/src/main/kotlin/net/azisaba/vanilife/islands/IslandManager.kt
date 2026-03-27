@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap
 internal class IslandManager(
     private val repository: IslandRepository,
     private val world: World,
+    private val config: Config,
     private val plugin: Plugin,
 ) : IslandInfoLookup {
     private val islandsByPos: MutableMap<IslandPos, Island> = ConcurrentHashMap()
@@ -43,11 +44,27 @@ internal class IslandManager(
                 is PrimaryIslandData.Writable -> summary.primaryData
             }
 
+            val dragonData = when (summary.dragonData) {
+                is DragonMetadata.Snapshot -> DragonMetadata.Writable(
+                    summary.dragonData.installed,
+                    summary.dragonData.presetAir,
+                    summary.dragonData.presetWater,
+                    summary.dragonData.legacyExists,
+                    summary.dragonData.legacyBoostCredit,
+                    summary.dragonData.legacyLastPresetAir,
+                    islandPos,
+                    repository
+                )
+                is DragonMetadata.Writable -> summary.dragonData
+            }
+
             Island(
                 islandPos,
                 world,
                 summary.ownerUuid,
                 primaryData,
+                dragonData,
+                config,
                 plugin,
             )
         }

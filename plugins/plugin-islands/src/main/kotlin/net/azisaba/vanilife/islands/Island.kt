@@ -27,6 +27,8 @@ class Island internal constructor(
     val world: World,
     override val ownerUuid: UUID,
     override val primaryData: PrimaryIslandData.Writable,
+    override val dragonData: DragonMetadata,
+    private val config: Config,
     private val plugin: Plugin,
 ) : IslandInfo, ForwardingAudience,
     WaveAccessor by IslandWaveAccessor(pos),
@@ -54,9 +56,11 @@ class Island internal constructor(
 
     override fun audiences(): Iterable<Audience> = players.toSet()
 
+    private var dragonTickCounter: Long = 0L
     private suspend fun tick(time: Long) {
         waveTick(time)
         wrackTick(time)
+        dragonTick(time)
 
         while (true) {
             val action = channel.tryReceive().getOrNull() ?: break
@@ -68,6 +72,33 @@ class Island internal constructor(
 
         if (players.isEmpty() && channel.isEmpty) {
             stopTicking()
+        }
+    }
+
+    private suspend fun dragonTick(time: Long) {
+        if (!dragonData.installed) return
+        // Only run when players present and owner is among them
+        if (players.isEmpty()) return
+        dragonTickCounter++
+        val intervalSeconds = config.dragon.buff.tickIntervalSeconds.coerceAtLeast(1L)
+        val ticksPerInterval = intervalSeconds * 20L
+        if (dragonTickCounter % ticksPerInterval != 0L) return
+
+        val owner = players.firstOrNull { it.uniqueId == ownerUuid } ?: return
+
+        // Fire event to gather buffs
+        val islandId = pos.toLong().toString()
+        val event = net.azisaba.vanilife.event.DragonBuffQueryEvent(islandId, owner)
+        plugin.server.pluginManager.callEvent(event)
+
+        // Apply accumulated buffs, merging same-type buffs by max amplifier
+        val byType = event.accumulator.groupBy { it.type }
+        for ((type, list) in byType) {
+            val best = list.maxByOrNull { it.amplifier } ?: continue
+            // choose duration slightly longer than interval
+            val durationTicks = (intervalSeconds * 20 + 100).toInt()
+            val potion = org.bukkit.potion.PotionEffect(type, durationTicks, best.amplifier, false, false, true)
+            owner.addPotionEffect(potion)
         }
     }
 

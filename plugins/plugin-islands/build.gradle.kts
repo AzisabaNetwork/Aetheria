@@ -12,4 +12,10 @@ dependencies {
     implementation(libs.mccoroutine.folia.core)
     implementation(libs.postgresql)
     implementation(libs.tomlkt)
+
+    testImplementation(kotlin("test"))
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
