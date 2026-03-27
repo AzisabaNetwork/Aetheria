@@ -15,6 +15,13 @@ class Main : JavaPlugin() {
                 single<Plugin> { this@Main }
             })
         }
+
+        // register cooking recipes
+        CookingRecipes.bootstrap(server)
+
+        // setup listeners and BetterHud placeholders
+        setupEventListeners()
+        setupCookingBetterHudPlaceholders()
     }
 
     override fun onDisable() {
