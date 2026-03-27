@@ -7,7 +7,14 @@ import kr.toxicity.model.api.tracker.Tracker
 import net.azisaba.vanilife.Vanilife
 import net.azisaba.vanilife.npc.NpcMode
 import net.azisaba.vanilife.npc.NpcType
+import net.azisaba.vanilife.npc.ai.GlanceAtNearbyPlayerGoal
+import net.azisaba.vanilife.npc.ai.GrowNearbyBabyAnimalGoal
+import net.azisaba.vanilife.npc.ai.HopAroundGoal
+import net.azisaba.vanilife.npc.ai.LookAtNearbyOwnerGoal
+import net.azisaba.vanilife.npc.ai.SeekShelterFromRainGoal
 import net.azisaba.vanilife.npc.ai.TradingGoal
+import net.azisaba.vanilife.npc.ai.VisitFlowerGoal
+import net.azisaba.vanilife.npc.ai.WanderNearOwnerGoal
 import net.azisaba.vanilife.npc.dialog.NpcMenuDialog
 import net.kyori.adventure.audience.Audience
 import org.bukkit.Bukkit
@@ -56,12 +63,19 @@ class NpcWrapper private constructor(
     }
 
     private fun registerGoals() {
+        Bukkit.getMobGoals().addGoal(delegate, 1, SeekShelterFromRainGoal(this))
         Bukkit.getMobGoals().addGoal(delegate, 3, TradingGoal(this, delegate, tracker))
         NpcMode.entries.forEach { npcMode ->
             val goal = npcMode.createGoal(this) ?: return@forEach
             val priority = npcMode.goalPriority ?: return@forEach
             Bukkit.getMobGoals().addGoal(delegate, priority, goal)
         }
+        Bukkit.getMobGoals().addGoal(delegate, 6, LookAtNearbyOwnerGoal(this))
+        Bukkit.getMobGoals().addGoal(delegate, 6, GrowNearbyBabyAnimalGoal(this))
+        Bukkit.getMobGoals().addGoal(delegate, 7, VisitFlowerGoal(this))
+        Bukkit.getMobGoals().addGoal(delegate, 7, WanderNearOwnerGoal(this))
+        Bukkit.getMobGoals().addGoal(delegate, 9, GlanceAtNearbyPlayerGoal(this))
+        Bukkit.getMobGoals().addGoal(delegate, 10, HopAroundGoal(this))
     }
 
     private fun handleHitBoxInteract(event: HitBoxInteractEvent) {
