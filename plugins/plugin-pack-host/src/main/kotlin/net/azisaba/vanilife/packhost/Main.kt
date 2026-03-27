@@ -41,6 +41,7 @@ internal class Main : JavaPlugin() {
 
             font {
                 FishingFonts.FISH_SHADOWS to FishingFonts.fishShadows()
+                IslandsFonts.ENCHANTS to IslandsFonts.enchants()
                 IslandsFonts.WAVES to IslandsFonts.waves()
                 NpcFonts.NPC_ICONS to NpcFonts.npcIcons()
                 GeneralFonts.DEFAULT to GeneralFonts.default()
