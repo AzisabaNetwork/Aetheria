@@ -1,10 +1,10 @@
-package net.azisaba.vanilife.npc
+package net.azisaba.vanilife.islands
 
 import com.charleskorn.kaml.Yaml
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import net.azisaba.vanilife.npc.spawn.NpcNaturalSpawner
+import java.nio.file.Files
 import java.nio.file.StandardOpenOption
-import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
@@ -15,12 +15,12 @@ internal fun Main.yamlConfig(yaml: Yaml = defaultYaml): Configuration {
     val path = dataFolder.toPath().resolve("config.yml")
     if (!path.exists()) {
         val content = yaml.encodeToString(Configuration.serializer(), Configuration())
-        path.parent?.createDirectories()
+        path.parent?.let { Files.createDirectories(it) }
         path.writeText(
             content, options = arrayOf(
                 StandardOpenOption.CREATE,
                 StandardOpenOption.TRUNCATE_EXISTING,
-                StandardOpenOption.WRITE,
+                StandardOpenOption.WRITE
             )
         )
     }
@@ -30,5 +30,13 @@ internal fun Main.yamlConfig(yaml: Yaml = defaultYaml): Configuration {
 
 @Serializable
 internal data class Configuration(
-    val naturalSpawner: NpcNaturalSpawner.Configuration = NpcNaturalSpawner.Configuration(),
+    val database: DatabaseConfiguration = DatabaseConfiguration(),
+)
+
+@Serializable
+internal data class DatabaseConfiguration(
+    val url: String = "jdbc:postgresql://localhost:5432/vanilife",
+    val usernameEnv: String = "DATABASE_USERNAME",
+    val passwordEnv: String = "DATABASE_PASSWORD",
+    val maxPoolSize: Int = 12,
 )

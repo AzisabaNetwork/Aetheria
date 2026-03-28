@@ -13,6 +13,7 @@ import net.azisaba.vanilife.islands.repository.IslandRepository
 import net.azisaba.vanilife.islands.wrack.WrackType
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
+import org.jetbrains.exposed.v1.jdbc.Database
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
@@ -26,7 +27,7 @@ class Main : JavaPlugin() {
     }
 
     override fun onEnable() {
-        val config = tomlConfig()
+        val config = yamlConfig()
         val database = setupDatabase(config.database).setupTables()
 
         PacketEvents.getAPI().init()
@@ -38,8 +39,8 @@ class Main : JavaPlugin() {
             modules(
                 module {
                     single<Plugin> { this@Main }
-                    single { config }
-                    single { database }
+                    single<Configuration> { config }
+                    single<Database> { database }
                     single<IslandRepository> { DatabaseIslandRepository(get()) }
                     single<IslandEnchantmentRepository> { DatabaseIslandEnchantmentRepository(get()) }
                     single<IslandManager> { IslandManager(get(), get(), Vanilife.getIslandsWorld(), get()) }

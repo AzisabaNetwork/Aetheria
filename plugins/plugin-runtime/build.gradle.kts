@@ -17,5 +17,4 @@ dependencies {
     api(libs.packed.server)
     api(libs.packetevents)
     api(libs.postgresql)
-    api(libs.tomlkt)
 }
