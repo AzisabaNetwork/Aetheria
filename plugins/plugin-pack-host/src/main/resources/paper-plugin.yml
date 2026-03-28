@@ -13,7 +13,7 @@ dependencies:
       load: BEFORE
     AzisabaNetwork.Vanilife.Forestry:
       load: BEFORE
-    AzisabaNetwork.Vanilife.Islands:
+    AzisabaNetwork.Vanilife.Island:
       load: BEFORE
     AzisabaNetwork.Vanilife.Mining:
       load: BEFORE

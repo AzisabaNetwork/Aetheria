@@ -17,7 +17,7 @@ import net.azisaba.vanilife.fishing.FishingItemModels
 import net.azisaba.vanilife.fishing.FishingModels
 import net.azisaba.vanilife.fishing.FishingTranslations
 import net.azisaba.vanilife.forestry.ForestryTranslations
-import net.azisaba.vanilife.islands.IslandsFonts
+import net.azisaba.vanilife.island.IslandFonts
 import net.azisaba.vanilife.mining.MiningItemModels
 import net.azisaba.vanilife.mining.MiningModels
 import net.azisaba.vanilife.mining.MiningTranslations
@@ -41,8 +41,8 @@ internal class Main : JavaPlugin() {
 
             font {
                 FishingFonts.FISH_SHADOWS to FishingFonts.fishShadows()
-                IslandsFonts.ENCHANTS to IslandsFonts.enchants()
-                IslandsFonts.WAVES to IslandsFonts.waves()
+                IslandFonts.ENCHANTS to IslandFonts.enchants()
+                IslandFonts.WAVES to IslandFonts.waves()
                 NpcFonts.NPC_ICONS to NpcFonts.npcIcons()
                 GeneralFonts.DEFAULT to GeneralFonts.default()
             }
@@ -278,7 +278,7 @@ internal class Main : JavaPlugin() {
             includeJavaResources(net.azisaba.vanilife.farming.Main::class)
             includeJavaResources(net.azisaba.vanilife.fishing.Main::class)
             includeJavaResources(net.azisaba.vanilife.forestry.Main::class)
-            includeJavaResources(net.azisaba.vanilife.islands.Main::class)
+            includeJavaResources(net.azisaba.vanilife.island.Main::class)
             includeJavaResources(net.azisaba.vanilife.mining.Main::class)
             includeJavaResources(net.azisaba.vanilife.npc.Main::class)
             includeJavaResources(Main::class)

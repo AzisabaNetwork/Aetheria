@@ -11,5 +11,5 @@ dependencies:
   server:
     AzisabaNetwork.Vanilife.Runtime:
       load: BEFORE
-    AzisabaNetwork.Vanilife.Islands:
+    AzisabaNetwork.Vanilife.Island:
       load: BEFORE
