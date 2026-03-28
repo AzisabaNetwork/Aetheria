@@ -6,9 +6,14 @@ import de.articdive.jnoise.core.api.functions.Interpolation;
 import de.articdive.jnoise.generators.noise_parameters.fade_functions.FadeFunction;
 import de.articdive.jnoise.modules.octavation.fractal_functions.FractalFunction;
 import de.articdive.jnoise.pipeline.JNoise;
-import net.azisaba.vanilife.world.IslandPos;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import net.azisaba.vanilife.server.world.islands.noise.IslandNoise;
 import net.azisaba.vanilife.server.world.islands.river.RiverMap;
+import net.azisaba.vanilife.world.IslandPos;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
@@ -29,12 +34,6 @@ import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import org.jspecify.annotations.NullMarked;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
 @NullMarked
 public class IslandsChunkGenerator extends ChunkGenerator {
@@ -201,25 +200,25 @@ public class IslandsChunkGenerator extends ChunkGenerator {
     public void addDebugScreenInfo(final List<String> info, final RandomState random, final BlockPos pos) {
     }
 
-    private IslandNoise getIslandNoise(final long levelSeed, final IslandPos islandPos) {
+    private IslandNoise getIslandNoise(final long levelSeed, final IslandPos islandPosition) {
         long noiseKey = levelSeed;
 
-        noiseKey ^= ((long) islandPos.x() * 0x9E3779B97F4A7C15L);
+        noiseKey ^= ((long) islandPosition.x() * 0x9E3779B97F4A7C15L);
         noiseKey = Long.rotateLeft(noiseKey, 27);
 
-        noiseKey ^= ((long) islandPos.z() * 0xC2B2AE3D27D4EB4FL);
+        noiseKey ^= ((long) islandPosition.z() * 0xC2B2AE3D27D4EB4FL);
         noiseKey = Long.rotateLeft(noiseKey, 31);
 
-        return this.islandNoiseCache.computeIfAbsent(noiseKey, k -> IslandNoise.createDefault(islandPos.computeSeed(levelSeed)));
+        return this.islandNoiseCache.computeIfAbsent(noiseKey, k -> IslandNoise.createDefault(islandPosition.computeSeed(levelSeed)));
     }
 
-    private RiverMap getRiverMap(final long levelSeed, final IslandPos islandPos, final IslandNoise islandNoise) {
+    private RiverMap getRiverMap(final long levelSeed, final IslandPos islandPosition, final IslandNoise islandNoise) {
         long noiseKey = levelSeed;
 
-        noiseKey ^= ((long) islandPos.x() * 0x9E3779B97F4A7C15L);
+        noiseKey ^= ((long) islandPosition.x() * 0x9E3779B97F4A7C15L);
         noiseKey = Long.rotateLeft(noiseKey, 27);
 
-        noiseKey ^= ((long) islandPos.z() * 0xC2B2AE3D27D4EB4FL);
+        noiseKey ^= ((long) islandPosition.z() * 0xC2B2AE3D27D4EB4FL);
         noiseKey = Long.rotateLeft(noiseKey, 31);
 
         return this.riverMapCache.computeIfAbsent(noiseKey, k -> RiverMap.createDefault(islandNoise, this.settings));
@@ -254,11 +253,11 @@ public class IslandsChunkGenerator extends ChunkGenerator {
     }
 
     private BaseTerrainSample sampleBaseTerrainPoint(final long levelSeed, final int blockX, final int blockZ) {
-        final IslandPos islandPos = IslandPos.fromBlockPos(blockX, blockZ);
-        final IslandNoise islandNoise = this.getIslandNoise(levelSeed, islandPos);
-        final RiverMap riverMap = this.getRiverMap(levelSeed, islandPos, islandNoise);
-        final double localX = blockX - islandPos.centerBlockX();
-        final double localZ = blockZ - islandPos.centerBlockZ();
+        final IslandPos islandPosition = IslandPos.fromBlockPos(blockX, blockZ);
+        final IslandNoise islandNoise = this.getIslandNoise(levelSeed, islandPosition);
+        final RiverMap riverMap = this.getRiverMap(levelSeed, islandPosition, islandNoise);
+        final double localX = blockX - islandPosition.centerBlockX();
+        final double localZ = blockZ - islandPosition.centerBlockZ();
         final double signedDistance = islandNoise.computeSignedDistance(localX, localZ);
         final int baseHighestY = islandNoise.computeBaseHighestY(localX, localZ, signedDistance, this.settings);
         final int riverSurfaceBaseY = islandNoise.computeTerracedHighestY(localX, localZ, signedDistance, this.settings);

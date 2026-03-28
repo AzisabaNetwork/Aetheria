@@ -17,8 +17,8 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
 
-internal class WrapperWave(val pos: WavePos) : WrapperEntity(EntityTypes.TEXT_DISPLAY) {
-    private val random: Random = Random(pos.computeSeed())
+internal class WrapperWave(val position: WavePosition) : WrapperEntity(EntityTypes.TEXT_DISPLAY) {
+    private val random: Random = Random(position.computeSeed())
     private var cycleRandom: CycleRandom = CycleRandom.roll(random)
     private val ticksOffset: Long = random.nextLong(0L, CYCLE_TICKS)
     private var currentFrame: Char = IslandFonts.Waves.FRAME0
@@ -29,7 +29,7 @@ internal class WrapperWave(val pos: WavePos) : WrapperEntity(EntityTypes.TEXT_DI
             meta.text = Component.text(IslandFonts.Waves.FRAME0).font(IslandFonts.WAVES)
             meta.backgroundColor = 0
             meta.brightnessOverride = 0x00f000f0
-            meta.leftRotation = pos.coastSide.rotation
+            meta.leftRotation = position.coastSide.rotation
             meta.textOpacity = cycleRandom.textOpacity
             meta.transformationInterpolationDuration = 5
         }
@@ -90,7 +90,7 @@ internal class WrapperWave(val pos: WavePos) : WrapperEntity(EntityTypes.TEXT_DI
         val particlePacket = WrapperPlayServerParticle(
             Particle(ParticleTypes.POOF),
             false,
-            pos.computeForward(computeLocation(cycleRandom.movementProgressEnd), 4.5).position,
+            position.computeForward(computeLocation(cycleRandom.movementProgressEnd), 4.5).position,
             Vector3f(0.9f, 0f, 0.9f),
             0.01f,
             6,
@@ -112,19 +112,20 @@ internal class WrapperWave(val pos: WavePos) : WrapperEntity(EntityTypes.TEXT_DI
     }
 
     private fun computeLocation(progress: Double): Location {
-        val coastSize = if (pos.coastSide.axisX) IslandDefaults.ISLAND_SIZE_X_BLOCKS else IslandDefaults.ISLAND_SIZE_Z_BLOCKS
+        val coastSize =
+            if (position.coastSide.axisX) IslandDefaults.ISLAND_SIZE_X_BLOCKS else IslandDefaults.ISLAND_SIZE_Z_BLOCKS
 
         val forwardEnd = (coastSize * 0.18 - 20.0).coerceIn(12.0, 30.0)
         val forwardSpin = (coastSize * 0.078).coerceIn(10.0, 28.0)
         val forwardStart = forwardEnd + forwardSpin
 
         val lateralInset = 37.0
-        val lateralStart = if (pos.coastSide.axisX) pos.islandPos.minBlockZ() else pos.islandPos.minBlockX()
-        val lateralEnd = if (pos.coastSide.axisX) pos.islandPos.maxBlockZ() else pos.islandPos.maxBlockX()
-        val lateralStep = (lateralEnd - lateralStart) / (WavePos.WAVES_PER_COAST_SIDE - 1).toDouble()
+        val lateralStart = if (position.coastSide.axisX) position.islandPosition.minBlockZ() else position.islandPosition.minBlockX()
+        val lateralEnd = if (position.coastSide.axisX) position.islandPosition.maxBlockZ() else position.islandPosition.maxBlockX()
+        val lateralStep = (lateralEnd - lateralStart) / (WavePosition.WAVES_PER_COAST_SIDE - 1).toDouble()
         val lateralMin = (lateralStart + lateralInset).coerceAtMost(lateralEnd - lateralInset)
         val lateralMax = (lateralEnd - lateralInset).coerceAtLeast(lateralMin)
-        val lateralRaw = lateralStart + lateralStep * pos.index + cycleRandom.lateralOffset
+        val lateralRaw = lateralStart + lateralStep * position.index + cycleRandom.lateralOffset
         val lateral = lateralRaw.coerceIn(lateralMin, lateralMax)
 
         val t = (progress / cycleRandom.movementProgressEnd).coerceIn(0.0, 1.0)
@@ -134,13 +135,13 @@ internal class WrapperWave(val pos: WavePos) : WrapperEntity(EntityTypes.TEXT_DI
 
         val forwardRaw = forwardStart - forwardSpin * active + cycleRandom.forwardOffset
         val forward = forwardRaw.coerceIn(forwardEnd, forwardStart)
-        val fixed = pos.edgeCoord() + pos.coastSide.coastNormalSign * forward
+        val fixed = position.edgeCoord() + position.coastSide.coastNormalSign * forward
 
         val bob = sin((progress * 0.07) + ((ticksOffset.toDouble() / CYCLE_TICKS.toDouble()) * (PI * 2.0))) * 0.12
-        val x = if (pos.coastSide.axisX) fixed + bob else lateral
-        val z = if (pos.coastSide.axisX) lateral else fixed + bob
+        val x = if (position.coastSide.axisX) fixed + bob else lateral
+        val z = if (position.coastSide.axisX) lateral else fixed + bob
 
-        return Location(x, IslandDefaults.SEA_LEVEL + 0.88, z, pos.coastSide.yaw, 0f)
+        return Location(x, IslandDefaults.SEA_LEVEL + 0.88, z, position.coastSide.yaw, 0f)
     }
 
     companion object {

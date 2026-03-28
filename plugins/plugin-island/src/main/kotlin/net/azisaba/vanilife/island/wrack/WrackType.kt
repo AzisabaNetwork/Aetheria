@@ -86,7 +86,7 @@ sealed interface WrackType {
             }
             display.finish()
 
-            if (enchantmentKey !in island.enchantments) {
+            if (enchantmentKey !in island.enchantments()) {
                 island.addEnchantment(enchantmentKey)
             }
 

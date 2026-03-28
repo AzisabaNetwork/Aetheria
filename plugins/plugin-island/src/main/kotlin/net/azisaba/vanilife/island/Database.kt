@@ -2,8 +2,8 @@ package net.azisaba.vanilife.island
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import net.azisaba.vanilife.island.enchantment.DatabaseIslandEnchantmentRepository
-import net.azisaba.vanilife.island.repository.DatabaseIslandRepository
+import net.azisaba.vanilife.island.enchantment.IslandEnchantmentsTable
+import net.azisaba.vanilife.island.visitors.IslandVisitorsTable
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
@@ -25,8 +25,9 @@ internal fun Main.setupDatabase(config: DatabaseConfiguration): Database {
 
 internal fun Database.setupTables(): Database = transaction(this) {
     SchemaUtils.create(
-        DatabaseIslandRepository.IslandsTable,
-        DatabaseIslandEnchantmentRepository.Table,
+        IslandsTable,
+        IslandEnchantmentsTable,
+        IslandVisitorsTable,
     )
     this@setupTables
 }

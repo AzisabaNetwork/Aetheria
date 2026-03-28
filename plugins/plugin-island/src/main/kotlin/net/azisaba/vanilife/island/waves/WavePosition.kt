@@ -3,16 +3,16 @@ package net.azisaba.vanilife.island.waves
 import com.github.retrooper.packetevents.protocol.world.Location
 import com.github.retrooper.packetevents.util.Vector3d
 import net.azisaba.vanilife.island.CoastSide
+import net.azisaba.vanilife.island.boundaryBlock
 import net.azisaba.vanilife.world.IslandDefaults
 import net.azisaba.vanilife.world.IslandPos
-import net.azisaba.vanilife.island.boundaryBlock
 
-data class WavePos(val islandPos: IslandPos, val coastSide: CoastSide, val index: Int) {
-    fun edgeCoord(): Int = islandPos.boundaryBlock(coastSide)
+data class WavePosition(val islandPosition: IslandPos, val coastSide: CoastSide, val index: Int) {
+    fun edgeCoord(): Int = islandPosition.boundaryBlock(coastSide)
 
     fun location(): Location {
-        val lateralStart = if (coastSide.axisX) islandPos.minBlockZ().toDouble() else islandPos.minBlockX().toDouble()
-        val lateralEnd = if (coastSide.axisX) islandPos.maxBlockZ().toDouble() else islandPos.maxBlockX().toDouble()
+        val lateralStart = if (coastSide.axisX) islandPosition.minBlockZ().toDouble() else islandPosition.minBlockX().toDouble()
+        val lateralEnd = if (coastSide.axisX) islandPosition.maxBlockZ().toDouble() else islandPosition.maxBlockX().toDouble()
         val lateralStep = (lateralEnd - lateralStart) / (WAVES_PER_COAST_SIDE - 1).toDouble()
         val lateral = lateralStart + lateralStep * index
         val x = if (coastSide.axisX) edgeCoord().toDouble() else lateral
@@ -28,7 +28,7 @@ data class WavePos(val islandPos: IslandPos, val coastSide: CoastSide, val index
     }
 
     fun computeSeed(): Long {
-        var seed = (islandPos.x().toLong() * 73856093L) xor (islandPos.z().toLong() * 19349663L)
+        var seed = (islandPosition.x().toLong() * 73856093L) xor (islandPosition.z().toLong() * 19349663L)
         seed = seed xor (index.toLong() * 83492791L)
         seed = seed xor (coastSide.ordinal.toLong() * 29791L)
         return seed
@@ -38,10 +38,10 @@ data class WavePos(val islandPos: IslandPos, val coastSide: CoastSide, val index
         const val WAVES_PER_COAST_SIDE = 15
         const val WAVES_PER_ISLAND = WAVES_PER_COAST_SIDE * 4
 
-        fun posSet(islandPos: IslandPos): Set<WavePos> = buildSet(WAVES_PER_COAST_SIDE * CoastSide.entries.size) {
+        fun posSet(islandPos: IslandPos): Set<WavePosition> = buildSet(WAVES_PER_COAST_SIDE * CoastSide.entries.size) {
             for (coastSide in CoastSide.entries) {
                 for (index in 0 until WAVES_PER_COAST_SIDE) {
-                    add(WavePos(islandPos, coastSide, index))
+                    add(WavePosition(islandPos, coastSide, index))
                 }
             }
         }

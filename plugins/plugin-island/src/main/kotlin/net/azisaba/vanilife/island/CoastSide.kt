@@ -7,10 +7,10 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 enum class CoastSide(val axisX: Boolean, val axisZ: Boolean, val yaw: Float, val coastNormalSign: Double, val rotation: Quaternion4f) {
-    NORTH(false, true, -90f, -1.0, _root_ide_package_.net.azisaba.vanilife.island.axisAngle(-1f, 1f, 1f, 120f)),
-    SOUTH(false, true, -90f, 1.0, _root_ide_package_.net.azisaba.vanilife.island.axisAngle(-1f, -1f, -1f, 120f)),
-    EAST(true, false, 90f, 1.0, _root_ide_package_.net.azisaba.vanilife.island.axisAngle(0f, 1f, 1f, 180f)),
-    WEST(true, false, 90f, -1.0, _root_ide_package_.net.azisaba.vanilife.island.axisAngle(1f, 0f, 0f, -90f));
+    NORTH(false, true, -90f, -1.0, axisAngle(-1f, 1f, 1f, 120f)),
+    SOUTH(false, true, -90f, 1.0, axisAngle(-1f, -1f, -1f, 120f)),
+    EAST(true, false, 90f, 1.0, axisAngle(0f, 1f, 1f, 180f)),
+    WEST(true, false, 90f, -1.0, axisAngle(1f, 0f, 0f, -90f));
 }
 
 fun IslandPos.boundaryBlock(coastSide: net.azisaba.vanilife.island.CoastSide): Int = when {

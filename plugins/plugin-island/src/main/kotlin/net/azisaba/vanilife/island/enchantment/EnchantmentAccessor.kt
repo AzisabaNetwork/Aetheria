@@ -1,84 +1,58 @@
 package net.azisaba.vanilife.island.enchantment
 
-import io.papermc.paper.registry.RegistryAccess
 import io.papermc.paper.registry.RegistryKey
 import io.papermc.paper.registry.TypedKey
-import kotlinx.coroutines.runBlocking
 import net.azisaba.vanilife.world.IslandPos
 import org.bukkit.enchantments.Enchantment
-import org.bukkit.inventory.ItemStack
-import kotlin.random.Random
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.insertIgnore
+import org.jetbrains.exposed.v1.jdbc.select
+import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 
 interface EnchantmentAccessor {
-    val enchantments: Set<TypedKey<Enchantment>>
+    suspend fun enchantments(): Set<TypedKey<Enchantment>>
 
-    suspend fun addEnchantment(enchantment: TypedKey<Enchantment>)
+    suspend fun addEnchantment(enchantment: TypedKey<Enchantment>): Boolean
 
-    suspend fun removeEnchantment(enchantment: TypedKey<Enchantment>)
+    suspend fun removeEnchantment(enchantment: TypedKey<Enchantment>): Boolean
 
     suspend fun clearEnchantments()
 
-    fun rollEnchantments(
-        itemStack: ItemStack,
-        random: Random = Random.Default,
-        maxCount: Int = 3,
-    ): List<TypedKey<Enchantment>> = buildList {
-        if (maxCount <= 0) return@buildList
-
-        val itemKey = RegistryKey.ITEM.typedKey(itemStack.type.key)
-        val weighted = enchantments
-            .mapNotNull { key ->
-                RegistryAccess.registryAccess()
-                    .getRegistry(RegistryKey.ENCHANTMENT)[key]
-                    ?.takeIf { enchantment ->
-                        enchantment.getPrimaryItems()?.contains(itemKey) ?: enchantment.canEnchantItem(itemStack)
-                    }
-                    ?.weight
-                    ?.takeIf { it > 0 }
-                    ?.let { key to it }
-            }
-            .toMutableList()
-
-        repeat(minOf(maxCount, weighted.size)) {
-            val totalWeight = weighted.sumOf { it.second }
-            if (totalWeight <= 0) return@repeat
-
-            var roll = random.nextInt(totalWeight)
-            val index = weighted.indexOfFirst { (_, weight) ->
-                roll -= weight
-                roll < 0
-            }
-
-            if (index >= 0) {
-                add(weighted.removeAt(index).first)
-            }
-        }
+    companion object {
+        fun fromDatabase(position: IslandPos, database: Database): EnchantmentAccessor =
+            EnchantmentAccessorImpl(position, database)
     }
 }
 
-internal class IslandEnchantmentAccessor(
-    private val islandPos: IslandPos,
-    private val repository: IslandEnchantmentRepository,
+private class EnchantmentAccessorImpl(
+    private val position: IslandPos, private val database: Database,
 ) : EnchantmentAccessor {
-    override val enchantments: Set<TypedKey<Enchantment>>
-        get() = enchantmentsMutable
-
-    private val enchantmentsMutable = runBlocking {
-        repository.lookupByPos(islandPos).toMutableSet()
+    override suspend fun enchantments(): Set<TypedKey<Enchantment>> = suspendTransaction(database) {
+        IslandEnchantmentsTable.select(IslandEnchantmentsTable.enchantment)
+            .where { IslandEnchantmentsTable.island eq position.toLong() }
+            .map { RegistryKey.ENCHANTMENT.typedKey(it[IslandEnchantmentsTable.enchantment]) }
+            .toSet()
     }
 
-    override suspend fun addEnchantment(enchantment: TypedKey<Enchantment>) {
-        repository.addEnchantment(islandPos, enchantment)
-        enchantmentsMutable += enchantment
+    override suspend fun addEnchantment(enchantment: TypedKey<Enchantment>) = suspendTransaction(database) {
+        IslandEnchantmentsTable.insertIgnore {
+            it[IslandEnchantmentsTable.island] = position.toLong()
+            it[IslandEnchantmentsTable.enchantment] = enchantment
+        }.insertedCount > 0
     }
 
-    override suspend fun removeEnchantment(enchantment: TypedKey<Enchantment>) {
-        repository.removeEnchantment(islandPos, enchantment)
-        enchantmentsMutable -= enchantment
+    override suspend fun removeEnchantment(enchantment: TypedKey<Enchantment>) = suspendTransaction(database) {
+        IslandEnchantmentsTable.deleteWhere {
+            (IslandEnchantmentsTable.island eq position.toLong()) and
+                (IslandEnchantmentsTable.enchantment eq enchantment)
+        } > 0
     }
 
-    override suspend fun clearEnchantments() {
-        repository.clearEnchantments(islandPos)
-        enchantmentsMutable.clear()
+    override suspend fun clearEnchantments() = suspendTransaction(database) {
+        IslandEnchantmentsTable.deleteWhere { IslandEnchantmentsTable.island eq position.toLong() }
+        Unit
     }
 }

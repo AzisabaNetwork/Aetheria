@@ -10,15 +10,19 @@ interface WaveAccessor {
     fun removeWaveViewer(uuid: UUID)
 
     fun waveTick(time: Long)
+
+    companion object {
+        fun create(position: IslandPos): WaveAccessor = WaveAccessorImpl(position)
+    }
 }
 
-internal class IslandWaveAccessor(islandPos: IslandPos) : WaveAccessor {
+private class WaveAccessorImpl(position: IslandPos) : WaveAccessor {
     private val wrapperEntityContainer: EntityContainer = EntityContainer.basic()
 
-    private val wavesByPos: MutableMap<WavePos, WrapperWave> = HashMap(WavePos.WAVES_PER_ISLAND)
+    private val wavesByPos: MutableMap<WavePosition, WrapperWave> = HashMap(WavePosition.WAVES_PER_ISLAND)
 
     init {
-        for (wavePos in WavePos.posSet(islandPos)) {
+        for (wavePos in WavePosition.posSet(position)) {
             val wrapperWave = WrapperWave(wavePos)
             wrapperWave.spawn(wavePos.location(), wrapperEntityContainer)
             wavesByPos[wavePos] = wrapperWave

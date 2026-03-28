@@ -4,6 +4,7 @@ dependencies {
     api(libs.entitylib)
     api(libs.exposed.core)
     api(libs.exposed.jdbc)
+    api(libs.exposed.kotlin.datetime)
     api(libs.hikaricp)
     api(libs.kaml)
     api(libs.kotlinx.coroutines.core)

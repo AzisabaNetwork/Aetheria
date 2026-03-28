@@ -16,17 +16,20 @@ interface WrackAccessor {
     fun spawnWrack(wrackType: WrackType)
 
     suspend fun wrackTick(time: Long)
+
+    companion object {
+        fun create(position: IslandPos, world: IslandsWorld, plugin: Plugin): WrackAccessor =
+            WrackAccessorImpl(position, world, plugin)
+    }
 }
 
-internal class IslandWrackAccessor(
-    val islandPos: IslandPos,
-    val world: IslandsWorld,
-    val plugin: Plugin,
+private class WrackAccessorImpl(
+    private val position: IslandPos, private val world: IslandsWorld, private val plugin: Plugin,
 ) : WrackAccessor {
     private val viewers: MutableSet<Player> = mutableSetOf()
     private val wrackEntities: MutableList<WrackEntity> = mutableListOf()
     private val tickingWrackEntities: MutableList<WrackEntity> = mutableListOf()
-    private val random = Random(islandPos.computeSeed(world.seed))
+    private val random = Random(position.computeSeed(world.seed))
 
     private val channel: Channel<Action> = Channel(Channel.BUFFERED)
 
@@ -34,7 +37,8 @@ internal class IslandWrackAccessor(
 
     override fun removeWrackViewer(player: Player) = enqueueAction(Action.RemoveViewer(player))
 
-    override fun spawnWrack(wrackType: WrackType) = enqueueAction(Action.SpawnWrack(wrackType, CoastSide.entries.random()))
+    override fun spawnWrack(wrackType: WrackType) =
+        enqueueAction(Action.SpawnWrack(wrackType, CoastSide.entries.random()))
 
     fun enqueueAction(action: Action) {
         val result = channel.trySend(action)
@@ -76,8 +80,8 @@ internal class IslandWrackAccessor(
     }
 
     private suspend fun spawnWrackAction(action: Action.SpawnWrack, time: Long) {
-        val driftPath = DriftPath.random(islandPos, action.coastSide, world, plugin)
-        val wrackEntity = WrackEntity(action.wrackType, islandPos, world, driftPath, time) {
+        val driftPath = DriftPath.random(position, action.coastSide, world, plugin)
+        val wrackEntity = WrackEntity(action.wrackType, position, world, driftPath, time) {
             wrackEntities.remove(it)
             tickingWrackEntities.remove(it)
         }

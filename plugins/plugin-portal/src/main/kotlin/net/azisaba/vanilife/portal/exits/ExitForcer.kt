@@ -21,8 +21,8 @@ class ExitForcer(
     private val resourceCellSpacing: Int,
     private val safeSearchRadius: Int,
 ) {
-    suspend fun findSafeLocation(islandPos: IslandPos, plugin: Plugin): Location {
-        val (baseX, baseZ) = baseXZOf(islandPos)
+    suspend fun findSafeLocation(islandPosition: IslandPos, plugin: Plugin): Location {
+        val (baseX, baseZ) = baseXZOf(islandPosition)
 
         return withContext(plugin.regionDispatcher(Location(world, baseX.toDouble(), 0.0, baseZ.toDouble()))) {
             for (radius in 0..safeSearchRadius) {
@@ -55,13 +55,13 @@ class ExitForcer(
         }
     }
 
-    private fun baseXZOf(islandPos: IslandPos): Pair<Int, Int> {
-        val random = Random(islandPos.computeSeed(world.seed))
+    private fun baseXZOf(islandPosition: IslandPos): Pair<Int, Int> {
+        val random = Random(islandPosition.computeSeed(world.seed))
         val radius = baseRadius + random.nextDouble() * radiusVariance
         val angle = random.nextDouble(0.0, PI * 2.0)
 
-        val originalX = islandPos.x() * resourceCellSpacing
-        val originalZ = islandPos.z() * resourceCellSpacing
+        val originalX = islandPosition.x() * resourceCellSpacing
+        val originalZ = islandPosition.z() * resourceCellSpacing
         val x = originalX + (cos(angle) * radius).roundToInt()
         val z = originalZ + (sin(angle) * radius).roundToInt()
 

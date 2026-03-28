@@ -6,10 +6,6 @@ import me.tofaa.entitylib.APIConfig
 import me.tofaa.entitylib.EntityLib
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform
 import net.azisaba.vanilife.Vanilife
-import net.azisaba.vanilife.island.enchantment.DatabaseIslandEnchantmentRepository
-import net.azisaba.vanilife.island.enchantment.IslandEnchantmentRepository
-import net.azisaba.vanilife.island.repository.DatabaseIslandRepository
-import net.azisaba.vanilife.island.repository.IslandRepository
 import net.azisaba.vanilife.island.wrack.WrackType
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
@@ -41,9 +37,7 @@ class Main : JavaPlugin() {
                     single<Plugin> { this@Main }
                     single<Configuration> { config }
                     single<Database> { database }
-                    single<IslandRepository> { DatabaseIslandRepository(get()) }
-                    single<IslandEnchantmentRepository> { DatabaseIslandEnchantmentRepository(get()) }
-                    single<IslandManager> { IslandManager(get(), get(), Vanilife.getIslandsWorld(), get()) }
+                    single<IslandMap> { IslandMap(get(), get()) }
                 },
             )
         }
