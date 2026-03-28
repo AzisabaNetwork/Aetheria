@@ -1,0 +1,6 @@
+name: AzisabaNetwork.Vanilife.Runtime
+version: 0.0.0
+api-version: 1.21.11
+main: net.azisaba.vanilife.runtime.Main
+bootstrapper: net.azisaba.vanilife.runtime.Bootstrap
+folia-supported: true

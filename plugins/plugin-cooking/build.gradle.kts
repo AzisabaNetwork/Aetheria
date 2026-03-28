@@ -1,5 +1,4 @@
 dependencies {
-    compileOnly(libs.packed.core)
-    compileOnly(libs.packed.resource)
+    compileOnly(project(":plugins:plugin-runtime"))
     implementation(libs.koin.core)
 }

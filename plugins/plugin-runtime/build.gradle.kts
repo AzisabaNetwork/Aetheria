@@ -1,0 +1,18 @@
+dependencies {
+    api(kotlin("stdlib"))
+    api(libs.entitylib)
+    api(libs.exposed.core)
+    api(libs.exposed.jdbc)
+    api(libs.hikaricp)
+    api(libs.kaml)
+    api(libs.kotlinx.coroutines.core)
+    api(libs.mccoroutine.folia.api)
+    api(libs.mccoroutine.folia.core)
+    api(libs.minecraftserialization.adventure)
+    api(libs.packed.core)
+    api(libs.packed.resource)
+    api(libs.packed.server)
+    api(libs.packetevents)
+    api(libs.postgresql)
+    api(libs.tomlkt)
+}

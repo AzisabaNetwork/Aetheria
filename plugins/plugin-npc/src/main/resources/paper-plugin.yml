@@ -6,11 +6,15 @@ bootstrapper: net.azisaba.vanilife.npc.Bootstrap
 folia-supported: true
 dependencies:
   bootstrap:
+    AzisabaNetwork.Vanilife.Runtime:
+      load: BEFORE
     AzisabaNetwork.Vanilife.Cooking:
       load: BEFORE
     AzisabaNetwork.Vanilife.Forestry:
       load: BEFORE
   server:
+    AzisabaNetwork.Vanilife.Runtime:
+      load: BEFORE
     AzisabaNetwork.Vanilife.Cooking:
       load: BEFORE
     AzisabaNetwork.Vanilife.DataDriven:

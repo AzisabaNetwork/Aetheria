@@ -5,7 +5,12 @@ main: net.azisaba.vanilife.fishing.Main
 bootstrapper: net.azisaba.vanilife.fishing.Bootstrap
 folia-supported: true
 dependencies:
+  bootstrap:
+    AzisabaNetwork.Vanilife.Runtime:
+      load: BEFORE
   server:
+    AzisabaNetwork.Vanilife.Runtime:
+      load: BEFORE
     BetterModel:
       load: BEFORE
     packetevents:

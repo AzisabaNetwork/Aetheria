@@ -5,6 +5,8 @@ main: net.azisaba.vanilife.islands.Main
 folia-supported: true
 dependencies:
   server:
+    AzisabaNetwork.Vanilife.Runtime:
+      load: BEFORE
     AzisabaNetwork.Vanilife.DataDriven:
       load: BEFORE
     BetterModel:

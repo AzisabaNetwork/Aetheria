@@ -1,5 +1,3 @@
 dependencies {
-    api(libs.minecraftserialization.adventure)
-    api(libs.minecraftserialization.valueproviders)
-    implementation(libs.kaml)
+    compileOnly(project(":plugins:plugin-runtime"))
 }

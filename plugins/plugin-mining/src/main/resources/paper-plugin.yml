@@ -5,7 +5,12 @@ main: net.azisaba.vanilife.mining.Main
 bootstrapper: net.azisaba.vanilife.mining.Bootstrap
 folia-supported: true
 dependencies:
+  bootstrap:
+    AzisabaNetwork.Vanilife.Runtime:
+      load: BEFORE
   server:
+    AzisabaNetwork.Vanilife.Runtime:
+      load: BEFORE
     BetterHud:
       load: BEFORE
     CoreProtect:

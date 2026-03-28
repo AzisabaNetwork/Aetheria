@@ -13,6 +13,12 @@ subprojects {
 
     tasks.named<ShadowJar>("shadowJar") {
         archiveClassifier.set("")
+        if (project.path != ":plugins:plugin-runtime") {
+            dependencies {
+                exclude(dependency("org.jetbrains.kotlin:.*"))
+                exclude(dependency("org.jetbrains.kotlinx:.*"))
+            }
+        }
     }
 }
 
@@ -25,11 +31,19 @@ gradle.projectsEvaluated {
     listOf("runServer", "runDevServer").forEach { taskName ->
         (rootProject.findProject(":folia-server")?.tasks?.findByName(taskName) as? JavaExec)?.apply {
             dependsOn(pluginShadowJarTasks)
-            doFirst {
-                pluginShadowJarFiles.forEach { shadowJarFile ->
-                    args("--add-plugin", shadowJarFile.get().asFile.absolutePath)
-                }
-            }
+            argumentProviders.add(
+                objects.newInstance(AddPluginArgumentProvider::class.java).apply {
+                    pluginJars.from(pluginShadowJarFiles)
+                },
+            )
         }
     }
+}
+
+abstract class AddPluginArgumentProvider : CommandLineArgumentProvider {
+    @get:InputFiles
+    abstract val pluginJars: ConfigurableFileCollection
+
+    override fun asArguments(): Iterable<String> =
+        pluginJars.files.flatMap { listOf("--add-plugin", it.absolutePath) }
 }

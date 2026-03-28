@@ -5,6 +5,11 @@ main: net.azisaba.vanilife.portal.Main
 bootstrapper: net.azisaba.vanilife.portal.Bootstrap
 folia-supported: true
 dependencies:
+  bootstrap:
+    AzisabaNetwork.Vanilife.Runtime:
+      load: BEFORE
   server:
+    AzisabaNetwork.Vanilife.Runtime:
+      load: BEFORE
     AzisabaNetwork.Vanilife.Islands:
       load: BEFORE

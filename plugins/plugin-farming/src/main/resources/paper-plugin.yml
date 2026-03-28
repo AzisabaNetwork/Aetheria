@@ -5,6 +5,11 @@ main: net.azisaba.vanilife.farming.Main
 bootstrapper: net.azisaba.vanilife.farming.Bootstrap
 folia-supported: true
 dependencies:
+  bootstrap:
+    AzisabaNetwork.Vanilife.Runtime:
+      load: BEFORE
   server:
+    AzisabaNetwork.Vanilife.Runtime:
+      load: BEFORE
     packetevents:
       load: BEFORE

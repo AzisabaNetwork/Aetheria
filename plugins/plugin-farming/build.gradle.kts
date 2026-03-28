@@ -1,8 +1,4 @@
 dependencies {
-    compileOnly(libs.packed.core)
-    compileOnly(libs.packed.resource)
-    compileOnly(libs.packetevents)
+    compileOnly(project(":plugins:plugin-runtime"))
     implementation(libs.entitylib)
-    implementation(libs.mccoroutine.folia.api)
-    implementation(libs.mccoroutine.folia.core)
 }

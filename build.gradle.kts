@@ -38,7 +38,6 @@ paperweight {
 }
 
 val kotlinx = libs.kotlinx
-val packed = libs.packed
 val jnoise = libs.jnoise
 
 subprojects {
@@ -108,12 +107,7 @@ allprojects {
 
 project(":folia-server") {
     dependencies {
-        implementation(kotlin("stdlib"))
-        implementation(kotlinx.coroutines.core)
         implementation(jnoise.pipeline)
-        implementation(packed.core)
-        implementation(packed.resource)
-        implementation(packed.server)
     }
 }
 
