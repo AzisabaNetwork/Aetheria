@@ -17,8 +17,6 @@ dependencies:
       load: BEFORE
     AzisabaNetwork.Vanilife.Cooking:
       load: BEFORE
-    AzisabaNetwork.Vanilife.DataDriven:
-      load: BEFORE
     AzisabaNetwork.Vanilife.Fishing:
       load: BEFORE
     AzisabaNetwork.Vanilife.Forestry:

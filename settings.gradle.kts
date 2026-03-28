@@ -14,8 +14,8 @@ rootProject.name = "vanilife"
 
 include(":folia-api")
 include(":folia-server")
+include(":plugins:common")
 include(":plugins:plugin-cooking")
-include(":plugins:plugin-data-driven")
 include(":plugins:plugin-farming")
 include(":plugins:plugin-fishing")
 include(":plugins:plugin-forestry")

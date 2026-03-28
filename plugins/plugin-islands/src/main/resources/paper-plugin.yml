@@ -7,8 +7,6 @@ dependencies:
   server:
     AzisabaNetwork.Vanilife.Runtime:
       load: BEFORE
-    AzisabaNetwork.Vanilife.DataDriven:
-      load: BEFORE
     BetterModel:
       load: BEFORE
     packetevents:

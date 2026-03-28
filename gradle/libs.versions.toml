@@ -1,4 +1,8 @@
 [versions]
+kotlin = "2.3.0"
+kotlinx-coroutines = "1.10.2"
+kotlinx-serialization = "1.10.0"
+
 bettercommand = "1.4.3"
 betterhud = "1.14.1"
 bettermodel = "2.1.0"
@@ -9,8 +13,6 @@ hikaricp = "7.0.2"
 jnoise = "4.1.0"
 kaml = "0.104.0"
 koin = "4.1.1"
-kotlin = "2.3.0"
-kotlinx-coroutines = "1.10.2"
 mccoroutine = "2.22.0"
 minecraftexposed = "1.0.0-R0.1-SNAPSHOT"
 minecraftserialization = "1.0.0-R0.6-SNAPSHOT"
@@ -30,6 +32,7 @@ shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 [libraries]
 # Language
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 
 # Dependency Injection (DI)
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }

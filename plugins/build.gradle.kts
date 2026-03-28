@@ -23,8 +23,9 @@ subprojects {
 }
 
 gradle.projectsEvaluated {
-    val pluginShadowJarTasks = subprojects.map { it.tasks.named<ShadowJar>("shadowJar") }
-    val pluginShadowJarFiles = subprojects.map { project ->
+    val pluginProjects = subprojects.filter { it.name.startsWith("plugin-") }
+    val pluginShadowJarTasks = pluginProjects.map { it.tasks.named<ShadowJar>("shadowJar") }
+    val pluginShadowJarFiles = pluginProjects.map { project ->
         project.tasks.named<ShadowJar>("shadowJar").flatMap { it.archiveFile }
     }
 

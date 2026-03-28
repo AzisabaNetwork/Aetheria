@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
 import kr.toxicity.model.api.BetterModel
 import kr.toxicity.model.api.data.renderer.ModelRenderer
 import net.azisaba.serialization.KeySerializer
-import net.azisaba.vanilife.datadriven.ItemStackProvider
+import net.azisaba.vanilife.ItemStackProvider
 import net.azisaba.vanilife.islands.Island
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.sound.Sound

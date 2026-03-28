@@ -1,4 +1,4 @@
-package net.azisaba.vanilife.datadriven
+package net.azisaba.vanilife
 
 import io.papermc.paper.registry.RegistryAccess
 import io.papermc.paper.registry.RegistryKey

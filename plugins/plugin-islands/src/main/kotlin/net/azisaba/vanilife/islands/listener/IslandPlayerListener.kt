@@ -4,22 +4,15 @@ import com.github.shynixn.mccoroutine.folia.launch
 import io.papermc.paper.event.player.AsyncChatEvent
 import io.papermc.paper.event.player.AsyncPlayerSpawnLocationEvent
 import io.papermc.paper.registry.keys.EnchantmentKeys
-import io.papermc.paper.registry.keys.ItemTypeKeys
-import io.papermc.paper.registry.keys.SoundEventKeys
 import kotlinx.coroutines.runBlocking
-import net.azisaba.serialization.IntProvider
 import net.azisaba.vanilife.Vanilife
-import net.azisaba.vanilife.datadriven.ItemStackProvider
 import net.azisaba.vanilife.islands.IslandManager
 import net.azisaba.vanilife.islands.wrack.WrackType
-import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
-import org.bukkit.Material
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 
 internal class IslandPlayerListener(private val plugin: Plugin, private val service: IslandManager) : Listener {

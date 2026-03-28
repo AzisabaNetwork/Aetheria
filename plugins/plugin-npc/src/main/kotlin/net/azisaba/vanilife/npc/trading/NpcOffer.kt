@@ -2,8 +2,8 @@ package net.azisaba.vanilife.npc.trading
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import net.azisaba.vanilife.ItemStackProvider
 import net.azisaba.vanilife.Season
-import net.azisaba.vanilife.datadriven.ItemStackProvider
 import org.bukkit.inventory.MerchantRecipe
 import kotlin.random.Random
 
