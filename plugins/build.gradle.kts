@@ -29,6 +29,12 @@ gradle.projectsEvaluated {
         project.tasks.named<ShadowJar>("shadowJar").flatMap { it.archiveFile }
     }
 
+    tasks.register("shadowPluginModules") {
+        group = "build"
+        description = "Builds shadow JARs for plugin modules under :plugins."
+        dependsOn(pluginShadowJarTasks)
+    }
+
     listOf("runServer", "runDevServer").forEach { taskName ->
         (rootProject.findProject(":folia-server")?.tasks?.findByName(taskName) as? JavaExec)?.apply {
             dependsOn(pluginShadowJarTasks)
