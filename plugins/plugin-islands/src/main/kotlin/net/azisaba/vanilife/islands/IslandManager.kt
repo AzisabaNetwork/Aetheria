@@ -5,7 +5,6 @@ import net.azisaba.vanilife.islands.repository.IslandRepository
 import net.azisaba.vanilife.islands.repository.PrimaryIslandData
 import net.azisaba.vanilife.world.IslandPos
 import net.azisaba.vanilife.world.IslandsWorld
-import org.bukkit.World
 import org.bukkit.plugin.Plugin
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap

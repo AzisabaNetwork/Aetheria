@@ -1,13 +1,12 @@
 package net.azisaba.vanilife.islands.wrack
 
 import kotlinx.coroutines.channels.Channel
-import net.azisaba.vanilife.Vanilife
 import net.azisaba.vanilife.islands.CoastSide
 import net.azisaba.vanilife.world.IslandPos
 import net.azisaba.vanilife.world.IslandsWorld
-import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
+import kotlin.random.Random
 
 interface WrackAccessor {
     fun addWrackViewer(player: Player)
@@ -19,10 +18,15 @@ interface WrackAccessor {
     suspend fun wrackTick(time: Long)
 }
 
-internal class IslandWrackAccessor(val islandPos: IslandPos, val world: IslandsWorld, val plugin: Plugin) : WrackAccessor {
+internal class IslandWrackAccessor(
+    val islandPos: IslandPos,
+    val world: IslandsWorld,
+    val plugin: Plugin,
+) : WrackAccessor {
     private val viewers: MutableSet<Player> = mutableSetOf()
     private val wrackEntities: MutableList<WrackEntity> = mutableListOf()
     private val tickingWrackEntities: MutableList<WrackEntity> = mutableListOf()
+    private val random = Random(islandPos.computeSeed(world.seed))
 
     private val channel: Channel<Action> = Channel(Channel.BUFFERED)
 
@@ -44,6 +48,9 @@ internal class IslandWrackAccessor(val islandPos: IslandPos, val world: IslandsW
 
         if (time % 200L == 0L) {
             viewers.removeIf { !it.isValid }
+            if (viewers.isNotEmpty()) {
+                WrackType.roll(random)?.let(::spawnWrack)
+            }
         }
 
         while (true) {

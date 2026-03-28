@@ -11,6 +11,7 @@ import kotlinx.serialization.Serializable
 import kr.toxicity.model.api.BetterModel
 import kr.toxicity.model.api.data.renderer.ModelRenderer
 import net.azisaba.serialization.KeySerializer
+import net.azisaba.vanilife.DynamicContents
 import net.azisaba.vanilife.ItemStackProvider
 import net.azisaba.vanilife.islands.Island
 import net.kyori.adventure.key.Key
@@ -20,6 +21,8 @@ import kotlin.random.Random
 
 @Serializable
 sealed interface WrackType {
+    val weight: Int
+
     val modelName: String
         get() = "bottle"
 
@@ -27,9 +30,25 @@ sealed interface WrackType {
 
     suspend fun drop(random: Random, player: Player, island: Island, entity: WrackEntity)
 
+    companion object : DynamicContents<WrackType>("wrack_types", lazy { WrackType.serializer() }) {
+        fun roll(random: Random): WrackType? {
+            val entries = all().filter { it.weight > 0 }
+            if (entries.isEmpty()) return null
+
+            val totalWeight = entries.sumOf(WrackType::weight)
+            var roll = random.nextInt(totalWeight)
+            for (entry in all()) {
+                roll -= entry.weight
+                if (roll < 0) return entry
+            }
+
+            return entries.last()
+        }
+    }
+
     @Serializable
     @SerialName("Item")
-    data class Item(val item: ItemStackProvider) : WrackType {
+    data class Item(val item: ItemStackProvider, override val weight: Int) : WrackType {
         override suspend fun drop(random: Random, player: Player, island: Island, entity: WrackEntity) {
             val itemStack = item.sample(random)
             val dropLocation = entity.location
@@ -41,7 +60,9 @@ sealed interface WrackType {
 
     @Serializable
     @SerialName("Enchantment")
-    data class Enchantment(val id: @Serializable(with = KeySerializer::class) Key) : WrackType {
+    data class Enchantment(
+        val id: @Serializable(with = KeySerializer::class) Key, override val weight: Int,
+    ) : WrackType {
         override suspend fun drop(random: Random, player: Player, island: Island, entity: WrackEntity) {
             RegistryAccess.registryAccess()
                 .getRegistry(RegistryKey.ENCHANTMENT)

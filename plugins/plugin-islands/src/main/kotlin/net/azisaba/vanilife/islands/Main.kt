@@ -10,6 +10,7 @@ import net.azisaba.vanilife.islands.enchantment.DatabaseIslandEnchantmentReposit
 import net.azisaba.vanilife.islands.enchantment.IslandEnchantmentRepository
 import net.azisaba.vanilife.islands.repository.DatabaseIslandRepository
 import net.azisaba.vanilife.islands.repository.IslandRepository
+import net.azisaba.vanilife.islands.wrack.WrackType
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
 import org.koin.core.KoinApplication
@@ -30,6 +31,8 @@ class Main : JavaPlugin() {
 
         PacketEvents.getAPI().init()
         EntityLib.init(SpigotEntityLibPlatform(this), APIConfig(PacketEvents.getAPI()))
+
+        WrackType.bootstrap(this)
 
         koinApp = startKoin {
             modules(

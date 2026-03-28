@@ -52,7 +52,8 @@ internal class IslandPlayerListener(private val plugin: Plugin, private val serv
             repeat(message.length) {
                 island?.spawnWrack(
                     WrackType.Enchantment(
-                        EnchantmentKeys.AQUA_AFFINITY
+                        EnchantmentKeys.AQUA_AFFINITY,
+                        1,
                     )
                 )
             }

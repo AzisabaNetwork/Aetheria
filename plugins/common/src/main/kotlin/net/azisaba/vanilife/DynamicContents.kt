@@ -11,13 +11,13 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlin.io.path.*
 
 abstract class DynamicContents<T>(
-    val name: String, private val serializer: KSerializer<T>, private val yaml: Yaml = DEFAULT_YAML,
-) {
+    val name: String, private val lazySerializer: Lazy<KSerializer<T>>, private val yaml: Yaml = DEFAULT_YAML,
+) : Contents<T> {
     private val mapReference: AtomicReference<Map<Key, T>?> = AtomicReference(null)
 
-    fun byKey(key: Key): Holder<T>? = requireLoaded()[key]?.let { Holder(key, it) }
+    override fun byKey(key: Key): T? = requireLoaded()[key]
 
-    fun all(): Collection<T> = requireLoaded().values
+    override fun all(): Set<T> = requireLoaded().values.toSet()
 
     fun bootstrap(plugin: Plugin) {
         val contentsRoot = plugin.dataFolder.toPath().resolve(name)
@@ -60,7 +60,7 @@ abstract class DynamicContents<T>(
         }
 
         return try {
-            yaml.decodeFromString(serializer, text)
+            yaml.decodeFromString(lazySerializer.value, text)
         } catch (e: Exception) {
             throw IllegalArgumentException("Failed to parse YAML file: $this\n$text", e)
         }
@@ -74,6 +74,4 @@ abstract class DynamicContents<T>(
             )
         )
     }
-
-    data class Holder<T>(val key: Key, val value: T)
 }

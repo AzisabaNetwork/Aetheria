@@ -19,7 +19,6 @@ import net.azisaba.vanilife.world.IslandPos
 import net.azisaba.vanilife.world.IslandsWorld
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.audience.ForwardingAudience
-import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import java.util.*
