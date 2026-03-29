@@ -128,5 +128,4 @@ public final class IslandPrismarinePortalFrameFeature extends Feature<NoneFeatur
             level.setBlock(start.above(i), Blocks.AIR.defaultBlockState(), 2);
         }
     }
-
 }
