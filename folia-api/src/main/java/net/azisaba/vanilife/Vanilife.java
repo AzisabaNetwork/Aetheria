@@ -1,7 +1,6 @@
 package net.azisaba.vanilife;
 
 import java.util.Objects;
-import net.azisaba.vanilife.world.IslandDefaults;
 import net.azisaba.vanilife.world.IslandsWorld;
 import net.azisaba.vanilife.world.ResourceWorld;
 import net.kyori.adventure.key.Key;
@@ -12,7 +11,7 @@ public final class Vanilife {
     public static final String NAMESPACE = "vanilife";
 
     public static @NotNull IslandsWorld getIslandsWorld() {
-        return (IslandsWorld) Objects.requireNonNull(Bukkit.getWorld(IslandDefaults.WORLD_KEY));
+        return (IslandsWorld) Objects.requireNonNull(Bukkit.getWorld(IslandsWorld.WORLD_KEY));
     }
 
     // TODO: Implement auto wipe

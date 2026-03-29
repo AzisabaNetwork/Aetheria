@@ -12,6 +12,6 @@ public final class VanilifeBiomeSources {
         return Registry.register(registry, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "resource"), ResourceBiomeSource.CODEC);
     }
 
-    private  VanilifeBiomeSources() {
+    private VanilifeBiomeSources() {
     }
 }

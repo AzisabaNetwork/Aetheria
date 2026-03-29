@@ -1,7 +1,7 @@
 package net.azisaba.vanilife.island
 
-import net.azisaba.vanilife.world.IslandDefaults
-import net.azisaba.vanilife.world.IslandPos
+import net.azisaba.vanilife.world.IslandPosition
+import net.azisaba.vanilife.world.IslandsWorld
 import net.kyori.adventure.text.Component
 import org.bukkit.Location
 import org.bukkit.World
@@ -20,21 +20,21 @@ interface PrimaryDataAccessor {
 
     suspend fun displayName(displayName: Component?)
 
-    fun spawnPoint(position: IslandPos, world: World): Location = Location(
+    fun spawnPoint(position: IslandPosition, world: World): Location = Location(
         world,
         position.centerBlockX().toDouble(),
-        (IslandDefaults.MIN_Y + IslandDefaults.HEIGHT / 2).toDouble(),
+        (IslandsWorld.MIN_Y + IslandsWorld.HEIGHT / 2).toDouble(),
         position.centerBlockZ().toDouble(),
     )
 
     companion object {
-        fun fromDatabase(position: IslandPos, database: Database): PrimaryDataAccessor =
+        fun fromDatabase(position: IslandPosition, database: Database): PrimaryDataAccessor =
             PrimaryDataAccessorImpl(position, database)
     }
 }
 
 private class PrimaryDataAccessorImpl(
-    private val position: IslandPos, private val database: Database,
+    private val position: IslandPosition, private val database: Database,
 ) : PrimaryDataAccessor {
     override suspend fun level(): Int = suspendTransaction(database) {
         IslandsTable.select(IslandsTable.level)

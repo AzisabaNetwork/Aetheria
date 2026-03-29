@@ -8,7 +8,7 @@ import net.azisaba.vanilife.Vanilife
 import net.azisaba.vanilife.island.enchantment.EnchantmentAccessor
 import net.azisaba.vanilife.island.waves.WaveAccessor
 import net.azisaba.vanilife.island.wrack.WrackAccessor
-import net.azisaba.vanilife.world.IslandPos
+import net.azisaba.vanilife.world.IslandPosition
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.audience.ForwardingAudience
 import org.bukkit.entity.Player
@@ -18,7 +18,7 @@ import java.util.UUID
 import java.util.concurrent.CopyOnWriteArraySet
 
 class Island internal constructor(
-    val position: IslandPos,
+    val position: IslandPosition,
     val owner: UUID,
     private val database: Database,
     private val players: MutableSet<Player> = CopyOnWriteArraySet(),

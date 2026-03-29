@@ -2,7 +2,7 @@ package net.azisaba.vanilife.island.enchantment
 
 import io.papermc.paper.registry.RegistryKey
 import io.papermc.paper.registry.TypedKey
-import net.azisaba.vanilife.world.IslandPos
+import net.azisaba.vanilife.world.IslandPosition
 import org.bukkit.enchantments.Enchantment
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
@@ -22,13 +22,13 @@ interface EnchantmentAccessor {
     suspend fun clearEnchantments()
 
     companion object {
-        fun fromDatabase(position: IslandPos, database: Database): EnchantmentAccessor =
+        fun fromDatabase(position: IslandPosition, database: Database): EnchantmentAccessor =
             EnchantmentAccessorImpl(position, database)
     }
 }
 
 private class EnchantmentAccessorImpl(
-    private val position: IslandPos, private val database: Database,
+    private val position: IslandPosition, private val database: Database,
 ) : EnchantmentAccessor {
     override suspend fun enchantments(): Set<TypedKey<Enchantment>> = suspendTransaction(database) {
         IslandEnchantmentsTable.select(IslandEnchantmentsTable.enchantment)

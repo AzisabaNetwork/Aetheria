@@ -2,8 +2,8 @@ package net.azisaba.vanilife.island.wrack
 
 import io.papermc.paper.math.Position
 import net.azisaba.vanilife.island.CoastSide
-import net.azisaba.vanilife.world.IslandDefaults
-import net.azisaba.vanilife.world.IslandPos
+import net.azisaba.vanilife.world.IslandPosition
+import net.azisaba.vanilife.world.IslandsWorld
 import net.azisaba.vanilife.island.boundaryBlock
 import org.bukkit.World
 import org.bukkit.plugin.Plugin
@@ -44,13 +44,13 @@ data class DriftPath(val startPos: Position, val endPos: Position, val random: R
         val horizontalOffset = horizontalWave * horizontalAmplitude * envelope
 
         val verticalWave = sin(t * PI * (frequency * 0.7) + phase * 0.5)
-        val verticalCenter = IslandDefaults.SEA_LEVEL.toDouble() + BASE_Y_OFFSET + verticalAmplitude * 0.5
+        val verticalCenter = IslandsWorld.SEA_LEVEL.toDouble() + BASE_Y_OFFSET + verticalAmplitude * 0.5
         val verticalOffset = verticalWave * verticalAmplitude * envelope
 
         val finalX = baseX + orthoX * horizontalOffset
         val finalZ = baseZ + orthoZ * horizontalOffset
         val finalY = (verticalCenter + verticalOffset).coerceIn(
-            IslandDefaults.SEA_LEVEL.toDouble(),
+            IslandsWorld.SEA_LEVEL.toDouble(),
             verticalCenter + verticalAmplitude,
         )
 
@@ -66,13 +66,13 @@ data class DriftPath(val startPos: Position, val endPos: Position, val random: R
         private const val HORIZONTAL_AMPLITUDE: Double = 6.0
         private const val VERTICAL_AMPLITUDE: Double = 2.0
 
-        suspend fun random(islandPos: IslandPos, coastSide: CoastSide, world: World, plugin: Plugin): DriftPath {
+        suspend fun random(islandPos: IslandPosition, coastSide: CoastSide, world: World, plugin: Plugin): DriftPath {
             val salt = System.nanoTime()
             val random = Random(islandPos.computeSeed(world.seed) xor coastSide.ordinal.toLong() xor salt)
 
             val landFinder = LandFinder(random)
 
-            val seaLevel = IslandDefaults.SEA_LEVEL.toDouble() + BASE_Y_OFFSET + VERTICAL_AMPLITUDE * 0.5
+            val seaLevel = IslandsWorld.SEA_LEVEL.toDouble() + BASE_Y_OFFSET + VERTICAL_AMPLITUDE * 0.5
 
             val minX = islandPos.minBlockX().toDouble()
             val maxX = islandPos.maxBlockX().toDouble()
@@ -91,15 +91,15 @@ data class DriftPath(val startPos: Position, val endPos: Position, val random: R
             val tanX = if (coastSide.axisZ) 1.0 else 0.0
             val tanZ = if (coastSide.axisX) 1.0 else 0.0
 
-            val seaOffset = IslandDefaults.GRID_SIZE * (0.5 + random.nextDouble())
+            val seaOffset = 32.0 * (0.5 + random.nextDouble())
 
             val startX = finalEndPos.x() + normX * seaOffset + tanX * random.nextDouble(
-                -IslandDefaults.GRID_SIZE.toDouble(),
-                IslandDefaults.GRID_SIZE.toDouble()
+                -32.0,
+                32.0
             )
             val startZ = finalEndPos.z() + normZ * seaOffset + tanZ * random.nextDouble(
-                -IslandDefaults.GRID_SIZE.toDouble(),
-                IslandDefaults.GRID_SIZE.toDouble()
+                -32.0,
+                32.0
             )
 
             return DriftPath(

@@ -8,6 +8,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BiomeDefaultFeatures;
 import net.minecraft.data.worldgen.placement.EndPlacements;
+import net.minecraft.data.worldgen.placement.VegetationPlacements;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
@@ -27,6 +28,7 @@ import org.jspecify.annotations.NullMarked;
 
 @NullMarked
 public final class VanilifeBiomes {
+    public static final ResourceKey<Biome> ISLANDS = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "islands"));
     public static final ResourceKey<Biome> END_BARRENS = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "end_barrens"));
     public static final ResourceKey<Biome> END_MIDLANDS = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "end_midlands"));
     public static final ResourceKey<Biome> END_HIGHLANDS = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "end_highlands"));
@@ -36,19 +38,55 @@ public final class VanilifeBiomes {
 
     public static void bootstrap(final WritableRegistry<Biome> writable, final RegistryOps.RegistryInfoLookup lookup) {
         final HolderGetter<PlacedFeature> placedFeature = lookup.lookup(Registries.PLACED_FEATURE)
-                .orElseThrow()
-                .getter();
+            .orElseThrow()
+            .getter();
 
         final HolderGetter<ConfiguredWorldCarver<?>> worldCarvers = lookup.lookup(Registries.CONFIGURED_CARVER)
-                .orElseThrow()
-                .getter();
+            .orElseThrow()
+            .getter();
 
+        writable.register(VanilifeBiomes.ISLANDS, VanilifeBiomes.islands(placedFeature, worldCarvers), RegistrationInfo.BUILT_IN);
         writable.register(VanilifeBiomes.END_BARRENS, VanilifeBiomes.endBarrens(placedFeature, worldCarvers), RegistrationInfo.BUILT_IN);
         writable.register(VanilifeBiomes.END_MIDLANDS, VanilifeBiomes.endMidlands(placedFeature, worldCarvers), RegistrationInfo.BUILT_IN);
         writable.register(VanilifeBiomes.END_HIGHLANDS, VanilifeBiomes.endHighlands(placedFeature, worldCarvers), RegistrationInfo.BUILT_IN);
         writable.register(VanilifeBiomes.GLACIAL_CAVE, VanilifeBiomes.glacialCave(placedFeature, worldCarvers), RegistrationInfo.BUILT_IN);
         writable.register(VanilifeBiomes.SMALL_END_ISLANDS, VanilifeBiomes.smallEndIslands(placedFeature, worldCarvers), RegistrationInfo.BUILT_IN);
         writable.register(VanilifeBiomes.THE_END, VanilifeBiomes.theEnd(placedFeature, worldCarvers), RegistrationInfo.BUILT_IN);
+    }
+
+    private static Biome islands(final HolderGetter<PlacedFeature> placedFeatures, final HolderGetter<ConfiguredWorldCarver<?>> worldCarvers) {
+        final MobSpawnSettings.Builder mobSpawnSettings = new MobSpawnSettings.Builder();
+
+        final BiomeGenerationSettings.Builder generationSettings = new BiomeGenerationSettings.Builder(placedFeatures, worldCarvers);
+        BiomeDefaultFeatures.addDefaultOres(generationSettings);
+        BiomeDefaultFeatures.addDefaultSoftDisks(generationSettings);
+        generationSettings.addFeature(GenerationStep.Decoration.LOCAL_MODIFICATIONS, VanilifePlacedFeatures.ISLAND_GROUND_PATCH);
+        generationSettings.addFeature(GenerationStep.Decoration.LOCAL_MODIFICATIONS, VanilifePlacedFeatures.ISLAND_BEACH_PATCH);
+        generationSettings.addFeature(GenerationStep.Decoration.LOCAL_MODIFICATIONS, VanilifePlacedFeatures.ISLAND_WHEAT_PATCH);
+        generationSettings.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, VanilifePlacedFeatures.ISLAND_PRISMARINE_PORTAL_FRAME);
+        generationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VanilifePlacedFeatures.ISLAND_PINE_TREE);
+        generationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VanilifePlacedFeatures.ISLAND_JUNGLE_BUSH);
+        generationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VanilifePlacedFeatures.ISLAND_FALLEN_JUNGLE_TREE);
+        generationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VegetationPlacements.PATCH_GRASS_MEADOW);
+        generationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VegetationPlacements.FOREST_FLOWERS);
+        generationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VegetationPlacements.PATCH_SUNFLOWER);
+        generationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VegetationPlacements.WILDFLOWERS_MEADOW);
+        generationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VegetationPlacements.PATCH_FIREFLY_BUSH_NEAR_WATER);
+
+        return new Biome.BiomeBuilder()
+            .hasPrecipitation(false)
+            .temperature(1.15F)
+            .downfall(0.9F)
+            .specialEffects(new BiomeSpecialEffects.Builder()
+                .waterColor(0x2F65C8)
+                .grassColorOverride(0x63B44A)
+                .foliageColorOverride(0x3E8D32)
+                .build())
+            .mobSpawnSettings(mobSpawnSettings.build())
+            .generationSettings(generationSettings.build())
+            .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 0x14355F)
+            .setAttribute(EnvironmentAttributes.BACKGROUND_MUSIC, new BackgroundMusic(SoundEvents.MUSIC_BIOME_MEADOW))
+            .build();
     }
 
     private static Biome endBarrens(final HolderGetter<PlacedFeature> placedFeatures, final HolderGetter<ConfiguredWorldCarver<?>> worldCarvers) {
@@ -63,8 +101,8 @@ public final class VanilifeBiomes {
 
     private static Biome endHighlands(final HolderGetter<PlacedFeature> placedFeatures, final HolderGetter<ConfiguredWorldCarver<?>> worldCarvers) {
         BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder(placedFeatures, worldCarvers)
-                .addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, EndPlacements.END_GATEWAY_RETURN)
-                .addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, EndPlacements.CHORUS_PLANT);
+            .addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, EndPlacements.END_GATEWAY_RETURN)
+            .addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, EndPlacements.CHORUS_PLANT);
         return baseEndBiome(builder);
     }
 
@@ -73,13 +111,13 @@ public final class VanilifeBiomes {
         BiomeDefaultFeatures.caveSpawns(mobSpawnSettings);
 
         final BiomeGenerationSettings.Builder generationSettings = new BiomeGenerationSettings.Builder(placedFeatures, worldCarvers)
-                .addCarver(Carvers.CAVE)
-                .addCarver(Carvers.CAVE_EXTRA_UNDERGROUND)
-                .addCarver(Carvers.CANYON)
-                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, VanilifePlacedFeatures.CAVE_SNOW_COVER)
-                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, VanilifePlacedFeatures.CAVE_ICE_PILLAR)
-                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, VanilifePlacedFeatures.CAVE_ICE_CLUSTER)
-                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, VanilifePlacedFeatures.CAVE_WALL_FROST);
+            .addCarver(Carvers.CAVE)
+            .addCarver(Carvers.CAVE_EXTRA_UNDERGROUND)
+            .addCarver(Carvers.CANYON)
+            .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, VanilifePlacedFeatures.CAVE_SNOW_COVER)
+            .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, VanilifePlacedFeatures.CAVE_ICE_PILLAR)
+            .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, VanilifePlacedFeatures.CAVE_ICE_CLUSTER)
+            .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, VanilifePlacedFeatures.CAVE_WALL_FROST);
         BiomeDefaultFeatures.addDefaultCrystalFormations(generationSettings);
         BiomeDefaultFeatures.addDefaultMonsterRoom(generationSettings);
         BiomeDefaultFeatures.addDefaultUndergroundVariety(generationSettings);
@@ -89,39 +127,39 @@ public final class VanilifeBiomes {
         BiomeDefaultFeatures.addDripstone(generationSettings);
 
         return new Biome.BiomeBuilder()
-                .hasPrecipitation(true)
-                .temperature(-0.9F)
-                .temperatureAdjustment(Biome.TemperatureModifier.FROZEN)
-                .downfall(1.0F)
-                .specialEffects(new BiomeSpecialEffects.Builder()
-                        .waterColor(329011)
-                        .grassColorOverride(1118719)
-                        .foliageColorOverride(855309)
-                        .build())
-                .mobSpawnSettings(mobSpawnSettings.build())
-                .generationSettings(generationSettings.build())
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, -1084823)
-                .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, -14606047)
-                .setAttribute(EnvironmentAttributes.BACKGROUND_MUSIC, new BackgroundMusic(SoundEvents.MUSIC_BIOME_FROZEN_PEAKS))
-                .setAttribute(EnvironmentAttributes.INCREASED_FIRE_BURNOUT, true)
-                .setAttribute(EnvironmentAttributes.AMBIENT_PARTICLES, AmbientParticle.of(ParticleTypes.WHITE_ASH, 0.6f))
-                .setAttribute(EnvironmentAttributes.FOG_END_DISTANCE, 196.0f)
-                .setAttribute(EnvironmentAttributes.FOG_START_DISTANCE, -1.0f)
-                .setAttribute(EnvironmentAttributes.SKY_LIGHT_COLOR, 8026879)
-                .setAttribute(EnvironmentAttributes.SKY_LIGHT_FACTOR, 0.0f)
-                .build();
+            .hasPrecipitation(true)
+            .temperature(-0.9F)
+            .temperatureAdjustment(Biome.TemperatureModifier.FROZEN)
+            .downfall(1.0F)
+            .specialEffects(new BiomeSpecialEffects.Builder()
+                .waterColor(329011)
+                .grassColorOverride(1118719)
+                .foliageColorOverride(855309)
+                .build())
+            .mobSpawnSettings(mobSpawnSettings.build())
+            .generationSettings(generationSettings.build())
+            .setAttribute(EnvironmentAttributes.FOG_COLOR, -1084823)
+            .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, -14606047)
+            .setAttribute(EnvironmentAttributes.BACKGROUND_MUSIC, new BackgroundMusic(SoundEvents.MUSIC_BIOME_FROZEN_PEAKS))
+            .setAttribute(EnvironmentAttributes.INCREASED_FIRE_BURNOUT, true)
+            .setAttribute(EnvironmentAttributes.AMBIENT_PARTICLES, AmbientParticle.of(ParticleTypes.WHITE_ASH, 0.6f))
+            .setAttribute(EnvironmentAttributes.FOG_END_DISTANCE, 196.0f)
+            .setAttribute(EnvironmentAttributes.FOG_START_DISTANCE, -1.0f)
+            .setAttribute(EnvironmentAttributes.SKY_LIGHT_COLOR, 8026879)
+            .setAttribute(EnvironmentAttributes.SKY_LIGHT_FACTOR, 0.0f)
+            .build();
     }
 
     private static Biome smallEndIslands(final HolderGetter<PlacedFeature> placedFeatures, final HolderGetter<ConfiguredWorldCarver<?>> worldCarvers) {
         BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder(placedFeatures, worldCarvers)
-                .addFeature(GenerationStep.Decoration.RAW_GENERATION, EndPlacements.END_ISLAND_DECORATED);
+            .addFeature(GenerationStep.Decoration.RAW_GENERATION, EndPlacements.END_ISLAND_DECORATED);
         return baseEndBiome(builder);
     }
 
     private static Biome theEnd(final HolderGetter<PlacedFeature> placedFeatures, final HolderGetter<ConfiguredWorldCarver<?>> worldCarvers) {
         BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder(placedFeatures, worldCarvers)
-                .addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, EndPlacements.END_SPIKE)
-                .addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, EndPlacements.END_PLATFORM);
+            .addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, EndPlacements.END_SPIKE)
+            .addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, EndPlacements.END_PLATFORM);
         return baseEndBiome(builder);
     }
 
@@ -129,14 +167,14 @@ public final class VanilifeBiomes {
         final MobSpawnSettings.Builder mobSpawnSettings = new MobSpawnSettings.Builder();
         BiomeDefaultFeatures.endSpawns(mobSpawnSettings);
         return new Biome.BiomeBuilder()
-                .hasPrecipitation(false)
-                .temperature(0.5F)
-                .downfall(0.5F)
-                .specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).build())
-                .mobSpawnSettings(mobSpawnSettings.build())
-                .generationSettings(generationSettings.build())
-                .setAttribute(EnvironmentAttributes.SKY_COLOR, 1250067)
-                .setAttribute(EnvironmentAttributes.FOG_COLOR, 9538492)
-                .build();
+            .hasPrecipitation(false)
+            .temperature(0.5F)
+            .downfall(0.5F)
+            .specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).build())
+            .mobSpawnSettings(mobSpawnSettings.build())
+            .generationSettings(generationSettings.build())
+            .setAttribute(EnvironmentAttributes.SKY_COLOR, 1250067)
+            .setAttribute(EnvironmentAttributes.FOG_COLOR, 9538492)
+            .build();
     }
 }

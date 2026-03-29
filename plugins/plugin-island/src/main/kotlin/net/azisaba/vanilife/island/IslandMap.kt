@@ -4,7 +4,7 @@ import com.github.shynixn.mccoroutine.folia.launch
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import net.azisaba.vanilife.world.IslandPos
+import net.azisaba.vanilife.world.IslandPosition
 import org.bukkit.plugin.Plugin
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -18,9 +18,9 @@ import java.util.concurrent.ConcurrentMap
 internal class IslandMap(
     private val database: Database,
     private val plugin: Plugin,
-    private val map: ConcurrentMap<IslandPos, Island> = ConcurrentHashMap(),
+    private val map: ConcurrentMap<IslandPosition, Island> = ConcurrentHashMap(),
 ) {
-    private val positionByOwner: ConcurrentMap<UUID, IslandPos> = ConcurrentHashMap()
+    private val positionByOwner: ConcurrentMap<UUID, IslandPosition> = ConcurrentHashMap()
     private var job: Job? = null
 
     init {
@@ -33,7 +33,7 @@ internal class IslandMap(
         }
     }
 
-    suspend fun lookup(position: IslandPos): Island? {
+    suspend fun lookup(position: IslandPosition): Island? {
         map[position]?.let { return it }
         val owner = lookupOwner(position) ?: return null
         positionByOwner.putIfAbsent(owner, position)
@@ -47,16 +47,16 @@ internal class IslandMap(
 
     suspend fun lookupOrCreate(owner: UUID): Island = lookup(owner) ?: create(owner)
 
-    suspend fun lookupPosition(owner: UUID): IslandPos? = positionByOwner[owner] ?: suspendTransaction(database) {
+    suspend fun lookupPosition(owner: UUID): IslandPosition? = positionByOwner[owner] ?: suspendTransaction(database) {
         IslandsTable.select(IslandsTable.id)
             .where { IslandsTable.owner eq owner }
             .singleOrNull()
             ?.get(IslandsTable.id)
             ?.value
-            ?.let(IslandPos::fromLong)
+            ?.let(IslandPosition::fromLong)
     }?.also { positionByOwner.putIfAbsent(owner, it) }
 
-    suspend fun contains(position: IslandPos): Boolean = suspendTransaction(database) {
+    suspend fun contains(position: IslandPosition): Boolean = suspendTransaction(database) {
         IslandsTable.select(IslandsTable.id)
             .where { IslandsTable.id eq position.toLong() }
             .singleOrNull() != null
@@ -68,14 +68,14 @@ internal class IslandMap(
                 it[IslandsTable.owner] = owner
                 it[IslandsTable.level] = 1
                 it[IslandsTable.displayName] = null
-            }.value.let(IslandPos::fromLong)
+            }.value.let(IslandPosition::fromLong)
         }
 
         positionByOwner.putIfAbsent(owner, position)
         return map.computeIfAbsent(position) { Island(it, owner, database) }
     }
 
-    private suspend fun lookupOwner(position: IslandPos): UUID? = suspendTransaction(database) {
+    private suspend fun lookupOwner(position: IslandPosition): UUID? = suspendTransaction(database) {
         IslandsTable.select(IslandsTable.owner)
             .where { IslandsTable.id eq position.toLong() }
             .singleOrNull()

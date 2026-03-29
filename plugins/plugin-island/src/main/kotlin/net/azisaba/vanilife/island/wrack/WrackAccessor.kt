@@ -2,7 +2,7 @@ package net.azisaba.vanilife.island.wrack
 
 import kotlinx.coroutines.channels.Channel
 import net.azisaba.vanilife.island.CoastSide
-import net.azisaba.vanilife.world.IslandPos
+import net.azisaba.vanilife.world.IslandPosition
 import net.azisaba.vanilife.world.IslandsWorld
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
@@ -18,13 +18,13 @@ interface WrackAccessor {
     suspend fun wrackTick(time: Long)
 
     companion object {
-        fun create(position: IslandPos, world: IslandsWorld, plugin: Plugin): WrackAccessor =
+        fun create(position: IslandPosition, world: IslandsWorld, plugin: Plugin): WrackAccessor =
             WrackAccessorImpl(position, world, plugin)
     }
 }
 
 private class WrackAccessorImpl(
-    private val position: IslandPos, private val world: IslandsWorld, private val plugin: Plugin,
+    private val position: IslandPosition, private val world: IslandsWorld, private val plugin: Plugin,
 ) : WrackAccessor {
     private val viewers: MutableSet<Player> = mutableSetOf()
     private val wrackEntities: MutableList<WrackEntity> = mutableListOf()

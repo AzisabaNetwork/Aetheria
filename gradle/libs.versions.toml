@@ -10,7 +10,6 @@ coreprotect = "23.1"
 entitylib = "3.0.3-SNAPSHOT"
 exposed = "1.0.0"
 hikaricp = "7.0.2"
-jnoise = "4.1.0"
 kaml = "0.104.0"
 koin = "4.1.1"
 mccoroutine = "2.22.0"
@@ -62,5 +61,4 @@ hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikaricp" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 
 # Utility
-jnoise-pipeline = { module = "de.articdive:jnoise-pipeline", version.ref = "jnoise" }
 kaml = { module = "com.charleskorn.kaml:kaml", version.ref = "kaml" }

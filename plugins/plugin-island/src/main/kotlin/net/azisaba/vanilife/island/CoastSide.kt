@@ -1,7 +1,7 @@
 package net.azisaba.vanilife.island
 
 import com.github.retrooper.packetevents.util.Quaternion4f
-import net.azisaba.vanilife.world.IslandPos
+import net.azisaba.vanilife.world.IslandPosition
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
@@ -13,7 +13,7 @@ enum class CoastSide(val axisX: Boolean, val axisZ: Boolean, val yaw: Float, val
     WEST(true, false, 90f, -1.0, axisAngle(1f, 0f, 0f, -90f));
 }
 
-fun IslandPos.boundaryBlock(coastSide: net.azisaba.vanilife.island.CoastSide): Int = when {
+fun IslandPosition.boundaryBlock(coastSide: net.azisaba.vanilife.island.CoastSide): Int = when {
     coastSide.axisX && coastSide.coastNormalSign < 0 -> minBlockX()
     coastSide.axisX && coastSide.coastNormalSign > 0 -> maxBlockX()
     coastSide.axisZ && coastSide.coastNormalSign < 0 -> minBlockZ()

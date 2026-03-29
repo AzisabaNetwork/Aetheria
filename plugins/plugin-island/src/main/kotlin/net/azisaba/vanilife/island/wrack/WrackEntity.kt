@@ -11,7 +11,7 @@ import kr.toxicity.model.api.nms.HitBoxListener
 import kr.toxicity.model.api.tracker.DummyTracker
 import kr.toxicity.model.api.util.function.BonePredicate
 import net.azisaba.vanilife.island.getIslandAt
-import net.azisaba.vanilife.world.IslandPos
+import net.azisaba.vanilife.world.IslandPosition
 import net.azisaba.vanilife.world.IslandsWorld
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -22,7 +22,7 @@ import org.koin.core.component.inject
 
 class WrackEntity internal constructor(
     private val wrackType: WrackType,
-    private val islandPos: IslandPos,
+    private val islandPos: IslandPosition,
     private val world: IslandsWorld,
     private val path: DriftPath,
     private val spawnTime: Long,

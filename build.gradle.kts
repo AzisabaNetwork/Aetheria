@@ -38,8 +38,6 @@ paperweight {
 }
 
 val kotlinx = libs.kotlinx
-val jnoise = libs.jnoise
-
 subprojects {
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
@@ -102,12 +100,6 @@ subprojects {
 allprojects {
     tasks.withType<RebuildGitPatches>().configureEach {
         filterPatches = false
-    }
-}
-
-project(":folia-server") {
-    dependencies {
-        implementation(jnoise.pipeline)
     }
 }
 

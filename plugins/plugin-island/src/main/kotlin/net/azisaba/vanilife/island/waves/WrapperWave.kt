@@ -9,8 +9,8 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPa
 import me.tofaa.entitylib.container.EntityContainer
 import me.tofaa.entitylib.meta.display.TextDisplayMeta
 import me.tofaa.entitylib.wrapper.WrapperEntity
-import net.azisaba.vanilife.world.IslandDefaults
 import net.azisaba.vanilife.island.IslandFonts
+import net.azisaba.vanilife.world.IslandsWorld
 import net.kyori.adventure.text.Component
 import kotlin.math.PI
 import kotlin.math.cos
@@ -113,7 +113,7 @@ internal class WrapperWave(val position: WavePosition) : WrapperEntity(EntityTyp
 
     private fun computeLocation(progress: Double): Location {
         val coastSize =
-            if (position.coastSide.axisX) IslandDefaults.ISLAND_SIZE_X_BLOCKS else IslandDefaults.ISLAND_SIZE_Z_BLOCKS
+            if (position.coastSide.axisX) IslandsWorld.ISLAND_SIZE_X_BLOCKS else IslandsWorld.ISLAND_SIZE_Z_BLOCKS
 
         val forwardEnd = (coastSize * 0.18 - 20.0).coerceIn(12.0, 30.0)
         val forwardSpin = (coastSize * 0.078).coerceIn(10.0, 28.0)
@@ -141,7 +141,7 @@ internal class WrapperWave(val position: WavePosition) : WrapperEntity(EntityTyp
         val x = if (position.coastSide.axisX) fixed + bob else lateral
         val z = if (position.coastSide.axisX) lateral else fixed + bob
 
-        return Location(x, IslandDefaults.SEA_LEVEL + 0.88, z, position.coastSide.yaw, 0f)
+        return Location(x, IslandsWorld.SEA_LEVEL + 0.88, z, position.coastSide.yaw, 0f)
     }
 
     companion object {

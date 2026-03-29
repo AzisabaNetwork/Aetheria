@@ -2,7 +2,7 @@ package net.azisaba.vanilife.portal.exits
 
 import com.github.shynixn.mccoroutine.folia.regionDispatcher
 import kotlinx.coroutines.withContext
-import net.azisaba.vanilife.world.IslandPos
+import net.azisaba.vanilife.world.IslandPosition
 import org.bukkit.Bukkit
 import org.bukkit.HeightMap
 import org.bukkit.Location
@@ -21,7 +21,7 @@ class ExitForcer(
     private val resourceCellSpacing: Int,
     private val safeSearchRadius: Int,
 ) {
-    suspend fun findSafeLocation(islandPosition: IslandPos, plugin: Plugin): Location {
+    suspend fun findSafeLocation(islandPosition: IslandPosition, plugin: Plugin): Location {
         val (baseX, baseZ) = baseXZOf(islandPosition)
 
         return withContext(plugin.regionDispatcher(Location(world, baseX.toDouble(), 0.0, baseZ.toDouble()))) {
@@ -55,7 +55,7 @@ class ExitForcer(
         }
     }
 
-    private fun baseXZOf(islandPosition: IslandPos): Pair<Int, Int> {
+    private fun baseXZOf(islandPosition: IslandPosition): Pair<Int, Int> {
         val random = Random(islandPosition.computeSeed(world.seed))
         val radius = baseRadius + random.nextDouble() * radiusVariance
         val angle = random.nextDouble(0.0, PI * 2.0)

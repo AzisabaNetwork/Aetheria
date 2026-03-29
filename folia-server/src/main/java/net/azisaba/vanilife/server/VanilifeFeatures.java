@@ -5,6 +5,8 @@ import net.azisaba.vanilife.server.world.feature.CaveIceClusterFeature;
 import net.azisaba.vanilife.server.world.feature.CaveIcePillarFeature;
 import net.azisaba.vanilife.server.world.feature.CaveSnowCoverFeature;
 import net.azisaba.vanilife.server.world.feature.CaveWallFrostFeature;
+import net.azisaba.vanilife.server.world.feature.IslandPrismarinePortalFrameFeature;
+import net.azisaba.vanilife.server.world.feature.IslandWheatPatchFeature;
 import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.registries.Registries;
@@ -21,6 +23,8 @@ public final class VanilifeFeatures {
     public static final ResourceKey<Feature<NoneFeatureConfiguration>> CAVE_ICE_PILLAR = create(Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "cave_ice_pillar"));
     public static final ResourceKey<Feature<CaveSnowCoverFeature.Configuration>> CAVE_SNOW_COVER = create(Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "cave_snow_cover"));
     public static final ResourceKey<Feature<CaveWallFrostFeature.Configuration>> CAVE_WALL_FROST = create(Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "cave_wall_frost"));
+    public static final ResourceKey<Feature<NoneFeatureConfiguration>> ISLAND_WHEAT_PATCH = create(Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_wheat_patch"));
+    public static final ResourceKey<Feature<NoneFeatureConfiguration>> ISLAND_PRISMARINE_PORTAL_FRAME = create(Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_prismarine_portal_frame"));
 
     private VanilifeFeatures() {
     }
@@ -30,6 +34,8 @@ public final class VanilifeFeatures {
         register(writable, CAVE_ICE_PILLAR, caveIcePillar());
         register(writable, CAVE_SNOW_COVER, caveSnowCover());
         register(writable, CAVE_WALL_FROST, caveWallFrost());
+        register(writable, ISLAND_WHEAT_PATCH, islandWheatPatch());
+        register(writable, ISLAND_PRISMARINE_PORTAL_FRAME, islandPrismarinePortalFrame());
     }
 
     private static Feature<CaveIceClusterFeature.Configuration> caveIceCluster() {
@@ -46,6 +52,14 @@ public final class VanilifeFeatures {
 
     private static Feature<CaveWallFrostFeature.Configuration> caveWallFrost() {
         return new CaveWallFrostFeature(CaveWallFrostFeature.Configuration.CODEC);
+    }
+
+    private static Feature<NoneFeatureConfiguration> islandWheatPatch() {
+        return new IslandWheatPatchFeature(NoneFeatureConfiguration.CODEC);
+    }
+
+    private static Feature<NoneFeatureConfiguration> islandPrismarinePortalFrame() {
+        return new IslandPrismarinePortalFrameFeature(NoneFeatureConfiguration.CODEC);
     }
 
     @SuppressWarnings("unchecked")

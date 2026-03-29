@@ -4,10 +4,10 @@ import com.github.retrooper.packetevents.protocol.world.Location
 import com.github.retrooper.packetevents.util.Vector3d
 import net.azisaba.vanilife.island.CoastSide
 import net.azisaba.vanilife.island.boundaryBlock
-import net.azisaba.vanilife.world.IslandDefaults
-import net.azisaba.vanilife.world.IslandPos
+import net.azisaba.vanilife.world.IslandPosition
+import net.azisaba.vanilife.world.IslandsWorld
 
-data class WavePosition(val islandPosition: IslandPos, val coastSide: CoastSide, val index: Int) {
+data class WavePosition(val islandPosition: IslandPosition, val coastSide: CoastSide, val index: Int) {
     fun edgeCoord(): Int = islandPosition.boundaryBlock(coastSide)
 
     fun location(): Location {
@@ -17,7 +17,7 @@ data class WavePosition(val islandPosition: IslandPos, val coastSide: CoastSide,
         val lateral = lateralStart + lateralStep * index
         val x = if (coastSide.axisX) edgeCoord().toDouble() else lateral
         val z = if (coastSide.axisX) lateral else edgeCoord().toDouble()
-        return Location(x, IslandDefaults.SEA_LEVEL + 0.15, z, coastSide.yaw, 0f)
+        return Location(x, IslandsWorld.SEA_LEVEL + 0.15, z, coastSide.yaw, 0f)
     }
 
     fun computeForward(location: Location, offset: Double): Location {
@@ -38,7 +38,7 @@ data class WavePosition(val islandPosition: IslandPos, val coastSide: CoastSide,
         const val WAVES_PER_COAST_SIDE = 15
         const val WAVES_PER_ISLAND = WAVES_PER_COAST_SIDE * 4
 
-        fun posSet(islandPos: IslandPos): Set<WavePosition> = buildSet(WAVES_PER_COAST_SIDE * CoastSide.entries.size) {
+        fun posSet(islandPos: IslandPosition): Set<WavePosition> = buildSet(WAVES_PER_COAST_SIDE * CoastSide.entries.size) {
             for (coastSide in CoastSide.entries) {
                 for (index in 0 until WAVES_PER_COAST_SIDE) {
                     add(WavePosition(islandPos, coastSide, index))
