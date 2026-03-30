@@ -29,7 +29,7 @@ internal interface IslandRepository : IslandInfoLookup {
     suspend fun insert(ownerUuid: UUID, primaryData: PrimaryIslandData = PrimaryIslandData.Snapshot()): IslandSummary
 
     // Wipe handling: called when island/world is wiped to clear per-island transient state
-    suspend fun handleWipe(where: IslandPos)
+    suspend fun handleWipe(where: IslandPos, legacyEnabled: Boolean)
 
     suspend fun updateDisplayName(where: IslandPos, displayName: Component?)
 
@@ -107,8 +107,7 @@ internal class DatabaseIslandRepository(private val database: Database) : Island
         Unit
     }
 
-    override suspend fun handleWipe(where: IslandPos) = suspendTransaction(database) {
-        // Clear dragon color presets but grant legacy ticket if installed
+    override suspend fun handleWipe(where: IslandPos, legacyEnabled: Boolean) = suspendTransaction(database) {
         val row = IslandsTable.selectAll().where { IslandsTable.id eq serializePos(where) }.firstOrNull() ?: return@suspendTransaction
         val installed = row[IslandsTable.dragonInstalled]
         val lastAir = row[IslandsTable.dragonPresetAir]
@@ -117,7 +116,7 @@ internal class DatabaseIslandRepository(private val database: Database) : Island
             it[IslandsTable.dragonPresetAir] = null
             it[IslandsTable.dragonPresetWater] = null
             it[IslandsTable.dragonInstalled] = false
-            if (installed) {
+            if (installed && legacyEnabled) {
                 it[IslandsTable.dragonLegacyExists] = true
                 it[IslandsTable.dragonLegacyBoostCredit] = 1
                 it[IslandsTable.dragonLegacyLastPresetAir] = lastAir
