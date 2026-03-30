@@ -5,6 +5,7 @@ import java.time.Month;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.translation.Translatable;
 import org.jspecify.annotations.NullMarked;
@@ -39,6 +40,69 @@ public enum Season implements Translatable {
 
     public List<Month> months() {
         return this.months;
+    }
+
+    /**
+     * Computes the resource world key path for this season in the given year.
+     * <p>
+     * The path follows the format {@code {year}/{season_name}}, e.g. {@code 2026/spring}.
+     *
+     * @param year the year in which this season occurs
+     * @return the resource world key, e.g. {@code vanilife:2026/spring}
+     */
+    public Key resourceWorldKey(final int year) {
+        return Key.key(Vanilife.NAMESPACE, year + "/" + this.name().toLowerCase(Locale.ROOT));
+    }
+
+    /**
+     * Returns the resource world key for the current season and date.
+     * <p>
+     * For winter (Dec, Jan, Feb), the year is determined by the first month of the season (December),
+     * so winter starting in Dec 2025 produces {@code vanilife:2025/winter}.
+     *
+     * @return the resource world key for the current date
+     */
+    public static Key currentResourceWorldKey() {
+        final LocalDate today = LocalDate.now();
+        final Season season = now();
+        final boolean isWinterCarryover = season == WINTER && today.getMonth() != Month.DECEMBER;
+        final int year = isWinterCarryover ? today.getYear() - 1 : today.getYear();
+        return season.resourceWorldKey(year);
+    }
+
+    /**
+     * Returns the resource world key path (without namespace) for the current season.
+     *
+     * @return the path portion of the resource world key, e.g. {@code 2026/spring}
+     */
+    public static String currentResourceWorldPath() {
+        return currentResourceWorldKey().value();
+    }
+
+    /**
+     * Checks whether the given key is a resource world key (matches the {@code vanilife:{year}/{season}} pattern).
+     *
+     * @param key the key to check
+     * @return true if the key matches a resource world key pattern
+     */
+    public static boolean isResourceWorldKey(final Key key) {
+        if (!Vanilife.NAMESPACE.equals(key.namespace())) {
+            return false;
+        }
+        final String value = key.value();
+        final int slash = value.indexOf('/');
+        if (slash <= 0 || slash == value.length() - 1) {
+            return false;
+        }
+        final String yearPart = value.substring(0, slash);
+        final String seasonPart = value.substring(slash + 1);
+        try {
+            Integer.parseInt(yearPart);
+        } catch (final NumberFormatException e) {
+            return false;
+        }
+        return Arrays.stream(Season.values())
+                .anyMatch(s -> s.name().toLowerCase(Locale.ROOT).equals(seasonPart));
     }
 
     public Season next() {

@@ -280,9 +280,9 @@ index 2c3d36a9d4bf361c516fe1fe6e29d225002b303c..1a791232f82f9a896e295a0f0565af2a
          this.generator = generator;
 -        this.world = new CraftWorld((ServerLevel) this, generator, biomeProvider, environment);
 +        // Vanilife start - custom world wrapper
-+        if (dimension == RESOURCE) {
++        if (VanilifeLevelStems.isResourceLevel(dimension)) {
 +            this.world = new ResourceWorldImpl((ServerLevel) this, generator, biomeProvider, environment);
-+        } else if (dimension == ISLANDS) {
++        } else if (dimension.equals(ISLANDS)) {
 +            this.world = new IslandsWorldImpl((ServerLevel) this, generator, biomeProvider, environment);
 +        } else {
 +            this.world = new CraftWorld((ServerLevel) this, generator, biomeProvider, environment);

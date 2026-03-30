@@ -28,7 +28,11 @@ import org.jspecify.annotations.NullMarked;
 
 @NullMarked
 public final class VanilifeLevelStems {
-    public static final ResourceKey<LevelStem> RESOURCE = ResourceKey.create(Registries.LEVEL_STEM, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "2026/spring"));
+    public static final ResourceKey<LevelStem> RESOURCE = ResourceKey.create(Registries.LEVEL_STEM, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "resource"));
+
+    public static boolean isResourceLevel(final ResourceKey<?> key) {
+        return RESOURCE.identifier().equals(key.identifier());
+    }
     public static final ResourceKey<LevelStem> ISLANDS = ResourceKey.create(Registries.LEVEL_STEM, PaperAdventure.asVanilla(IslandDefaults.WORLD_KEY));
 
     public static void bootstrap(final WritableRegistry<LevelStem> writable, final RegistryOps.RegistryInfoLookup lookup) {
