@@ -64,12 +64,12 @@ public final class VanilifeBiomes {
         generationSettings.addFeature(GenerationStep.Decoration.LOCAL_MODIFICATIONS, VanilifePlacedFeatures.ISLAND_BEACH_PATCH);
         generationSettings.addFeature(GenerationStep.Decoration.LOCAL_MODIFICATIONS, VanilifePlacedFeatures.ISLAND_WHEAT_PATCH);
         generationSettings.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, VanilifePlacedFeatures.ISLAND_PRISMARINE_PORTAL_FRAME);
-        generationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VanilifePlacedFeatures.ISLAND_PINE_TREE);
+        generationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VanilifePlacedFeatures.ISLAND_CONIFER_TREE);
         generationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VanilifePlacedFeatures.ISLAND_JUNGLE_BUSH);
         generationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VanilifePlacedFeatures.ISLAND_FALLEN_JUNGLE_TREE);
         generationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VegetationPlacements.PATCH_GRASS_MEADOW);
+        generationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VegetationPlacements.PATCH_DEAD_BUSH);
         generationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VegetationPlacements.FOREST_FLOWERS);
-        generationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VegetationPlacements.PATCH_SUNFLOWER);
         generationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VegetationPlacements.WILDFLOWERS_MEADOW);
         generationSettings.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VegetationPlacements.PATCH_FIREFLY_BUSH_NEAR_WATER);
 
@@ -78,13 +78,13 @@ public final class VanilifeBiomes {
             .temperature(1.15F)
             .downfall(0.9F)
             .specialEffects(new BiomeSpecialEffects.Builder()
-                .waterColor(0x2F65C8)
-                .grassColorOverride(0x63B44A)
-                .foliageColorOverride(0x3E8D32)
+                .waterColor(3106248)
+                .grassColorOverride(13148746)
+                .foliageColorOverride(11762221)
                 .build())
             .mobSpawnSettings(mobSpawnSettings.build())
             .generationSettings(generationSettings.build())
-            .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 0x14355F)
+            .setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, 1324383)
             .setAttribute(EnvironmentAttributes.BACKGROUND_MUSIC, new BackgroundMusic(SoundEvents.MUSIC_BIOME_MEADOW))
             .build();
     }

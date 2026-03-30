@@ -29,7 +29,7 @@ import java.util.List;
 
 @NullMarked
 public final class VanilifePlacedFeatures {
-    public static final ResourceKey<PlacedFeature> ISLAND_PINE_TREE = ResourceKey.create(Registries.PLACED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_pine_tree"));
+    public static final ResourceKey<PlacedFeature> ISLAND_CONIFER_TREE = ResourceKey.create(Registries.PLACED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_conifer_tree"));
     public static final ResourceKey<PlacedFeature> ISLAND_JUNGLE_BUSH = ResourceKey.create(Registries.PLACED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_jungle_bush"));
     public static final ResourceKey<PlacedFeature> ISLAND_FALLEN_JUNGLE_TREE = ResourceKey.create(Registries.PLACED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_fallen_jungle_tree"));
     public static final ResourceKey<PlacedFeature> ISLAND_GROUND_PATCH = ResourceKey.create(Registries.PLACED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_ground_patch"));
@@ -49,7 +49,7 @@ public final class VanilifePlacedFeatures {
             .orElseThrow()
             .getter();
 
-        writable.register(ISLAND_PINE_TREE, islandPineTree(configuredFeatures), RegistrationInfo.BUILT_IN);
+        writable.register(ISLAND_CONIFER_TREE, islandConiferTree(configuredFeatures), RegistrationInfo.BUILT_IN);
         writable.register(ISLAND_JUNGLE_BUSH, islandJungleBush(configuredFeatures), RegistrationInfo.BUILT_IN);
         writable.register(ISLAND_FALLEN_JUNGLE_TREE, islandFallenJungleTree(configuredFeatures), RegistrationInfo.BUILT_IN);
         writable.register(ISLAND_GROUND_PATCH, islandGroundPatch(configuredFeatures, VanilifeConfiguredFeatures.ISLAND_GROUND_PATCH, 2), RegistrationInfo.BUILT_IN);
@@ -80,11 +80,11 @@ public final class VanilifePlacedFeatures {
         );
     }
 
-    private static PlacedFeature islandPineTree(final HolderGetter<ConfiguredFeature<?, ?>> configuredFeatures) {
+    private static PlacedFeature islandConiferTree(final HolderGetter<ConfiguredFeature<?, ?>> configuredFeatures) {
         return new PlacedFeature(
-            configuredFeatures.getOrThrow(TreeFeatures.OAK),
+            configuredFeatures.getOrThrow(VanilifeConfiguredFeatures.ISLAND_CONIFER_TREE),
             List.of(
-                CountPlacement.of(5),
+                CountPlacement.of(4),
                 InSquarePlacement.spread(),
                 HeightmapPlacement.onHeightmap(Heightmap.Types.WORLD_SURFACE_WG),
                 BlockPredicateFilter.forPredicate(
