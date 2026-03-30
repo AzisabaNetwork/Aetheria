@@ -1,0 +1,14 @@
+island:
+  texts:
+    1:
+      name: island_font
+      pattern: "<image:island> [island_display_name] (<image:level_purple>[island_level])"
+      x: 0
+      y: 0
+      align: right
+      scale: 0.7
+      conditions:
+        1:
+          first: island_visible
+          second: true
+          operation: "=="

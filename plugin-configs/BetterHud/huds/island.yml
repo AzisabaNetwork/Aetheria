@@ -1,0 +1,10 @@
+island:
+  layouts:
+    1:
+      name: island
+      gui:
+        x: 100
+        y: 0
+      pixel:
+        x: -16
+        y: 6

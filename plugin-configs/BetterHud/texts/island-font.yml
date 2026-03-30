@@ -1,0 +1,41 @@
+island_font:
+  file: misaki_gothic.ttf
+  scale: 16
+  height: 8
+  ascent: 7
+  merge-default-bitmap: false
+  use-unifont: false
+  include:
+    - japan
+    - china
+  images:
+    island:
+      name: "island.png"
+      x: 0
+      y: -1
+      scale: 1.0
+    level_blue:
+      name: "level/blue.png"
+      x: 0
+      y: -2
+      scale: 1.5
+    level_green:
+      name: "level/green.png"
+      x: 0
+      y: -2
+      scale: 1.5
+    level_pink:
+      name: "level/pink.png"
+      x: 0
+      y: -2
+      scale: 1.5
+    level_purple:
+      name: "level/purple.png"
+      x: 0
+      y: -2
+      scale: 1.5
+    level_yellow:
+      name: "level/yellow.png"
+      x: 0
+      y: -2
+      scale: 1.5

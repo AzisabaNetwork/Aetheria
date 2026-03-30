@@ -12,6 +12,10 @@ import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 import org.jetbrains.exposed.v1.jdbc.update
 
 interface PrimaryDataAccessor {
+    val level: Int
+
+    val displayName: Component?
+
     suspend fun level(): Int
 
     suspend fun level(level: Int)
@@ -28,37 +32,44 @@ interface PrimaryDataAccessor {
     )
 
     companion object {
-        fun fromDatabase(position: IslandPosition, database: Database): PrimaryDataAccessor =
-            PrimaryDataAccessorImpl(position, database)
+        fun create(
+            position: IslandPosition, database: Database, level: Int, displayName: Component?
+        ): PrimaryDataAccessor = PrimaryDataAccessorImpl(position, database, level, displayName)
     }
 }
 
 private class PrimaryDataAccessorImpl(
-    private val position: IslandPosition, private val database: Database,
+    private val position: IslandPosition, private val database: Database, level: Int, displayName: Component?,
 ) : PrimaryDataAccessor {
+    override var level: Int = level
+        private set
+
+    override var displayName: Component? = displayName
+        private set
+
     override suspend fun level(): Int = suspendTransaction(database) {
         IslandsTable.select(IslandsTable.level)
             .where { IslandsTable.id eq position.toLong() }
-            .first()[IslandsTable.level]
-    }
+            .single()[IslandsTable.level]
+    }.also { this@PrimaryDataAccessorImpl.level = it }
 
     override suspend fun level(level: Int) = suspendTransaction(database) {
         IslandsTable.update(where = { IslandsTable.id eq position.toLong() }) {
             it[IslandsTable.level] = level
         }
-        Unit
+        this@PrimaryDataAccessorImpl.level = level
     }
 
     override suspend fun displayName(): Component? = suspendTransaction(database) {
         IslandsTable.select(IslandsTable.displayName)
             .where { IslandsTable.id eq position.toLong() }
-            .first()[IslandsTable.displayName]
-    }
+            .single()[IslandsTable.displayName]
+    }.also { this@PrimaryDataAccessorImpl.displayName = it }
 
     override suspend fun displayName(displayName: Component?) = suspendTransaction(database) {
         IslandsTable.update(where = { IslandsTable.id eq position.toLong() }) {
             it[IslandsTable.displayName] = displayName
         }
-        Unit
+        this@PrimaryDataAccessorImpl.displayName = displayName
     }
 }

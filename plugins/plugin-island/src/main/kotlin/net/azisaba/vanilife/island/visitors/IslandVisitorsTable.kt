@@ -20,7 +20,7 @@ internal object IslandVisitorsTable : Table("island_visitors") {
 
     val lastVisitAt: Column<Instant> = timestamp("last_visit_at")
 
-    val totalStayTime: Column<Duration> = duration("total_stay_time")
+    val stayTime: Column<Duration> = duration("stay_time")
 
     override val primaryKey: PrimaryKey = PrimaryKey(position, visitor)
 }

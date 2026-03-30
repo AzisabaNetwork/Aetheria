@@ -3,7 +3,7 @@ package net.azisaba.vanilife.portal.listener
 import com.github.shynixn.mccoroutine.folia.launch
 import com.github.shynixn.mccoroutine.folia.regionDispatcher
 import net.azisaba.vanilife.Vanilife
-import net.azisaba.vanilife.island.getIsland
+import net.azisaba.vanilife.island.ownedIsland
 import net.azisaba.vanilife.portal.exits.ExitForcer
 import net.azisaba.vanilife.portal.exits.getExitAnchor
 import org.bukkit.entity.Player
@@ -23,7 +23,7 @@ internal class PortalEnterListener(private val forcer: ExitForcer, private val p
         }
 
         plugin.launch(plugin.regionDispatcher(forcer.world, 0, 0)) {
-            val island = player.getIsland() ?: return@launch
+            val island = player.ownedIsland() ?: return@launch
             val exitAnchor = forcer.world.getExitAnchor(player)
             if (exitAnchor?.teleportOrClear(forcer.world, player) != true) {
                 val safeLocation = forcer.findSafeLocation(island.position, plugin)

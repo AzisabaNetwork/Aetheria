@@ -1,7 +1,7 @@
 package net.azisaba.vanilife.island
 
-import net.azisaba.vanilife.island.listener.EnchantingTableListener
 import net.azisaba.vanilife.island.enchantment.EnchantingTableBehaviour
+import net.azisaba.vanilife.island.listener.EnchantingTableListener
 import net.azisaba.vanilife.island.listener.IslandPlayerListener
 import org.koin.core.Koin
 

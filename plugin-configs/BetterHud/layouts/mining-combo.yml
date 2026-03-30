@@ -2,7 +2,7 @@ mining_combo:
   texts:
     1:
       name: mining_combo_font
-      pattern: "<image:[item_in_main_hand]> <bold>[mining_combo] COMBO!</bold>"
+      pattern: "<image:[item_in_main_hand]> <bold>[mining_combo] あ!</bold>"
       x: 0
       y: 0
       align: right

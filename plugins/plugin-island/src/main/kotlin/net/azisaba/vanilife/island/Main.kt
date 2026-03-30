@@ -5,7 +5,6 @@ import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import me.tofaa.entitylib.APIConfig
 import me.tofaa.entitylib.EntityLib
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform
-import net.azisaba.vanilife.Vanilife
 import net.azisaba.vanilife.island.wrack.WrackType
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
@@ -13,6 +12,7 @@ import org.jetbrains.exposed.v1.jdbc.Database
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
+import org.koin.dsl.onClose
 
 class Main : JavaPlugin() {
     private lateinit var koinApp: KoinApplication
@@ -31,18 +31,23 @@ class Main : JavaPlugin() {
 
         WrackType.bootstrap(this)
 
+        val cacheMap = IslandCacheMap(database)
+        val ticker = IslandTicker(this, cacheMap)
+
         koinApp = startKoin {
             modules(
                 module {
                     single<Plugin> { this@Main }
                     single<Configuration> { config }
                     single<Database> { database }
-                    single<IslandMap> { IslandMap(get(), get()) }
+                    single<IslandTicker> { ticker } onClose { it?.close() }
+                    single<IslandCacheMap> { cacheMap }
                 },
             )
         }
 
         setupEventListeners(koinApp.koin)
+        setupIslandBetterHudPlaceholders()
     }
 
     override fun onDisable() {

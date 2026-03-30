@@ -32,27 +32,26 @@ private class EnchantmentAccessorImpl(
 ) : EnchantmentAccessor {
     override suspend fun enchantments(): Set<TypedKey<Enchantment>> = suspendTransaction(database) {
         IslandEnchantmentsTable.select(IslandEnchantmentsTable.enchantment)
-            .where { IslandEnchantmentsTable.island eq position.toLong() }
+            .where { IslandEnchantmentsTable.position eq position.toLong() }
             .map { RegistryKey.ENCHANTMENT.typedKey(it[IslandEnchantmentsTable.enchantment]) }
             .toSet()
     }
 
     override suspend fun addEnchantment(enchantment: TypedKey<Enchantment>) = suspendTransaction(database) {
         IslandEnchantmentsTable.insertIgnore {
-            it[IslandEnchantmentsTable.island] = position.toLong()
+            it[IslandEnchantmentsTable.position] = this@EnchantmentAccessorImpl.position.toLong()
             it[IslandEnchantmentsTable.enchantment] = enchantment
         }.insertedCount > 0
     }
 
     override suspend fun removeEnchantment(enchantment: TypedKey<Enchantment>) = suspendTransaction(database) {
         IslandEnchantmentsTable.deleteWhere {
-            (IslandEnchantmentsTable.island eq position.toLong()) and
-                (IslandEnchantmentsTable.enchantment eq enchantment)
+            (IslandEnchantmentsTable.position eq this@EnchantmentAccessorImpl.position.toLong()) and (IslandEnchantmentsTable.enchantment eq enchantment)
         } > 0
     }
 
     override suspend fun clearEnchantments() = suspendTransaction(database) {
-        IslandEnchantmentsTable.deleteWhere { IslandEnchantmentsTable.island eq position.toLong() }
+        IslandEnchantmentsTable.deleteWhere { IslandEnchantmentsTable.position eq this@EnchantmentAccessorImpl.position.toLong() }
         Unit
     }
 }

@@ -22,13 +22,14 @@ self-host-port: 8163
 merge-other-folders: []
 loading-head: random
 default-hud:
-  - mining_combo
+- island
+- mining_combo
 default-popup: []
 default-compass: []
 load-minecraft-default-textures: false
 included-minecraft-list:
-  - block
-  - item
+- block
+- item
 resourcepack-obfuscation: false
 clear-build-folder: true
 use-legacy-format: false
