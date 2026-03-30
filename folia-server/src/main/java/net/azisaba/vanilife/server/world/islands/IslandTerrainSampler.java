@@ -29,7 +29,7 @@ final class IslandTerrainSampler {
     }
 
     TerrainSample sample(final long levelSeed, final int blockX, final int blockZ) {
-        final IslandPosition islandPos = IslandPosition.fromBlockPosition(blockX, blockZ);
+        final IslandPosition islandPos = IslandPosition.fromBlockXZ(blockX, blockZ);
         final long islandSeed = islandPos.computeSeed(levelSeed);
         final IslandNoise islandNoise = this.getIslandNoise(islandSeed);
         final IslandRiverLayout riverLayout = this.getIslandRiverLayout(islandSeed);

@@ -25,7 +25,7 @@ public final class IslandWheatPatchFeature extends Feature<NoneFeatureConfigurat
     @Override
     public boolean place(final FeaturePlaceContext<NoneFeatureConfiguration> context) {
         final WorldGenLevel level = context.level();
-        final IslandPosition islandPos = IslandPosition.fromBlockPosition(context.origin().getX(), context.origin().getZ());
+        final IslandPosition islandPos = IslandPosition.fromBlockXZ(context.origin().getX(), context.origin().getZ());
         final long seed = islandPos.computeSeed(level.getSeed()) ^ 0x51C2E6B4D9A3F17BL;
         final RandomSource random = RandomSource.create(seed);
         final ChunkPos currentChunk = new ChunkPos(context.origin());

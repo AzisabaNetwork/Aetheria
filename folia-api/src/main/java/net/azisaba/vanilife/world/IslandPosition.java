@@ -1,6 +1,7 @@
 package net.azisaba.vanilife.world;
 
 import com.google.common.base.Preconditions;
+import io.papermc.paper.math.Position;
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
@@ -11,7 +12,11 @@ public sealed interface IslandPosition permits IslandPositionImpl {
         return new IslandPositionImpl(x, z);
     }
 
-    static IslandPosition fromBlockPosition(final int blockX, final int blockZ) {
+    static IslandPosition fromPosition(final Position position) {
+        return fromBlockXZ(position.blockX(), position.blockZ());
+    }
+
+    static IslandPosition fromBlockXZ(final int blockX, final int blockZ) {
         return of(islandAxisOf(blockX), islandAxisOf(blockZ));
     }
 

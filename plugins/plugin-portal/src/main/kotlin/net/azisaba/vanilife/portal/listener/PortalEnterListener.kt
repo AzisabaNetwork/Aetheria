@@ -2,10 +2,11 @@ package net.azisaba.vanilife.portal.listener
 
 import com.github.shynixn.mccoroutine.folia.launch
 import com.github.shynixn.mccoroutine.folia.regionDispatcher
-import net.azisaba.vanilife.Vanilife
+import net.azisaba.vanilife.island.IslandPlayerMap
 import net.azisaba.vanilife.island.ownedIsland
 import net.azisaba.vanilife.portal.exits.ExitForcer
 import net.azisaba.vanilife.portal.exits.getExitAnchor
+import net.azisaba.vanilife.world.IslandsWorld
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -18,7 +19,7 @@ internal class PortalEnterListener(private val forcer: ExitForcer, private val p
         event.isCancelled = true
 
         val player = event.entity as? Player
-        if (player == null || event.location.world != Vanilife.getIslandsWorld()) {
+        if (player == null || event.location.world !is IslandsWorld) {
             return
         }
 
@@ -28,6 +29,7 @@ internal class PortalEnterListener(private val forcer: ExitForcer, private val p
             if (exitAnchor?.teleportOrClear(forcer.world, player) != true) {
                 val safeLocation = forcer.findSafeLocation(island.position, plugin)
                 player.teleportAsync(safeLocation)
+                IslandPlayerMap.remove(player)
             }
         }
     }

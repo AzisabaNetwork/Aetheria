@@ -8,6 +8,7 @@ import io.papermc.paper.registry.data.dialog.action.DialogAction
 import io.papermc.paper.registry.data.dialog.body.DialogBody
 import io.papermc.paper.registry.data.dialog.type.DialogType
 import net.azisaba.vanilife.island.ownedIsland
+import net.azisaba.vanilife.island.teleport
 import net.azisaba.vanilife.portal.PortalTranslations
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickCallback
@@ -59,6 +60,6 @@ internal object ReturnDialog : KoinComponent {
 
     private suspend fun returnToIsland(player: Player) {
         val island = player.ownedIsland() ?: return
-        // island.registerPlayer(player)
+        player.teleport(island)
     }
 }

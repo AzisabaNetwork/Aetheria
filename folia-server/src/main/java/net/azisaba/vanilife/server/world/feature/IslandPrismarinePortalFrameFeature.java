@@ -51,11 +51,11 @@ public final class IslandPrismarinePortalFrameFeature extends Feature<NoneFeatur
         final int centerX = minX + 8;
         final int centerZ = minZ + 8;
         final LinkedHashSet<IslandPosition> islands = new LinkedHashSet<>();
-        islands.add(IslandPosition.fromBlockPosition(minX, minZ));
-        islands.add(IslandPosition.fromBlockPosition(minX, maxZ));
-        islands.add(IslandPosition.fromBlockPosition(maxX, minZ));
-        islands.add(IslandPosition.fromBlockPosition(maxX, maxZ));
-        islands.add(IslandPosition.fromBlockPosition(centerX, centerZ));
+        islands.add(IslandPosition.fromBlockXZ(minX, minZ));
+        islands.add(IslandPosition.fromBlockXZ(minX, maxZ));
+        islands.add(IslandPosition.fromBlockXZ(maxX, minZ));
+        islands.add(IslandPosition.fromBlockXZ(maxX, maxZ));
+        islands.add(IslandPosition.fromBlockXZ(centerX, centerZ));
         return islands;
     }
 

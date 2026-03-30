@@ -5,7 +5,7 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
-internal object IslandPlayerMap {
+object IslandPlayerMap {
     private val map: ConcurrentMap<UUID, Island> = ConcurrentHashMap()
 
     fun lookup(uuid: UUID): Island? = map[uuid]
