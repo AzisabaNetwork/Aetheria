@@ -75,6 +75,7 @@ private class PrimaryDataAccessorImpl(
             it[IslandsTable.level] = level
             it[IslandsTable.score] = 0.0
         }
+        score = 0.0
         this@PrimaryDataAccessorImpl.level = level
     }
 
