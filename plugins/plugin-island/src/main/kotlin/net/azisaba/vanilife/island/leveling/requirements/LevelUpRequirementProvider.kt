@@ -1,4 +1,4 @@
-package net.azisaba.vanilife.island.leveling
+package net.azisaba.vanilife.island.leveling.requirements
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

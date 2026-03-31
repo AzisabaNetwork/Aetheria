@@ -1,4 +1,4 @@
-package net.azisaba.vanilife.island.leveling
+package net.azisaba.vanilife.island.leveling.score
 
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap

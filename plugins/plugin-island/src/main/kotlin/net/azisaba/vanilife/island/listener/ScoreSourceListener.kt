@@ -2,7 +2,7 @@ package net.azisaba.vanilife.island.listener
 
 import com.github.shynixn.mccoroutine.folia.launch
 import net.azisaba.vanilife.island.IslandCacheMap
-import net.azisaba.vanilife.island.leveling.ScoreSource
+import net.azisaba.vanilife.island.leveling.score.ScoreSource
 import net.azisaba.vanilife.world.IslandPosition
 import net.azisaba.vanilife.world.IslandsWorld
 import org.bukkit.event.EventHandler

@@ -5,7 +5,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import net.azisaba.vanilife.ConfigurationHolder
-import net.azisaba.vanilife.island.leveling.LevelUpRequirementProvider
+import net.azisaba.vanilife.island.leveling.requirements.LevelUpRequirementProvider
 import net.azisaba.vanilife.island.leveling.tryLevelUp
 import org.bukkit.Bukkit
 import org.bukkit.plugin.Plugin

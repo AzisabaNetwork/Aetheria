@@ -1,4 +1,4 @@
-package net.azisaba.vanilife.island.leveling
+package net.azisaba.vanilife.island.leveling.score
 
 import io.papermc.paper.registry.set.RegistryValueSet
 import kotlinx.serialization.SerialName

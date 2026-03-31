@@ -1,6 +1,8 @@
 package net.azisaba.vanilife.island.leveling
 
 import kotlinx.serialization.Serializable
+import net.azisaba.vanilife.island.leveling.requirements.LevelUpRequirement
+import net.azisaba.vanilife.island.leveling.requirements.LevelUpRequirementProvider
 import kotlin.time.Duration
 
 @Serializable

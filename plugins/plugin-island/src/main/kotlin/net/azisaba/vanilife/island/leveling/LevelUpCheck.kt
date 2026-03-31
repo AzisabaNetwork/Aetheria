@@ -1,6 +1,7 @@
 package net.azisaba.vanilife.island.leveling
 
 import net.azisaba.vanilife.island.Island
+import net.azisaba.vanilife.island.leveling.requirements.LevelUpRequirementProvider
 
 internal suspend fun Island.tryLevelUp(requirements: LevelUpRequirementProvider): Boolean {
     val nextLevel = level + 1

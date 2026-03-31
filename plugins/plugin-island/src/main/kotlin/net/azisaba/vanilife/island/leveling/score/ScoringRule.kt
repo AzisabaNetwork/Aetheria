@@ -1,4 +1,4 @@
-package net.azisaba.vanilife.island.leveling
+package net.azisaba.vanilife.island.leveling.score
 
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration

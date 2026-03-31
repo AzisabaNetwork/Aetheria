@@ -2,8 +2,8 @@ package net.azisaba.vanilife.island
 
 import net.azisaba.vanilife.Vanilife
 import net.azisaba.vanilife.island.enchantment.EnchantmentAccessor
-import net.azisaba.vanilife.island.leveling.ScoreSource
-import net.azisaba.vanilife.island.leveling.ScoringManager
+import net.azisaba.vanilife.island.leveling.score.ScoreSource
+import net.azisaba.vanilife.island.leveling.score.ScoringManager
 import net.azisaba.vanilife.island.visitors.VisitorsAccessor
 import net.azisaba.vanilife.island.waves.WaveAccessor
 import net.azisaba.vanilife.island.wrack.WrackAccessor

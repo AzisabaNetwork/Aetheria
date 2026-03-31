@@ -6,7 +6,7 @@ import me.tofaa.entitylib.APIConfig
 import me.tofaa.entitylib.EntityLib
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform
 import net.azisaba.vanilife.ReloadableConfiguration
-import net.azisaba.vanilife.island.leveling.ScoreSource
+import net.azisaba.vanilife.island.leveling.score.ScoreSource
 import net.azisaba.vanilife.island.wrack.WrackType
 import net.azisaba.vanilife.reloadableConfig
 import net.azisaba.vanilife.island.leveling.LevelingConfiguration
