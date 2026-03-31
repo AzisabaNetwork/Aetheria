@@ -2,7 +2,6 @@ package net.azisaba.vanilife.island
 
 import net.azisaba.serialization.IntProvider
 import net.azisaba.vanilife.ConfigurationHolder
-import net.azisaba.vanilife.Vanilife
 import net.azisaba.vanilife.island.enchantment.EnchantmentAccessor
 import net.azisaba.vanilife.island.leveling.score.ScoreSource
 import net.azisaba.vanilife.island.leveling.score.ScoringManager
@@ -14,9 +13,10 @@ import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.audience.ForwardingAudience
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
+import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
+import org.bukkit.plugin.Plugin
 import org.jetbrains.exposed.v1.jdbc.Database
-import org.koin.core.context.GlobalContext
 import java.util.*
 
 class Island internal constructor(
@@ -28,6 +28,7 @@ class Island internal constructor(
     private val spawnLimit: ConfigurationHolder<Int>,
     private val spawnIntervalTicks: ConfigurationHolder<IntProvider>,
     private val database: Database,
+    private val plugin: Plugin,
 ) :
     ForwardingAudience,
     PrimaryDataAccessor by PrimaryDataAccessor.create(position, database, level, score, displayName),
@@ -38,8 +39,7 @@ class Island internal constructor(
         position,
         spawnLimit,
         spawnIntervalTicks,
-        world = Vanilife.getIslandsWorld(),
-        plugin = GlobalContext.get().get()
+        plugin,
     ) {
     private val scoringManager: ScoringManager = ScoringManager()
 
@@ -50,7 +50,15 @@ class Island internal constructor(
         score(this.score + score)
     }
 
+    fun isOwner(uuid: UUID): Boolean = uuid == owner
+
+    fun canFlight(uuid: UUID): Boolean = level == MAX_LEVEL && isOwner(uuid)
+
     internal suspend fun addPlayer(player: Player) {
+        if (canFlight(player.uniqueId)) {
+            player.allowFlight = true
+        }
+
         if (ScoreSource.all().any { it is ScoreSource.VisitPlayer }) {
             val isFirstVisit = hasVisited(player)
 
@@ -71,6 +79,10 @@ class Island internal constructor(
         endVisit(player)
         removeWaveViewer(player.uniqueId)
         removeWrackViewer(player)
+
+        if (!player.gameMode.isInvulnerable) {
+            player.allowFlight = false
+        }
     }
 
     companion object {

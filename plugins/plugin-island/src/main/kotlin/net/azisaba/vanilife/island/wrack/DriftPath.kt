@@ -59,20 +59,20 @@ data class DriftPath(val startPos: Position, val endPos: Position, val random: R
     companion object {
         private const val HORIZONTAL_AMPLITUDE: Double = 6.0
 
-        suspend fun random(islandPos: IslandPosition, coastSide: CoastSide, world: World, plugin: Plugin): DriftPath {
+        suspend fun random(islandPosition: IslandPosition, coastSide: CoastSide, world: World, plugin: Plugin): DriftPath {
             val salt = System.nanoTime()
-            val random = Random(islandPos.computeSeed(world.seed) xor coastSide.ordinal.toLong() xor salt)
+            val random = Random(islandPosition.computeSeed(world.seed) xor coastSide.ordinal.toLong() xor salt)
 
             val landFinder = LandFinder(random)
 
             val driftY = IslandsWorld.SEA_LEVEL.toDouble()
 
-            val minX = islandPos.minBlockX().toDouble()
-            val maxX = islandPos.maxBlockX().toDouble()
-            val minZ = islandPos.minBlockZ().toDouble()
-            val maxZ = islandPos.maxBlockZ().toDouble()
+            val minX = islandPosition.minBlockX().toDouble()
+            val maxX = islandPosition.maxBlockX().toDouble()
+            val minZ = islandPosition.minBlockZ().toDouble()
+            val maxZ = islandPosition.maxBlockZ().toDouble()
 
-            val boundary = islandPos.boundaryBlock(coastSide).toDouble()
+            val boundary = islandPosition.boundaryBlock(coastSide).toDouble()
             val rawEndX = if (coastSide.axisX) boundary else random.nextDouble(minX, maxX)
             val rawEndZ = if (coastSide.axisZ) boundary else random.nextDouble(minZ, maxZ)
             val rawEndPos = Position.fine(rawEndX, driftY, rawEndZ)

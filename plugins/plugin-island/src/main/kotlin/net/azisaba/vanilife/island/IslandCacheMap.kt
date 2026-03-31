@@ -3,6 +3,7 @@ package net.azisaba.vanilife.island
 import net.azisaba.vanilife.ConfigurationHolder
 import net.azisaba.vanilife.island.wrack.WrackConfiguration
 import net.azisaba.vanilife.world.IslandPosition
+import org.bukkit.plugin.Plugin
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
@@ -14,6 +15,7 @@ import java.util.concurrent.ConcurrentMap
 
 internal class IslandCacheMap(
     private val database: Database,
+    private val plugin: Plugin,
     private val wrackConfig: ConfigurationHolder<WrackConfiguration>,
 ) : Iterable<Island> {
     private val islandByPosition: ConcurrentMap<IslandPosition, Island> = ConcurrentHashMap()
@@ -44,6 +46,7 @@ internal class IslandCacheMap(
                 spawnLimit = wrackConfig.map(WrackConfiguration::spawnLimit),
                 spawnIntervalTicks = wrackConfig.map(WrackConfiguration::spawnIntervalTicks),
                 database,
+                plugin,
             )
         }
         cacheOwnerPosition(owner, position)
@@ -70,6 +73,7 @@ internal class IslandCacheMap(
                 spawnLimit = wrackConfig.map(WrackConfiguration::spawnLimit),
                 spawnIntervalTicks = wrackConfig.map(WrackConfiguration::spawnIntervalTicks),
                 database,
+                plugin,
             )
         }
     }

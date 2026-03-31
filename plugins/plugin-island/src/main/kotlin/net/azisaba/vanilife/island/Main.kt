@@ -36,7 +36,7 @@ class Main : JavaPlugin() {
         ScoreSource.bootstrap(this)
         WrackType.bootstrap(this)
 
-        val cacheMap = IslandCacheMap(database, wrackConfig = config.map(Configuration::wrack))
+        val cacheMap = IslandCacheMap(database, plugin = this, wrackConfig = config.map(Configuration::wrack))
         val ticker = IslandTicker(
             this,
             cacheMap,

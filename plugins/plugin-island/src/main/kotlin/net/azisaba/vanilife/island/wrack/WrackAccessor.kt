@@ -3,9 +3,9 @@ package net.azisaba.vanilife.island.wrack
 import kotlinx.coroutines.channels.Channel
 import net.azisaba.serialization.IntProvider
 import net.azisaba.vanilife.ConfigurationHolder
+import net.azisaba.vanilife.Vanilife
 import net.azisaba.vanilife.island.CoastSide
 import net.azisaba.vanilife.world.IslandPosition
-import net.azisaba.vanilife.world.IslandsWorld
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import kotlin.random.Random
@@ -24,9 +24,8 @@ interface WrackAccessor {
             position: IslandPosition,
             spawnLimit: ConfigurationHolder<Int>,
             spawnIntervalTicks: ConfigurationHolder<IntProvider>,
-            world: IslandsWorld,
             plugin: Plugin,
-        ): WrackAccessor = WrackAccessorImpl(position, spawnLimit, spawnIntervalTicks, world, plugin)
+        ): WrackAccessor = WrackAccessorImpl(position, spawnLimit, spawnIntervalTicks, plugin)
     }
 }
 
@@ -34,13 +33,12 @@ private class WrackAccessorImpl(
     private val position: IslandPosition,
     private val spawnLimit: ConfigurationHolder<Int>,
     private val spawnIntervalTicks: ConfigurationHolder<IntProvider>,
-    private val world: IslandsWorld,
     private val plugin: Plugin,
 ) : WrackAccessor {
     private val viewers: MutableSet<Player> = mutableSetOf()
     private val wrackEntities: MutableList<WrackEntity> = mutableListOf()
     private val tickingWrackEntities: MutableList<WrackEntity> = mutableListOf()
-    private val random = Random(position.computeSeed(world.seed))
+    private val random = Random(position.computeSeed(Vanilife.getIslandsWorld().seed))
 
     private val channel: Channel<Action> = Channel(Channel.BUFFERED)
 
@@ -99,8 +97,8 @@ private class WrackAccessorImpl(
     }
 
     private suspend fun spawnWrackAction(action: Action.SpawnWrack, time: Long) {
-        val driftPath = DriftPath.random(position, action.coastSide, world, plugin)
-        val wrackEntity = WrackEntity(action.wrackType, position, world, driftPath, time) {
+        val driftPath = DriftPath.random(position, action.coastSide, Vanilife.getIslandsWorld(), plugin)
+        val wrackEntity = WrackEntity(action.wrackType, position, Vanilife.getIslandsWorld(), driftPath, time) {
             wrackEntities.remove(it)
             tickingWrackEntities.remove(it)
         }
