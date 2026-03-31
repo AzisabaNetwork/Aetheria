@@ -53,19 +53,19 @@ internal class IslandTicker(
         ACTIVE(1L) {
             override suspend fun tick(island: Island, time: Long) {
                 if (IslandPlayerMap.lookup(island.owner) === island) {
-                    island.wrackTick(time)
+                    island.wrackTick(time, island.level)
                 }
                 island.waveTick(time)
             }
         },
         OWNER_ONLINE(3L) {
             override suspend fun tick(island: Island, time: Long) {
-                island.wrackTick(time)
+                island.wrackTick(time, island.level)
             }
         },
         IDLE(20L * 5) {
             override suspend fun tick(island: Island, time: Long) {
-                island.wrackTick(time)
+                island.wrackTick(time, island.level)
             }
         };
 

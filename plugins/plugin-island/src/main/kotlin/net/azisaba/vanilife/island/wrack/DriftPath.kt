@@ -14,7 +14,6 @@ import kotlin.random.Random
 
 data class DriftPath(val startPos: Position, val endPos: Position, val random: Random) {
     private val horizontalAmplitude: Double = HORIZONTAL_AMPLITUDE
-    private val verticalAmplitude: Double = VERTICAL_AMPLITUDE
 
     private val frequency: Double = 2.0
 
@@ -44,15 +43,11 @@ data class DriftPath(val startPos: Position, val endPos: Position, val random: R
         val horizontalOffset = horizontalWave * horizontalAmplitude * envelope
 
         val verticalWave = sin(t * PI * (frequency * 0.7) + phase * 0.5)
-        val verticalCenter = IslandsWorld.SEA_LEVEL.toDouble() + BASE_Y_OFFSET + verticalAmplitude * 0.5
-        val verticalOffset = verticalWave * verticalAmplitude * envelope
+        val verticalProgress = ((verticalWave * envelope) + 1.0) * 0.5
 
         val finalX = baseX + orthoX * horizontalOffset
         val finalZ = baseZ + orthoZ * horizontalOffset
-        val finalY = (verticalCenter + verticalOffset).coerceIn(
-            IslandsWorld.SEA_LEVEL.toDouble(),
-            verticalCenter + verticalAmplitude,
-        )
+        val finalY = lerp(IslandsWorld.SEA_LEVEL.toDouble(), IslandsWorld.SEA_LEVEL - 1.0, verticalProgress)
 
         return Position.fine(finalX, finalY, finalZ)
     }
@@ -62,9 +57,7 @@ data class DriftPath(val startPos: Position, val endPos: Position, val random: R
     }
 
     companion object {
-        private const val BASE_Y_OFFSET: Double = 1.0
         private const val HORIZONTAL_AMPLITUDE: Double = 6.0
-        private const val VERTICAL_AMPLITUDE: Double = 2.0
 
         suspend fun random(islandPos: IslandPosition, coastSide: CoastSide, world: World, plugin: Plugin): DriftPath {
             val salt = System.nanoTime()
@@ -72,7 +65,7 @@ data class DriftPath(val startPos: Position, val endPos: Position, val random: R
 
             val landFinder = LandFinder(random)
 
-            val seaLevel = IslandsWorld.SEA_LEVEL.toDouble() + BASE_Y_OFFSET + VERTICAL_AMPLITUDE * 0.5
+            val driftY = IslandsWorld.SEA_LEVEL.toDouble()
 
             val minX = islandPos.minBlockX().toDouble()
             val maxX = islandPos.maxBlockX().toDouble()
@@ -82,7 +75,7 @@ data class DriftPath(val startPos: Position, val endPos: Position, val random: R
             val boundary = islandPos.boundaryBlock(coastSide).toDouble()
             val rawEndX = if (coastSide.axisX) boundary else random.nextDouble(minX, maxX)
             val rawEndZ = if (coastSide.axisZ) boundary else random.nextDouble(minZ, maxZ)
-            val rawEndPos = Position.fine(rawEndX, seaLevel, rawEndZ)
+            val rawEndPos = Position.fine(rawEndX, driftY, rawEndZ)
             val finalEndPos = landFinder.find(world, rawEndPos, plugin) ?: rawEndPos
 
             val normX = if (coastSide.axisX) coastSide.coastNormalSign else 0.0
@@ -103,7 +96,7 @@ data class DriftPath(val startPos: Position, val endPos: Position, val random: R
             )
 
             return DriftPath(
-                Position.fine(startX, seaLevel, startZ),
+                Position.fine(startX, driftY, startZ),
                 finalEndPos,
                 random
             )

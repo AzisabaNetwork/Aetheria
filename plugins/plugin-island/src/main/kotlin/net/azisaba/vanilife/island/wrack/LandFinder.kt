@@ -49,7 +49,12 @@ internal class LandFinder(
     private fun testLandAt(location: Location): Location? {
         val block = location.world.getBlockAt(location)
         val isLandBlock = block.type.isAir && block.getRelative(BlockFace.DOWN).type == Material.SAND
-        return if (isLandBlock) location else null
+        return if (isLandBlock) {
+            block.getRelative(BlockFace.DOWN).location
+                .add(0.5, 1.0, 0.5)
+        } else {
+            null
+        }
     }
 
     private fun shuffledOffsets(): List<Vector3ic> {

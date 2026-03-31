@@ -171,14 +171,14 @@ sealed interface LevelUpRequirementProvider {
         }
     }
 
-    private companion object {
+    companion object {
         const val START_LEVEL: Int = Island.MIN_LEVEL + 1
 
-        fun requireLevel(level: Int) = require(level in START_LEVEL..Island.MAX_LEVEL) {
+        private fun requireLevel(level: Int) = require(level in START_LEVEL..Island.MAX_LEVEL) {
             "Level $level is out of range [$START_LEVEL..${Island.MAX_LEVEL}]"
         }
 
-        fun progress(level: Int): Double {
+        private fun progress(level: Int): Double {
             val range = Island.MAX_LEVEL - START_LEVEL
             if (range <= 0) return 1.0
 
@@ -186,10 +186,10 @@ sealed interface LevelUpRequirementProvider {
             return raw.coerceIn(0.0, 1.0)
         }
 
-        fun lerp(a: Double, b: Double, t: Double): Double = a + (b - a) * t
+        private fun lerp(a: Double, b: Double, t: Double): Double = a + (b - a) * t
 
-        fun lerpInt(a: Int, b: Int, t: Double): Int = (a + (b - a) * t).roundToInt()
+        private fun lerpInt(a: Int, b: Int, t: Double): Int = (a + (b - a) * t).roundToInt()
 
-        fun lerpDuration(a: Duration, b: Duration, t: Double): Duration = a + (b - a) * t
+        private fun lerpDuration(a: Duration, b: Duration, t: Double): Duration = a + (b - a) * t
     }
 }

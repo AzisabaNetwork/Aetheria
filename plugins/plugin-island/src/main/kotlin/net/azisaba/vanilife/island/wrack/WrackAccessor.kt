@@ -15,7 +15,7 @@ interface WrackAccessor {
 
     fun spawnWrack(wrackType: WrackType)
 
-    suspend fun wrackTick(time: Long)
+    suspend fun wrackTick(time: Long, level: Int)
 
     companion object {
         fun create(position: IslandPosition, world: IslandsWorld, plugin: Plugin): WrackAccessor =
@@ -47,13 +47,13 @@ private class WrackAccessorImpl(
         }
     }
 
-    override suspend fun wrackTick(time: Long) {
+    override suspend fun wrackTick(time: Long, level: Int) {
         tickingWrackEntities.removeIf { !it.tick(time) }
 
         if (time % 200L == 0L) {
             viewers.removeIf { !it.isValid }
             if (viewers.isNotEmpty()) {
-                WrackType.roll(random)?.let(::spawnWrack)
+                WrackType.roll(random, level)?.let(::spawnWrack)
             }
         }
 

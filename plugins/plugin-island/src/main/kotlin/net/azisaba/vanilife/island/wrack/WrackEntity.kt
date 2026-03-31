@@ -66,6 +66,7 @@ class WrackEntity internal constructor(
 
     private fun strandTick() {
         val location = Location(world, path.endPos.x(), path.endPos.y(), path.endPos.z())
+        tracker.location(BukkitLocation(location))
         plugin.launch(plugin.regionDispatcher(location)) {
             val textDisplay = world.spawn(location, TextDisplay::class.java) { it.isPersistent = false }
             tracker.createHitBox(
