@@ -1,5 +1,7 @@
 package net.azisaba.vanilife.island
 
+import net.azisaba.serialization.IntProvider
+import net.azisaba.vanilife.ConfigurationHolder
 import net.azisaba.vanilife.Vanilife
 import net.azisaba.vanilife.island.enchantment.EnchantmentAccessor
 import net.azisaba.vanilife.island.leveling.score.ScoreSource
@@ -23,6 +25,8 @@ class Island internal constructor(
     level: Int,
     score: Double,
     displayName: Component?,
+    private val spawnLimit: ConfigurationHolder<Int>,
+    private val spawnIntervalTicks: ConfigurationHolder<IntProvider>,
     private val database: Database,
 ) :
     ForwardingAudience,
@@ -30,7 +34,13 @@ class Island internal constructor(
     EnchantmentAccessor by EnchantmentAccessor.fromDatabase(position, database),
     VisitorsAccessor by VisitorsAccessor.fromDatabase(position, database),
     WaveAccessor by WaveAccessor.create(position),
-    WrackAccessor by WrackAccessor.create(position, Vanilife.getIslandsWorld(), GlobalContext.get().get()) {
+    WrackAccessor by WrackAccessor.create(
+        position,
+        spawnLimit,
+        spawnIntervalTicks,
+        world = Vanilife.getIslandsWorld(),
+        plugin = GlobalContext.get().get()
+    ) {
     private val scoringManager: ScoringManager = ScoringManager()
 
     override fun audiences(): Iterable<Audience> = IslandPlayerMap.collect(this).mapNotNull(Bukkit::getPlayer)

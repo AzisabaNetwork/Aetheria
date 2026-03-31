@@ -1,16 +1,21 @@
 package net.azisaba.vanilife.island
 
+import net.azisaba.vanilife.ConfigurationHolder
+import net.azisaba.vanilife.island.wrack.WrackConfiguration
 import net.azisaba.vanilife.world.IslandPosition
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
-internal class IslandCacheMap(private val database: Database) : Iterable<Island> {
+internal class IslandCacheMap(
+    private val database: Database,
+    private val wrackConfig: ConfigurationHolder<WrackConfiguration>,
+) : Iterable<Island> {
     private val islandByPosition: ConcurrentMap<IslandPosition, Island> = ConcurrentHashMap()
 
     private val positionByOwner: ConcurrentMap<UUID, IslandPosition> = ConcurrentHashMap()
@@ -30,7 +35,16 @@ internal class IslandCacheMap(private val database: Database) : Iterable<Island>
         val displayName = row[IslandsTable.displayName]
 
         val island = islandByPosition.computeIfAbsent(position) {
-            Island(it, owner, level, score, displayName, database)
+            Island(
+                it,
+                owner,
+                level,
+                score,
+                displayName,
+                spawnLimit = wrackConfig.map(WrackConfiguration::spawnLimit),
+                spawnIntervalTicks = wrackConfig.map(WrackConfiguration::spawnIntervalTicks),
+                database,
+            )
         }
         cacheOwnerPosition(owner, position)
         return island
@@ -47,7 +61,16 @@ internal class IslandCacheMap(private val database: Database) : Iterable<Island>
         val position = insertToDatabase(owner)
         cacheOwnerPosition(owner, position)
         return islandByPosition.computeIfAbsent(position) {
-            Island(it, owner, Island.MIN_LEVEL, 0.0, null, database)
+            Island(
+                it,
+                owner,
+                Island.MIN_LEVEL,
+                score = 0.0,
+                displayName = null,
+                spawnLimit = wrackConfig.map(WrackConfiguration::spawnLimit),
+                spawnIntervalTicks = wrackConfig.map(WrackConfiguration::spawnIntervalTicks),
+                database,
+            )
         }
     }
 

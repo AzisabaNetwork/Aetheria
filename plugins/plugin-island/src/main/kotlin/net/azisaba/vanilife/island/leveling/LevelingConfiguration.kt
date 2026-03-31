@@ -6,7 +6,7 @@ import net.azisaba.vanilife.island.leveling.requirements.LevelUpRequirementProvi
 import kotlin.time.Duration
 
 @Serializable
-data class LevelingConfiguration(
+internal data class LevelingConfiguration(
     val levelUpCheckIntervalTicks: Long = 20L * 60,
     val levelUpRequirements: LevelUpRequirementProvider = LevelUpRequirementProvider.Constant(
         LevelUpRequirement(minScore = 10.0, minVisitors = 0, minTotalStayTime = Duration.ZERO),

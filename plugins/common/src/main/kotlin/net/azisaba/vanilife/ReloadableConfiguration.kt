@@ -1,6 +1,8 @@
 package net.azisaba.vanilife
 
+import com.charleskorn.kaml.PolymorphismStyle
 import com.charleskorn.kaml.Yaml
+import com.charleskorn.kaml.YamlConfiguration
 import kotlinx.serialization.KSerializer
 import org.bukkit.plugin.Plugin
 import java.nio.file.Path
@@ -13,7 +15,12 @@ import kotlin.io.path.writeText
 
 const val defaultName: String = "config.yml"
 
-val defaultYaml: Yaml = Yaml.default
+val defaultYaml: Yaml = Yaml(
+    configuration = YamlConfiguration(
+        polymorphismStyle = PolymorphismStyle.Property,
+        polymorphismPropertyName = "kind",
+    )
+)
 
 fun <T : Any> Plugin.reloadableConfig(default: T, serializer: KSerializer<T>): ReloadableConfiguration<T> {
     val reloadableConfig = ReloadableConfiguration(defaultName, defaultYaml, default, serializer)

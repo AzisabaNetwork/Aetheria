@@ -6,10 +6,10 @@ import me.tofaa.entitylib.APIConfig
 import me.tofaa.entitylib.EntityLib
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform
 import net.azisaba.vanilife.ReloadableConfiguration
+import net.azisaba.vanilife.island.leveling.LevelingConfiguration
 import net.azisaba.vanilife.island.leveling.score.ScoreSource
 import net.azisaba.vanilife.island.wrack.WrackType
 import net.azisaba.vanilife.reloadableConfig
-import net.azisaba.vanilife.island.leveling.LevelingConfiguration
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -36,7 +36,7 @@ class Main : JavaPlugin() {
         ScoreSource.bootstrap(this)
         WrackType.bootstrap(this)
 
-        val cacheMap = IslandCacheMap(database)
+        val cacheMap = IslandCacheMap(database, wrackConfig = config.map(Configuration::wrack))
         val ticker = IslandTicker(
             this,
             cacheMap,

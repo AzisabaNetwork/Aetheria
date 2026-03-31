@@ -1,6 +1,8 @@
 package net.azisaba.vanilife.island.wrack
 
 import kotlinx.coroutines.channels.Channel
+import net.azisaba.serialization.IntProvider
+import net.azisaba.vanilife.ConfigurationHolder
 import net.azisaba.vanilife.island.CoastSide
 import net.azisaba.vanilife.world.IslandPosition
 import net.azisaba.vanilife.world.IslandsWorld
@@ -18,13 +20,22 @@ interface WrackAccessor {
     suspend fun wrackTick(time: Long, level: Int)
 
     companion object {
-        fun create(position: IslandPosition, world: IslandsWorld, plugin: Plugin): WrackAccessor =
-            WrackAccessorImpl(position, world, plugin)
+        fun create(
+            position: IslandPosition,
+            spawnLimit: ConfigurationHolder<Int>,
+            spawnIntervalTicks: ConfigurationHolder<IntProvider>,
+            world: IslandsWorld,
+            plugin: Plugin,
+        ): WrackAccessor = WrackAccessorImpl(position, spawnLimit, spawnIntervalTicks, world, plugin)
     }
 }
 
 private class WrackAccessorImpl(
-    private val position: IslandPosition, private val world: IslandsWorld, private val plugin: Plugin,
+    private val position: IslandPosition,
+    private val spawnLimit: ConfigurationHolder<Int>,
+    private val spawnIntervalTicks: ConfigurationHolder<IntProvider>,
+    private val world: IslandsWorld,
+    private val plugin: Plugin,
 ) : WrackAccessor {
     private val viewers: MutableSet<Player> = mutableSetOf()
     private val wrackEntities: MutableList<WrackEntity> = mutableListOf()
@@ -32,6 +43,8 @@ private class WrackAccessorImpl(
     private val random = Random(position.computeSeed(world.seed))
 
     private val channel: Channel<Action> = Channel(Channel.BUFFERED)
+
+    private var nextSpawnTime: Long = 0L
 
     override fun addWrackViewer(player: Player) = enqueueAction(Action.AddViewer(player))
 
@@ -50,11 +63,8 @@ private class WrackAccessorImpl(
     override suspend fun wrackTick(time: Long, level: Int) {
         tickingWrackEntities.removeIf { !it.tick(time) }
 
-        if (time % 200L == 0L) {
-            viewers.removeIf { !it.isValid }
-            if (viewers.isNotEmpty()) {
-                WrackType.roll(random, level)?.let(::spawnWrack)
-            }
+        if (time >= nextSpawnTime && wrackEntities.size <= spawnLimit.value()) {
+            spawnTick(time, level)
         }
 
         while (true) {
@@ -65,6 +75,15 @@ private class WrackAccessorImpl(
                 is Action.SpawnWrack -> spawnWrackAction(action, time)
             }
         }
+    }
+
+    private fun spawnTick(time: Long, level: Int) {
+        viewers.removeIf { !it.isValid }
+        if (viewers.isNotEmpty()) {
+            WrackType.roll(random, level)?.let(::spawnWrack)
+        }
+
+        nextSpawnTime = time + spawnIntervalTicks.value().sample(random)
     }
 
     private fun addViewerAction(action: Action.AddViewer) {
