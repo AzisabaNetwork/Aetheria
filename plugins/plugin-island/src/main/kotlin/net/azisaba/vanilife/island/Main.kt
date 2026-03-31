@@ -5,8 +5,11 @@ import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import me.tofaa.entitylib.APIConfig
 import me.tofaa.entitylib.EntityLib
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform
+import net.azisaba.vanilife.ReloadableConfiguration
 import net.azisaba.vanilife.island.leveling.ScoreSource
 import net.azisaba.vanilife.island.wrack.WrackType
+import net.azisaba.vanilife.reloadableConfig
+import net.azisaba.vanilife.island.leveling.LevelingConfiguration
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -24,8 +27,8 @@ class Main : JavaPlugin() {
     }
 
     override fun onEnable() {
-        val config = yamlConfig()
-        val database = setupDatabase(config.database).setupTables()
+        val config = reloadableConfig(Configuration(), Configuration.serializer())
+        val database = setupDatabase(config.value().database).setupTables()
 
         PacketEvents.getAPI().init()
         EntityLib.init(SpigotEntityLibPlatform(this), APIConfig(PacketEvents.getAPI()))
@@ -34,13 +37,20 @@ class Main : JavaPlugin() {
         WrackType.bootstrap(this)
 
         val cacheMap = IslandCacheMap(database)
-        val ticker = IslandTicker(this, cacheMap)
+        val ticker = IslandTicker(
+            this,
+            cacheMap,
+            levelUpRequirements = config.map(Configuration::leveling)
+                .map(LevelingConfiguration::levelUpRequirements),
+            levelUpCheckIntervalTicks = config.map(Configuration::leveling)
+                .map(LevelingConfiguration::levelUpCheckIntervalTicks),
+        )
 
         koinApp = startKoin {
             modules(
                 module {
                     single<Plugin> { this@Main }
-                    single<Configuration> { config }
+                    single<ReloadableConfiguration<Configuration>> { config }
                     single<Database> { database }
                     single<IslandTicker> { ticker } onClose { it?.close() }
                     single<IslandCacheMap> { cacheMap }

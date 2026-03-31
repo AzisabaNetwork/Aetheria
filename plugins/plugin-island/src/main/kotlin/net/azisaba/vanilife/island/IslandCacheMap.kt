@@ -47,7 +47,7 @@ internal class IslandCacheMap(private val database: Database) : Iterable<Island>
         val position = insertToDatabase(owner)
         cacheOwnerPosition(owner, position)
         return islandByPosition.computeIfAbsent(position) {
-            Island(it, owner, 1, 0.0, null, database)
+            Island(it, owner, Island.MIN_LEVEL, 0.0, null, database)
         }
     }
 
@@ -97,7 +97,7 @@ internal class IslandCacheMap(private val database: Database) : Iterable<Island>
     private suspend fun insertToDatabase(owner: UUID): IslandPosition = suspendTransaction(database) {
         IslandsTable.insertAndGetId {
             it[IslandsTable.owner] = owner
-            it[IslandsTable.level] = 1
+            it[IslandsTable.level] = Island.MIN_LEVEL
             it[IslandsTable.score] = 0.0
             it[IslandsTable.displayName] = null
         }.value.let(IslandPosition::fromLong)

@@ -4,26 +4,43 @@ import com.github.shynixn.mccoroutine.folia.launch
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import net.azisaba.vanilife.ConfigurationHolder
+import net.azisaba.vanilife.island.leveling.LevelUpRequirementProvider
+import net.azisaba.vanilife.island.leveling.tryLevelUp
 import org.bukkit.Bukkit
 import org.bukkit.plugin.Plugin
+import kotlin.time.Duration.Companion.milliseconds
 
-internal class IslandTicker(plugin: Plugin, private val cacheMap: IslandCacheMap) : AutoCloseable {
+internal class IslandTicker(
+    plugin: Plugin,
+    private val cacheMap: IslandCacheMap,
+    private val levelUpRequirements: ConfigurationHolder<LevelUpRequirementProvider>,
+    private val levelUpCheckIntervalTicks: ConfigurationHolder<Long>,
+) : AutoCloseable {
     private val job: Job = plugin.launch {
         var time = 0L
         while (isActive) {
             for (island in cacheMap) {
-                val tickLevel = island.tickLevel()
-                if (time % tickLevel.tickInterval == 0L) {
-                    tickLevel.tick(island, time)
-                }
+                island.tick(time)
             }
             time++
-            delay(50L)
+            delay(50L.milliseconds)
         }
     }
 
     override fun close() {
         job.cancel()
+    }
+
+    private suspend fun Island.tick(time: Long) {
+        val tickLevel = tickLevel()
+        if (time % tickLevel.tickInterval == 0L) {
+            tickLevel.tick(this, time)
+        }
+
+        if (time % levelUpCheckIntervalTicks.value() == 0L && IslandPlayerMap.lookup(owner) === this) {
+            tryLevelUp(levelUpRequirements.value())
+        }
     }
 
     private fun Island.tickLevel(): TickLevel = when {

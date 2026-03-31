@@ -14,6 +14,7 @@ import java.lang.Math.toRadians
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
+import kotlin.time.Duration.Companion.milliseconds
 
 internal class TimberAnimator(val config: Configuration = Configuration()) {
     suspend fun animate(context: TimberContext) {
@@ -35,10 +36,10 @@ internal class TimberAnimator(val config: Configuration = Configuration()) {
             blockState.block.type = Material.AIR
         }
 
-        delay(50L)
+        delay(50L.milliseconds)
         for (time in 1..config.animationTime) {
             entityContainer.entities.forEach { it.tick(time) }
-            delay(50L)
+            delay(50L.milliseconds)
         }
 
         entityContainer.clearEntities(true)

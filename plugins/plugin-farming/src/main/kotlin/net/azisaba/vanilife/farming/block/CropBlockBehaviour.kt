@@ -18,6 +18,7 @@ import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import kotlin.math.floor
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.milliseconds
 
 internal open class CropBlockBehaviour {
     private val wrapperEntityContainer: EntityContainer = EntityContainer.basic()
@@ -84,7 +85,7 @@ internal open class CropBlockBehaviour {
         )
         player?.let { textDisplay.addViewer(it.uniqueId) }
         plugin.launch {
-            delay(50L * 15)
+            delay((50L * 15).milliseconds)
             textDisplay.remove()
         }
 

@@ -62,4 +62,9 @@ class Island internal constructor(
         removeWaveViewer(player.uniqueId)
         removeWrackViewer(player)
     }
+
+    companion object {
+        const val MIN_LEVEL: Int = 1
+        const val MAX_LEVEL: Int = 50
+    }
 }

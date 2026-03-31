@@ -73,6 +73,7 @@ private class PrimaryDataAccessorImpl(
     override suspend fun level(level: Int) = suspendTransaction(database) {
         IslandsTable.update(where = { IslandsTable.id eq position.toLong() }) {
             it[IslandsTable.level] = level
+            it[IslandsTable.score] = 0.0
         }
         this@PrimaryDataAccessorImpl.level = level
     }
