@@ -1,14 +1,78 @@
+base: &base
+  name: island_font
+  x: 0
+  y: 0
+  align: right
+  scale: 0.7
+  conditions: &visible_condition
+    1:
+      first: island_visible
+      second: true
+      operation: "=="
 island:
   texts:
     1:
-      name: island_font
-      pattern: "<image:island> [island_display_name] (<image:level_purple>[island_level])"
-      x: 0
-      y: 0
-      align: right
-      scale: 0.7
+      <<: *base
+      pattern: "<image:island> [island_display_name] (<image:level_green>[island_level])"
       conditions:
-        1:
-          first: island_visible
-          second: true
-          operation: "=="
+        <<: *visible_condition
+        2:
+          first: island_level
+          second: 0
+          operation: ">="
+        3:
+          first: island_level
+          second: 10
+          operation: "<="
+    2:
+      <<: *base
+      pattern: "<image:island> [island_display_name] (<image:level_blue>[island_level])"
+      conditions:
+        <<: *visible_condition
+        2:
+          first: island_level
+          second: 11
+          operation: ">="
+        3:
+          first: island_level
+          second: 20
+          operation: "<="
+    3:
+      <<: *base
+      pattern: "<image:island> [island_display_name] (<image:level_yellow>[island_level])"
+      conditions:
+        <<: *visible_condition
+        2:
+          first: island_level
+          second: 21
+          operation: ">="
+        3:
+          first: island_level
+          second: 30
+          operation: "<="
+    4:
+      <<: *base
+      pattern: "<image:island> [island_display_name] (<image:level_pink>[island_level])"
+      conditions:
+        <<: *visible_condition
+        2:
+          first: island_level
+          second: 31
+          operation: ">="
+        3:
+          first: island_level
+          second: 40
+          operation: "<="
+    5:
+      <<: *base
+      pattern: "<image:island> [island_display_name] (<image:level_purple>[island_level])"
+      conditions:
+        <<: *visible_condition
+        2:
+          first: island_level
+          second: 41
+          operation: ">="
+        3:
+          first: island_level
+          second: 50
+          operation: "<="
