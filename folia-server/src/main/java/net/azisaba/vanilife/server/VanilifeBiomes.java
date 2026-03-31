@@ -58,7 +58,6 @@ public final class VanilifeBiomes {
         final MobSpawnSettings.Builder mobSpawnSettings = new MobSpawnSettings.Builder();
 
         final BiomeGenerationSettings.Builder generationSettings = new BiomeGenerationSettings.Builder(placedFeatures, worldCarvers);
-        BiomeDefaultFeatures.addDefaultOres(generationSettings);
         BiomeDefaultFeatures.addDefaultSoftDisks(generationSettings);
         generationSettings.addFeature(GenerationStep.Decoration.LOCAL_MODIFICATIONS, VanilifePlacedFeatures.ISLAND_GROUND_PATCH);
         generationSettings.addFeature(GenerationStep.Decoration.LOCAL_MODIFICATIONS, VanilifePlacedFeatures.ISLAND_BEACH_PATCH);
