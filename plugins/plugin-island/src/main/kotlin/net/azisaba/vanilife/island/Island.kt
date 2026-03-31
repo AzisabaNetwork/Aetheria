@@ -46,6 +46,7 @@ class Island internal constructor(
 
             ScoreSource.all()
                 .filterIsInstance<ScoreSource.VisitPlayer>()
+                .filter { it.targetLevel.matches(level) }
                 .filter { !it.firstVisitOnly || isFirstVisit }
                 .forEach { source ->
                     updateScore(source)

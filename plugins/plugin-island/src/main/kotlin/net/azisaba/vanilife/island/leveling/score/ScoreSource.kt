@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 import net.azisaba.serialization.BlockTypeSetSerializer
 import net.azisaba.serialization.EntityTypeSetSerializer
 import net.azisaba.vanilife.DynamicContents
+import net.azisaba.vanilife.island.leveling.LevelPredicate
 import org.bukkit.block.BlockState
 import org.bukkit.block.BlockType
 import org.bukkit.entity.Entity
@@ -14,6 +15,8 @@ import org.bukkit.entity.EntityType
 @Serializable
 sealed interface ScoreSource {
     val rule: ScoringRule
+
+    val targetLevel: LevelPredicate
 
     fun score(context: ScoringContext, nowMillis: Long): ScoringRule.Result = rule.calculate(context, nowMillis)
 
@@ -24,6 +27,7 @@ sealed interface ScoreSource {
     data class BreakBlock(
         val blocks: @Serializable(with = BlockTypeSetSerializer::class) RegistryValueSet<BlockType>,
         override val rule: ScoringRule,
+        override val targetLevel: LevelPredicate,
     ) : ScoreSource {
         fun containsBlock(blockState: BlockState): Boolean = blocks.contains(blockState.type.asBlockType()!!)
     }
@@ -33,6 +37,7 @@ sealed interface ScoreSource {
     data class PlaceBlock(
         val blocks: @Serializable(with = BlockTypeSetSerializer::class) RegistryValueSet<BlockType>,
         override val rule: ScoringRule,
+        override val targetLevel: LevelPredicate,
     ) : ScoreSource {
         fun containsBlock(blockState: BlockState): Boolean = blocks.contains(blockState.type.asBlockType()!!)
     }
@@ -42,6 +47,7 @@ sealed interface ScoreSource {
     data class Breed(
         val entities: @Serializable(with = EntityTypeSetSerializer::class) RegistryValueSet<EntityType>,
         override val rule: ScoringRule,
+        override val targetLevel: LevelPredicate,
     ) : ScoreSource {
         fun containsEntity(entity: Entity): Boolean = entities.contains(entity.type)
     }
@@ -51,6 +57,7 @@ sealed interface ScoreSource {
     data class Harvest(
         val crops: @Serializable(with = BlockTypeSetSerializer::class) RegistryValueSet<BlockType>,
         override val rule: ScoringRule,
+        override val targetLevel: LevelPredicate,
     ) : ScoreSource {
         fun containsCrop(blockState: BlockState): Boolean = crops.contains(blockState.type.asBlockType()!!)
     }
@@ -60,5 +67,6 @@ sealed interface ScoreSource {
     data class VisitPlayer(
         val firstVisitOnly: Boolean = false,
         override val rule: ScoringRule,
+        override val targetLevel: LevelPredicate,
     ) : ScoreSource
 }
