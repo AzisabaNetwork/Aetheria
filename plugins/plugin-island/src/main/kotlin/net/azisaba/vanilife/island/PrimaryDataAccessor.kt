@@ -14,11 +14,17 @@ import org.jetbrains.exposed.v1.jdbc.update
 interface PrimaryDataAccessor {
     val level: Int
 
+    val score: Double
+
     val displayName: Component?
 
     suspend fun level(): Int
 
     suspend fun level(level: Int)
+
+    suspend fun score(): Double
+
+    suspend fun score(score: Double)
 
     suspend fun displayName(): Component?
 
@@ -33,15 +39,26 @@ interface PrimaryDataAccessor {
 
     companion object {
         fun create(
-            position: IslandPosition, database: Database, level: Int, displayName: Component?
-        ): PrimaryDataAccessor = PrimaryDataAccessorImpl(position, database, level, displayName)
+            position: IslandPosition,
+            database: Database,
+            level: Int,
+            score: Double,
+            displayName: Component?,
+        ): PrimaryDataAccessor = PrimaryDataAccessorImpl(position, database, level, score, displayName)
     }
 }
 
 private class PrimaryDataAccessorImpl(
-    private val position: IslandPosition, private val database: Database, level: Int, displayName: Component?,
+    private val position: IslandPosition,
+    private val database: Database,
+    level: Int,
+    score: Double,
+    displayName: Component?,
 ) : PrimaryDataAccessor {
     override var level: Int = level
+        private set
+
+    override var score: Double = score
         private set
 
     override var displayName: Component? = displayName
@@ -58,6 +75,19 @@ private class PrimaryDataAccessorImpl(
             it[IslandsTable.level] = level
         }
         this@PrimaryDataAccessorImpl.level = level
+    }
+
+    override suspend fun score(): Double = suspendTransaction(database) {
+        IslandsTable.select(IslandsTable.score)
+            .where { IslandsTable.id eq position.toLong() }
+            .single()[IslandsTable.score]
+    }.also { this@PrimaryDataAccessorImpl.score = it }
+
+    override suspend fun score(score: Double) = suspendTransaction(database) {
+        IslandsTable.update(where = { IslandsTable.id eq position.toLong() }) {
+            it[IslandsTable.score] = score
+        }
+        this@PrimaryDataAccessorImpl.score = score
     }
 
     override suspend fun displayName(): Component? = suspendTransaction(database) {

@@ -19,17 +19,18 @@ internal class IslandCacheMap(private val database: Database) : Iterable<Island>
     suspend fun lookup(position: IslandPosition): Island? {
         islandByPosition[position]?.let { return it }
         val row = suspendTransaction(database) {
-            IslandsTable.select(IslandsTable.owner, IslandsTable.level, IslandsTable.displayName)
+            IslandsTable.select(IslandsTable.owner, IslandsTable.level, IslandsTable.score, IslandsTable.displayName)
                 .where { IslandsTable.id eq position.toLong() }
                 .singleOrNull()
         } ?: return null
 
         val owner = row[IslandsTable.owner]
         val level = row[IslandsTable.level]
+        val score = row[IslandsTable.score]
         val displayName = row[IslandsTable.displayName]
 
         val island = islandByPosition.computeIfAbsent(position) {
-            Island(it, owner, level, displayName, database)
+            Island(it, owner, level, score, displayName, database)
         }
         cacheOwnerPosition(owner, position)
         return island
@@ -46,7 +47,7 @@ internal class IslandCacheMap(private val database: Database) : Iterable<Island>
         val position = insertToDatabase(owner)
         cacheOwnerPosition(owner, position)
         return islandByPosition.computeIfAbsent(position) {
-            Island(it, owner, 1, null, database)
+            Island(it, owner, 1, 0.0, null, database)
         }
     }
 
@@ -97,6 +98,7 @@ internal class IslandCacheMap(private val database: Database) : Iterable<Island>
         IslandsTable.insertAndGetId {
             it[IslandsTable.owner] = owner
             it[IslandsTable.level] = 1
+            it[IslandsTable.score] = 0.0
             it[IslandsTable.displayName] = null
         }.value.let(IslandPosition::fromLong)
     }

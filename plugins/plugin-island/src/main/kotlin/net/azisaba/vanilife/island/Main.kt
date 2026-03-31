@@ -5,6 +5,7 @@ import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import me.tofaa.entitylib.APIConfig
 import me.tofaa.entitylib.EntityLib
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform
+import net.azisaba.vanilife.island.leveling.ScoreSource
 import net.azisaba.vanilife.island.wrack.WrackType
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
@@ -29,6 +30,7 @@ class Main : JavaPlugin() {
         PacketEvents.getAPI().init()
         EntityLib.init(SpigotEntityLibPlatform(this), APIConfig(PacketEvents.getAPI()))
 
+        ScoreSource.bootstrap(this)
         WrackType.bootstrap(this)
 
         val cacheMap = IslandCacheMap(database)

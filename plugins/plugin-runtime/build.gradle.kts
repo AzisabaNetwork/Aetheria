@@ -12,6 +12,7 @@ dependencies {
     api(libs.mccoroutine.folia.core)
     api(libs.minecraftserialization.adventure)
     api(libs.minecraftserialization.joml)
+    api(libs.minecraftserialization.paper)
     api(libs.minecraftserialization.valueproviders)
     api(libs.packed.core)
     api(libs.packed.resource)
