@@ -20,7 +20,11 @@ sealed interface ScoreSource {
 
     fun score(context: ScoringContext, nowMillis: Long): ScoringRule.Result = rule.calculate(context, nowMillis)
 
-    companion object : DynamicContents<ScoreSource>("score_source", lazy { ScoreSource.serializer() })
+    companion object : DynamicContents<ScoreSource>("score_source", lazy { ScoreSource.serializer() }) {
+        fun all(level: Int): Set<ScoreSource> = all().filter {
+            it.targetLevel.matches(level)
+        }.toSet()
+    }
 
     @Serializable
     @SerialName("BreakBlock")

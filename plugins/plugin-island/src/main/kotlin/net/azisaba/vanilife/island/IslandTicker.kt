@@ -12,7 +12,7 @@ import org.bukkit.plugin.Plugin
 import kotlin.time.Duration.Companion.milliseconds
 
 internal class IslandTicker(
-    plugin: Plugin,
+    private val plugin: Plugin,
     private val cacheMap: IslandCacheMap,
     private val levelUpRequirements: ConfigurationHolder<LevelUpRequirementProvider>,
     private val levelUpCheckIntervalTicks: ConfigurationHolder<Long>,
@@ -39,7 +39,7 @@ internal class IslandTicker(
         }
 
         if (time % levelUpCheckIntervalTicks.value() == 0L && IslandPlayerMap.lookup(owner) === this) {
-            tryLevelUp(levelUpRequirements.value())
+            tryLevelUp(levelUpRequirements.value(), plugin)
         }
     }
 

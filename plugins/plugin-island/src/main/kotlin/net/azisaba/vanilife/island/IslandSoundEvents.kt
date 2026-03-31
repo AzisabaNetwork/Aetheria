@@ -1,4 +1,4 @@
-package net.azisaba.vanilife.npc
+package net.azisaba.vanilife.island
 
 import net.azisaba.packed.PackedKey
 import net.azisaba.packed.soundEvent
@@ -8,14 +8,14 @@ import net.azisaba.packed.sounds.PackSoundType
 import net.azisaba.vanilife.Vanilife
 import net.kyori.adventure.key.Key
 
-object NpcSoundEvents {
-    val NPC_READ_RECIPE: PackedKey<PackSoundEvent> = PackedKey.soundEvent(Vanilife.NAMESPACE, "npc.read_recipe")
+object IslandSoundEvents {
+    val ISLAND_LEVEL_UP: PackedKey<PackSoundEvent> = PackedKey.soundEvent(Vanilife.NAMESPACE, "island.level_up")
 
-    fun npcReadRecipe(): PackSoundEvent = PackSoundEvent(
+    fun levelUp(): PackSoundEvent = PackSoundEvent(
         sounds = listOf(
             PackSound(
                 type = PackSoundType.FILE,
-                name = Key.key(Vanilife.NAMESPACE, "npc/read_recipe"),
+                name = Key.key(Vanilife.NAMESPACE, "island/level_up"),
                 weight = 1,
             )
         ),

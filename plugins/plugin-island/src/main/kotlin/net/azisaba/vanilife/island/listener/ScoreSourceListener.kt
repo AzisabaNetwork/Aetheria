@@ -24,9 +24,8 @@ internal class ScoreSourceListener(private val cacheMap: IslandCacheMap, private
         plugin.launch {
             val island = cacheMap.lookup(position) ?: return@launch
 
-            ScoreSource.all()
+            ScoreSource.all(island.level)
                 .filterIsInstance<ScoreSource.BreakBlock>()
-                .filter { it.targetLevel.matches(island.level) }
                 .filter { it.containsBlock(blockState) }
                 .forEach { source ->
                     island.updateScore(source)
@@ -44,9 +43,8 @@ internal class ScoreSourceListener(private val cacheMap: IslandCacheMap, private
         plugin.launch {
             val island = cacheMap.lookup(position) ?: return@launch
 
-            ScoreSource.all()
+            ScoreSource.all(island.level)
                 .filterIsInstance<ScoreSource.PlaceBlock>()
-                .filter { it.targetLevel.matches(island.level) }
                 .filter { it.containsBlock(blockState) }
                 .forEach { source ->
                     island.updateScore(source)
@@ -63,9 +61,8 @@ internal class ScoreSourceListener(private val cacheMap: IslandCacheMap, private
         plugin.launch {
             val island = cacheMap.lookup(position) ?: return@launch
 
-            ScoreSource.all()
+            ScoreSource.all(island.level)
                 .filterIsInstance<ScoreSource.Breed>()
-                .filter { it.targetLevel.matches(island.level) }
                 .filter { it.containsEntity(event.entity) }
                 .forEach { source ->
                     island.updateScore(source)
@@ -83,9 +80,8 @@ internal class ScoreSourceListener(private val cacheMap: IslandCacheMap, private
         plugin.launch {
             val island = cacheMap.lookup(position) ?: return@launch
 
-            ScoreSource.all()
+            ScoreSource.all(island.level)
                 .filterIsInstance<ScoreSource.Harvest>()
-                .filter { it.targetLevel.matches(island.level) }
                 .filter { it.containsCrop(blockState) }
                 .forEach { source ->
                     island.updateScore(source)

@@ -34,14 +34,18 @@ sealed interface WrackType {
     suspend fun drop(random: Random, player: Player, island: Island, entity: WrackEntity)
 
     companion object : DynamicContents<WrackType>("wrack_type", lazy { WrackType.serializer() }) {
+        fun all(level: Int): Set<WrackType> = all().filter {
+            it.targetLevel.matches(level)
+        }.toSet()
+
         fun roll(random: Random, level: Int): WrackType? {
-            val entries = all().filter { it.targetLevel.matches(level) }
+            val entries = all(level)
                 .filter { it.weight > 0 }
                 .takeIf(List<WrackType>::isNotEmpty) ?: return null
 
             val totalWeight = entries.sumOf(WrackType::weight)
             var roll = random.nextInt(totalWeight)
-            for (entry in all()) {
+            for (entry in entries) {
                 roll -= entry.weight
                 if (roll < 0) return entry
             }

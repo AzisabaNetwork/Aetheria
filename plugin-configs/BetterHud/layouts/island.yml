@@ -23,7 +23,7 @@ island:
         3:
           first: island_level
           second: 10
-          operation: "<="
+          operation: "<"
     2:
       <<: *base
       pattern: "<image:island> [island_display_name] (<image:level_blue>[island_level])"
@@ -31,12 +31,12 @@ island:
         <<: *visible_condition
         2:
           first: island_level
-          second: 11
+          second: 10
           operation: ">="
         3:
           first: island_level
           second: 20
-          operation: "<="
+          operation: "<"
     3:
       <<: *base
       pattern: "<image:island> [island_display_name] (<image:level_yellow>[island_level])"
@@ -44,12 +44,12 @@ island:
         <<: *visible_condition
         2:
           first: island_level
-          second: 21
+          second: 20
           operation: ">="
         3:
           first: island_level
           second: 30
-          operation: "<="
+          operation: "<"
     4:
       <<: *base
       pattern: "<image:island> [island_display_name] (<image:level_pink>[island_level])"
@@ -57,12 +57,12 @@ island:
         <<: *visible_condition
         2:
           first: island_level
-          second: 31
+          second: 30
           operation: ">="
         3:
           first: island_level
           second: 40
-          operation: "<="
+          operation: "<"
     5:
       <<: *base
       pattern: "<image:island> [island_display_name] (<image:level_purple>[island_level])"
@@ -70,7 +70,7 @@ island:
         <<: *visible_condition
         2:
           first: island_level
-          second: 41
+          second: 40
           operation: ">="
         3:
           first: island_level

@@ -54,9 +54,8 @@ class Island internal constructor(
         if (ScoreSource.all().any { it is ScoreSource.VisitPlayer }) {
             val isFirstVisit = hasVisited(player)
 
-            ScoreSource.all()
+            ScoreSource.all(level)
                 .filterIsInstance<ScoreSource.VisitPlayer>()
-                .filter { it.targetLevel.matches(level) }
                 .filter { !it.firstVisitOnly || isFirstVisit }
                 .forEach { source ->
                     updateScore(source)

@@ -13,6 +13,7 @@ object IslandFonts {
     private const val WAVE_HEIGHT: Int = 512
 
     val ENCHANTS: PackedKey<PackFont> = PackedKey.font(Vanilife.NAMESPACE, "enchants")
+    val LEVEL_ICONS: PackedKey<PackFont> = PackedKey.font(Vanilife.NAMESPACE, "level_icons")
     val WAVES: PackedKey<PackFont> = PackedKey.font(Vanilife.NAMESPACE, "waves")
 
     fun enchants(): PackFont = PackFont(
@@ -34,6 +35,71 @@ object IslandFonts {
                 chars = listOf(Enchants.BOOK.toString()),
                 ascent = 0,
                 height = 52,
+            ),
+        )
+    )
+
+    fun levelIcons(): PackFont = PackFont(
+        listOf(
+            PackBitmapFontProvider(
+                file = Key.key(Vanilife.NAMESPACE, "icon/level/level_blue.png"),
+                chars = listOf(LevelIcons.LEVEL_BLUE.toString()),
+                ascent = 8,
+                height = 9,
+            ),
+            PackBitmapFontProvider(
+                file = Key.key(Vanilife.NAMESPACE, "icon/level/level_green.png"),
+                chars = listOf(LevelIcons.LEVEL_GREEN.toString()),
+                ascent = 8,
+                height = 9,
+            ),
+            PackBitmapFontProvider(
+                file = Key.key(Vanilife.NAMESPACE, "icon/level/level_pink.png"),
+                chars = listOf(LevelIcons.LEVEL_PINK.toString()),
+                ascent = 8,
+                height = 9,
+            ),
+            PackBitmapFontProvider(
+                file = Key.key(Vanilife.NAMESPACE, "icon/level/level_purple.png"),
+                chars = listOf(LevelIcons.LEVEL_PURPLE.toString()),
+                ascent = 8,
+                height = 9,
+            ),
+            PackBitmapFontProvider(
+                file = Key.key(Vanilife.NAMESPACE, "icon/level/level_yellow.png"),
+                chars = listOf(LevelIcons.LEVEL_YELLOW.toString()),
+                ascent = 8,
+                height = 9,
+            ),
+            PackBitmapFontProvider(
+                file = Key.key(Vanilife.NAMESPACE, "icon/level/level_up_blue.png"),
+                chars = listOf(LevelIcons.LEVEL_UP_BLUE.toString()),
+                ascent = 8,
+                height = 9,
+            ),
+            PackBitmapFontProvider(
+                file = Key.key(Vanilife.NAMESPACE, "icon/level/level_up_green.png"),
+                chars = listOf(LevelIcons.LEVEL_UP_GREEN.toString()),
+                ascent = 8,
+                height = 9,
+            ),
+            PackBitmapFontProvider(
+                file = Key.key(Vanilife.NAMESPACE, "icon/level/level_up_pink.png"),
+                chars = listOf(LevelIcons.LEVEL_UP_PINK.toString()),
+                ascent = 8,
+                height = 9,
+            ),
+            PackBitmapFontProvider(
+                file = Key.key(Vanilife.NAMESPACE, "icon/level/level_up_purple.png"),
+                chars = listOf(LevelIcons.LEVEL_UP_PURPLE.toString()),
+                ascent = 8,
+                height = 9,
+            ),
+            PackBitmapFontProvider(
+                file = Key.key(Vanilife.NAMESPACE, "icon/level/level_up_yellow.png"),
+                chars = listOf(LevelIcons.LEVEL_UP_YELLOW.toString()),
+                ascent = 8,
+                height = 9,
             ),
         )
     )
@@ -113,6 +179,36 @@ object IslandFonts {
         val ENCHANTING_TABLE: Char = nextChar()
         val ENCHANTED_BOOK: Char = nextChar()
         val BOOK: Char = nextChar()
+    }
+
+    object LevelIcons : CharCodeFactory() {
+        val LEVEL_BLUE: Char = nextChar()
+        val LEVEL_GREEN: Char = nextChar()
+        val LEVEL_PINK: Char = nextChar()
+        val LEVEL_PURPLE: Char = nextChar()
+        val LEVEL_YELLOW: Char = nextChar()
+
+        val LEVEL_UP_BLUE: Char = nextChar()
+        val LEVEL_UP_GREEN: Char = nextChar()
+        val LEVEL_UP_PINK: Char = nextChar()
+        val LEVEL_UP_PURPLE: Char = nextChar()
+        val LEVEL_UP_YELLOW: Char = nextChar()
+
+        fun levelOf(level: Int): Char = when (level) {
+            in 1..9 -> LEVEL_GREEN
+            in 10..19 -> LEVEL_BLUE
+            in 20..29 -> LEVEL_YELLOW
+            in 30..39 -> LEVEL_PINK
+            else -> LEVEL_PURPLE
+        }
+
+        fun levelUpOf(level: Int): Char = when (level) {
+            in 1..9 -> LEVEL_UP_GREEN
+            in 10..19 -> LEVEL_UP_BLUE
+            in 20..29 -> LEVEL_UP_YELLOW
+            in 30..39 -> LEVEL_UP_PINK
+            else -> LEVEL_UP_PURPLE
+        }
     }
 
     object Waves : CharCodeFactory() {

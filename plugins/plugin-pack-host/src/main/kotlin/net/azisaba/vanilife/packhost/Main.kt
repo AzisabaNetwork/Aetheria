@@ -18,10 +18,13 @@ import net.azisaba.vanilife.fishing.FishingModels
 import net.azisaba.vanilife.fishing.FishingTranslations
 import net.azisaba.vanilife.forestry.ForestryTranslations
 import net.azisaba.vanilife.island.IslandFonts
+import net.azisaba.vanilife.island.IslandSoundEvents
+import net.azisaba.vanilife.island.IslandTranslations
 import net.azisaba.vanilife.mining.MiningItemModels
 import net.azisaba.vanilife.mining.MiningModels
 import net.azisaba.vanilife.mining.MiningTranslations
-import net.azisaba.vanilife.npc.*
+import net.azisaba.vanilife.npc.NpcFonts
+import net.azisaba.vanilife.npc.NpcTranslations
 import net.azisaba.vanilife.portal.PortalTranslations
 import net.azisaba.vanilife.toolswap.ToolSwapTranslations
 import net.kyori.adventure.resource.ResourcePackInfo
@@ -42,6 +45,7 @@ internal class Main : JavaPlugin() {
             font {
                 FishingFonts.FISH_SHADOWS to FishingFonts.fishShadows()
                 IslandFonts.ENCHANTS to IslandFonts.enchants()
+                IslandFonts.LEVEL_ICONS to IslandFonts.levelIcons()
                 IslandFonts.WAVES to IslandFonts.waves()
                 NpcFonts.NPC_ICONS to NpcFonts.npcIcons()
                 GeneralFonts.DEFAULT to GeneralFonts.default()
@@ -157,11 +161,11 @@ internal class Main : JavaPlugin() {
                 PackedKey.lang(
                     Vanilife.NAMESPACE,
                     Locale.US
-                ) to (CookingTranslations.us() + FarmingTranslations.us() + FishingTranslations.us() + ForestryTranslations.us() + MiningTranslations.us() + NpcTranslations.us() + PortalTranslations.us() + ToolSwapTranslations.us() + GeneralTranslations.us())
+                ) to (CookingTranslations.us() + FarmingTranslations.us() + FishingTranslations.us() + ForestryTranslations.us() + IslandTranslations.us() + MiningTranslations.us() + NpcTranslations.us() + PortalTranslations.us() + ToolSwapTranslations.us() + GeneralTranslations.us())
                 PackedKey.lang(
                     Vanilife.NAMESPACE,
                     Locale.JAPAN
-                ) to (CookingTranslations.jp() + FarmingTranslations.jp() + FishingTranslations.jp() + ForestryTranslations.jp() + MiningTranslations.jp() + NpcTranslations.jp() + PortalTranslations.jp() + ToolSwapTranslations.jp() + GeneralTranslations.jp())
+                ) to (CookingTranslations.jp() + FarmingTranslations.jp() + FishingTranslations.jp() + ForestryTranslations.jp() + IslandTranslations.jp() + MiningTranslations.jp() + NpcTranslations.jp() + PortalTranslations.jp() + ToolSwapTranslations.jp() + GeneralTranslations.jp())
             }
 
             models {
@@ -271,7 +275,7 @@ internal class Main : JavaPlugin() {
             }
 
             sounds {
-                NpcSoundEvents.NPC_READ_RECIPE to NpcSoundEvents.npcReadRecipe()
+                IslandSoundEvents.ISLAND_LEVEL_UP to IslandSoundEvents.levelUp()
             }
 
             includeJavaResources(net.azisaba.vanilife.cooking.Main::class)
