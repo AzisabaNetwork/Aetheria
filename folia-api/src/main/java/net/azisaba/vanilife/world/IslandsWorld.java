@@ -6,7 +6,8 @@ import org.bukkit.World;
 
 public interface IslandsWorld extends World {
     int MIN_Y = 0;
-    int HEIGHT = 16 * 16;
+    int HEIGHT = 256;
+    float CLOUD_HEIGHT = 122.33F;
     int SEA_LEVEL = 12;
 
     int ISLAND_SIZE_X_BLOCKS = 144;

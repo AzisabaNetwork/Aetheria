@@ -81,12 +81,7 @@ public final class IslandSurfaceBlender {
 
     public BlockState oceanBlockStateAtY(final int highestY, final int y) {
         if (y <= highestY) {
-            final int depthBelowSeaLevel = Math.max(0, this.settings.seaLevel() - highestY);
-            final double stoneProgress = Mth.smoothstep(Mth.clamp((depthBelowSeaLevel - 2.0) / 10.0, 0.0, 1.0));
-            if (y < highestY - SURFACE_LAYER_THICKNESS) {
-                return this.selectOceanStoneState(stoneProgress, true);
-            }
-            return this.selectOceanFloorState(highestY, y, stoneProgress);
+            return Blocks.SAND.defaultBlockState();
         }
         if (y <= this.settings.seaLevel()) {
             return Blocks.WATER.defaultBlockState();
@@ -115,28 +110,4 @@ public final class IslandSurfaceBlender {
         return mixedNoise < threshold;
     }
 
-    private BlockState selectOceanFloorState(final int highestY, final int y, final double stoneProgress) {
-        final double layerProgress = Mth.clamp((highestY - y) / (double) SURFACE_LAYER_THICKNESS, 0.0, 1.0);
-        final double effectiveStoneProgress = Mth.clamp(stoneProgress * 0.8 + layerProgress * 0.2, 0.0, 1.0);
-        if (effectiveStoneProgress < 0.28) {
-            return Blocks.SAND.defaultBlockState();
-        }
-        if (effectiveStoneProgress < 0.52) {
-            return Blocks.GRAVEL.defaultBlockState();
-        }
-        if (effectiveStoneProgress < 0.78) {
-            return Blocks.SANDSTONE.defaultBlockState();
-        }
-        return this.selectOceanStoneState(effectiveStoneProgress, false);
-    }
-
-    private BlockState selectOceanStoneState(final double stoneProgress, final boolean deepLayer) {
-        if (stoneProgress < 0.72) {
-            return Blocks.STONE.defaultBlockState();
-        }
-        if (stoneProgress < 0.9) {
-            return deepLayer ? Blocks.ANDESITE.defaultBlockState() : Blocks.STONE.defaultBlockState();
-        }
-        return Blocks.ANDESITE.defaultBlockState();
-    }
 }

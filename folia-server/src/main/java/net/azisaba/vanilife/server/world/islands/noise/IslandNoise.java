@@ -85,7 +85,8 @@ public final class IslandNoise {
     ) {
         if (signedDistance > 0.0) {
             final int shoreDepthStepBlocks = Math.max(1, this.settings.offshoreDepthStepDistanceBlocks());
-            final int gradualDepth = Math.min(generatorSettings.seaDepth(), (int) Math.floor(signedDistance / shoreDepthStepBlocks));
+            final int maxDepth = Math.max(0, generatorSettings.seaLevel() - (generatorSettings.minY() + 1));
+            final int gradualDepth = Math.min(maxDepth, (int) Math.floor(signedDistance / shoreDepthStepBlocks));
             return generatorSettings.seaLevel() - gradualDepth;
         }
 

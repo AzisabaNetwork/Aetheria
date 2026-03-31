@@ -64,8 +64,8 @@ public final class VanilifeLevelStems {
         final BiomeSource biomeSource = new FixedBiomeSource(biome);
         final IslandsChunkGenerator generator = new IslandsChunkGenerator(
             new IslandsGeneratorSettings(
+                IslandsWorld.MIN_Y,
                 IslandsWorld.SEA_LEVEL,
-                36,
                 IslandsWorld.SEA_LEVEL + 2,
                 IslandsWorld.HEIGHT,
                 12

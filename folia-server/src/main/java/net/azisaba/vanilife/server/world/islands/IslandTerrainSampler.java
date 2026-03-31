@@ -16,7 +16,7 @@ final class IslandTerrainSampler {
     static final double RIVER_BANK_THRESHOLD = 0.015;
 
     private static final long DEEP_OCEAN_NOISE_SALT = 0xD1342543DE82EF95L;
-    private static final int DEEP_OCEAN_VARIATION = 2;
+    private static final int DEEP_OCEAN_VARIATION = 3;
     private static final int RIVER_BANK_SLOPE_BLOCKS = 6;
 
     private final IslandsGeneratorSettings settings;
@@ -157,13 +157,13 @@ final class IslandTerrainSampler {
     }
 
     private int resolveHighestY(final long levelSeed, final int blockX, final int blockZ, final int baseHighestY) {
-        final int deepBaseFloorY = this.settings.seaLevel() - this.settings.seaDepth();
+        final int deepBaseFloorY = this.settings.minY() + 1;
         if (baseHighestY > deepBaseFloorY) {
             return baseHighestY;
         }
 
         final int bump = (int) Math.round(sample2d(this.getDeepOceanNoise(levelSeed), blockX, blockZ, 16.0) * DEEP_OCEAN_VARIATION);
-        return deepBaseFloorY + bump;
+        return Math.max(deepBaseFloorY, deepBaseFloorY + bump);
     }
 
     private boolean isInland(final double signedDistance) {

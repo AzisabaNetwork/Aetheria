@@ -75,7 +75,7 @@ public final class VanilifeDimensionTypes {
     private static EnvironmentAttributeMap resourceEnvironment() {
         return EnvironmentAttributeMap.builder()
             .set(EnvironmentAttributes.CLOUD_COLOR, ARGB.white(0.8F))
-            .set(EnvironmentAttributes.CLOUD_HEIGHT, 122.33F)
+            .set(EnvironmentAttributes.CLOUD_HEIGHT, IslandsWorld.CLOUD_HEIGHT)
             .set(EnvironmentAttributes.FOG_COLOR, -4138753)
             .set(EnvironmentAttributes.SKY_COLOR, OverworldBiomes.calculateSkyColor(0.8F))
             .set(EnvironmentAttributes.BED_RULE, BedRule.CAN_SLEEP_WHEN_DARK)

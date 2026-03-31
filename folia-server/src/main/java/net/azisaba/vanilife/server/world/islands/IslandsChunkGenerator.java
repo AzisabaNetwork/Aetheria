@@ -59,7 +59,7 @@ public final class IslandsChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getMinY() {
-        return IslandsWorld.MIN_Y;
+        return this.settings.minY();
     }
 
     @Override
