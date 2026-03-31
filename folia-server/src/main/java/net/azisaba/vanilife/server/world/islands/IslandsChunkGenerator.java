@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import net.azisaba.vanilife.server.world.islands.IslandTerrainSampler.TerrainSample;
+import net.azisaba.vanilife.world.IslandsWorld;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
@@ -31,11 +32,11 @@ import org.jspecify.annotations.NullMarked;
 @NullMarked
 public final class IslandsChunkGenerator extends ChunkGenerator {
     public static final MapCodec<IslandsChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(
-            instance -> instance.group(
-                            IslandsGeneratorSettings.CODEC.fieldOf("settings").forGetter(generator -> generator.settings),
-                            BiomeSource.CODEC.fieldOf("biome_source").forGetter(ChunkGenerator::getBiomeSource)
-                    )
-                    .apply(instance, IslandsChunkGenerator::new)
+        instance -> instance.group(
+                IslandsGeneratorSettings.CODEC.fieldOf("settings").forGetter(generator -> generator.settings),
+                BiomeSource.CODEC.fieldOf("biome_source").forGetter(ChunkGenerator::getBiomeSource)
+            )
+            .apply(instance, IslandsChunkGenerator::new)
     );
 
     private final IslandsGeneratorSettings settings;
@@ -58,7 +59,7 @@ public final class IslandsChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getMinY() {
-        return DimensionDefaults.OVERWORLD_MIN_Y;
+        return IslandsWorld.MIN_Y;
     }
 
     @Override
@@ -73,10 +74,10 @@ public final class IslandsChunkGenerator extends ChunkGenerator {
 
     @Override
     public CompletableFuture<ChunkAccess> fillFromNoise(
-            final Blender blender,
-            final RandomState randomState,
-            final StructureManager structureManager,
-            final ChunkAccess chunk
+        final Blender blender,
+        final RandomState randomState,
+        final StructureManager structureManager,
+        final ChunkAccess chunk
     ) {
         final long levelSeed = structureManager.level.getMinecraftWorld().getSeed();
         final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
@@ -118,30 +119,30 @@ public final class IslandsChunkGenerator extends ChunkGenerator {
         final BlockState[] column = new BlockState[height.getHeight()];
 
         for (int y = minY; y < maxY; y++) {
-            column[y - minY] = this.blockStateAtY(sample, y);
+            column[y - minY] = this.blockStateAtY(sample, y, minY);
         }
         return new NoiseColumn(minY, column);
     }
 
     @Override
     public void applyCarvers(
-            final WorldGenRegion region,
-            final long seed,
-            final RandomState random,
-            final BiomeManager biomeManager,
-            final StructureManager structureManager,
-            final ChunkAccess chunk
+        final WorldGenRegion region,
+        final long seed,
+        final RandomState random,
+        final BiomeManager biomeManager,
+        final StructureManager structureManager,
+        final ChunkAccess chunk
     ) {
     }
 
     @Override
     public void createStructures(
-            final RegistryAccess registryAccess,
-            final ChunkGeneratorStructureState structureState,
-            final StructureManager structureManager,
-            final ChunkAccess chunk,
-            final StructureTemplateManager structureTemplateManager,
-            final ResourceKey<Level> level
+        final RegistryAccess registryAccess,
+        final ChunkGeneratorStructureState structureState,
+        final StructureManager structureManager,
+        final ChunkAccess chunk,
+        final StructureTemplateManager structureTemplateManager,
+        final ResourceKey<Level> level
     ) {
     }
 
@@ -154,36 +155,34 @@ public final class IslandsChunkGenerator extends ChunkGenerator {
     }
 
     private void fillTerrainColumn(
-            final ChunkAccess chunk,
-            final BlockPos.MutableBlockPos pos,
-            final long levelSeed,
-            final int blockX,
-            final int blockZ
+        final ChunkAccess chunk, final BlockPos.MutableBlockPos pos, final long levelSeed, final int blockX, final int blockZ
     ) {
         final TerrainSample sample = this.terrainSampler.sample(levelSeed, blockX, blockZ);
-        pos.set(blockX, 0, blockZ);
-        for (int y = chunk.getMinY(); y < this.settings.airTopY(); y++) {
+        final int minY = chunk.getMinY();
+        pos.set(blockX, minY, blockZ);
+        for (int y = minY; y < this.settings.airTopY(); y++) {
             pos.setY(y);
-            chunk.setBlockState(pos, this.blockStateAtY(sample, y), Block.UPDATE_NONE);
+            chunk.setBlockState(pos, this.blockStateAtY(sample, y, minY), Block.UPDATE_NONE);
         }
     }
 
-    private BlockState blockStateAtY(final TerrainSample sample, final int y) {
+    private BlockState blockStateAtY(final TerrainSample sample, final int y, final int minY) {
+        if (y == minY) {
+            return Blocks.BEDROCK.defaultBlockState();
+        }
         if (this.isRiverWater(sample, y)) {
             return Blocks.WATER.defaultBlockState();
         }
-        return sample.highestY() > this.settings.seaLevel()
-                ? this.surfaceBlender.landBlockStateAtY(
-                        sample.signedDistance(),
-                        sample.cornerInfluence(),
-                        sample.beachTransitionNoise(),
-                        sample.beachBlendNoise(),
-                        sample.highestY(),
-                        sample.riverStrength(),
-                        IslandTerrainSampler.RIVER_BANK_THRESHOLD,
-                        y
-                )
-                : this.surfaceBlender.oceanBlockStateAtY(sample.highestY(), y);
+        return sample.highestY() > this.settings.seaLevel() ? this.surfaceBlender.landBlockStateAtY(
+            sample.signedDistance(),
+            sample.cornerInfluence(),
+            sample.beachTransitionNoise(),
+            sample.beachBlendNoise(),
+            sample.highestY(),
+            sample.riverStrength(),
+            IslandTerrainSampler.RIVER_BANK_THRESHOLD,
+            y
+        ) : this.surfaceBlender.oceanBlockStateAtY(sample.highestY(), y);
     }
 
     private boolean isRiverWater(final TerrainSample sample, final int y) {

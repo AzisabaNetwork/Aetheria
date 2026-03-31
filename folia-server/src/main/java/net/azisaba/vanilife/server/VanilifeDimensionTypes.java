@@ -1,6 +1,7 @@
 package net.azisaba.vanilife.server;
 
 import net.azisaba.vanilife.Vanilife;
+import net.azisaba.vanilife.world.IslandsWorld;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.WritableRegistry;
@@ -58,9 +59,9 @@ public final class VanilifeDimensionTypes {
             true,
             false,
             1.0,
-            DimensionDefaults.OVERWORLD_MIN_Y,
-            DimensionDefaults.OVERWORLD_GENERATION_HEIGHT,
-            DimensionDefaults.OVERWORLD_GENERATION_HEIGHT,
+            IslandsWorld.MIN_Y,
+            IslandsWorld.HEIGHT,
+            IslandsWorld.HEIGHT,
             BlockTags.INFINIBURN_OVERWORLD,
             0.0F,
             new DimensionType.MonsterSettings(UniformInt.of(0, 7), 0),
