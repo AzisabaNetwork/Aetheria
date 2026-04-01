@@ -59,7 +59,9 @@ private class LevelDataAccessorImpl(
     }
 
     override suspend fun updateScore(source: ScoreSource) {
-        val providedScore = scoringManager.computeScore(source)
-        score(score + providedScore)
+        val give = scoringManager.computeScore(source)
+        val newScore = score + give
+        score(newScore)
+        score = newScore
     }
 }
