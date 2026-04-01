@@ -10,6 +10,8 @@ dependencies {
     api(libs.kotlinx.coroutines.core)
     api(libs.mccoroutine.folia.api)
     api(libs.mccoroutine.folia.core)
+    api(libs.minecraftexposed.adventure)
+    api(libs.minecraftexposed.paper)
     api(libs.minecraftserialization.adventure)
     api(libs.minecraftserialization.joml)
     api(libs.minecraftserialization.paper)
