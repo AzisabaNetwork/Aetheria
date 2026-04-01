@@ -3,11 +3,13 @@ package net.azisaba.vanilife.server.world.islands.river;
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
-record RiverNetwork(RiverNetwork.Mouth[] mouths, RiverNetwork.Trunk trunk) {
+public record RiverNetwork(Mouth[] mouths, Trunk trunk, Obstacle[] obstacles) {
+    public record Obstacle(double x, double z, double safeRadius) {}
+
     @NullMarked
     record Mouth(
-        double x, double z,
-        double directionX, double directionZ,
+        double startX, double startZ,
+        double[] waypointsX, double[] waypointsZ,
         double length, double width,
         double meanderAmplitude,
         double phase
@@ -16,8 +18,8 @@ record RiverNetwork(RiverNetwork.Mouth[] mouths, RiverNetwork.Trunk trunk) {
 
     @NullMarked
     record Trunk(
-        double x, double z,
-        double directionX, double directionZ,
+        double startX, double startZ,
+        double[] waypointsX, double[] waypointsZ,
         double length, double width,
         double meanderAmplitude,
         double phase

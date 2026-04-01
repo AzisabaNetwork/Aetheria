@@ -34,6 +34,7 @@ public final class VanilifePlacedFeatures {
     public static final ResourceKey<PlacedFeature> ISLAND_FALLEN_JUNGLE_TREE = ResourceKey.create(Registries.PLACED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_fallen_jungle_tree"));
     public static final ResourceKey<PlacedFeature> ISLAND_GROUND_PATCH = ResourceKey.create(Registries.PLACED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_ground_patch"));
     public static final ResourceKey<PlacedFeature> ISLAND_BEACH_PATCH = ResourceKey.create(Registries.PLACED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_beach_patch"));
+    public static final ResourceKey<PlacedFeature> ISLAND_SPAWN_WRECKAGE = ResourceKey.create(Registries.PLACED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_spawn_wreckage"));
     public static final ResourceKey<PlacedFeature> ISLAND_WHEAT_PATCH = ResourceKey.create(Registries.PLACED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_wheat_patch"));
     public static final ResourceKey<PlacedFeature> ISLAND_PRISMARINE_PORTAL_FRAME = ResourceKey.create(Registries.PLACED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_prismarine_portal_frame"));
     public static final ResourceKey<PlacedFeature> CAVE_ICE_CLUSTER = ResourceKey.create(Registries.PLACED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "cave_ice_cluster"));
@@ -54,6 +55,7 @@ public final class VanilifePlacedFeatures {
         writable.register(ISLAND_FALLEN_JUNGLE_TREE, islandFallenJungleTree(configuredFeatures), RegistrationInfo.BUILT_IN);
         writable.register(ISLAND_GROUND_PATCH, islandGroundPatch(configuredFeatures, VanilifeConfiguredFeatures.ISLAND_GROUND_PATCH, 2), RegistrationInfo.BUILT_IN);
         writable.register(ISLAND_BEACH_PATCH, islandGroundPatch(configuredFeatures, VanilifeConfiguredFeatures.ISLAND_BEACH_PATCH, 2), RegistrationInfo.BUILT_IN);
+        writable.register(ISLAND_SPAWN_WRECKAGE, islandChunkFeature(configuredFeatures, VanilifeConfiguredFeatures.ISLAND_SPAWN_WRECKAGE), RegistrationInfo.BUILT_IN);
         writable.register(ISLAND_WHEAT_PATCH, islandChunkFeature(configuredFeatures, VanilifeConfiguredFeatures.ISLAND_WHEAT_PATCH), RegistrationInfo.BUILT_IN);
         writable.register(ISLAND_PRISMARINE_PORTAL_FRAME, islandChunkFeature(configuredFeatures, VanilifeConfiguredFeatures.ISLAND_PRISMARINE_PORTAL_FRAME), RegistrationInfo.BUILT_IN);
         writable.register(CAVE_ICE_CLUSTER, caveIceCluster(configuredFeatures), RegistrationInfo.BUILT_IN);
@@ -71,7 +73,7 @@ public final class VanilifePlacedFeatures {
                 HeightmapPlacement.onHeightmap(Heightmap.Types.WORLD_SURFACE_WG),
                 BlockPredicateFilter.forPredicate(
                     BlockPredicate.allOf(
-                        BlockPredicate.matchesBlocks(Direction.DOWN.getUnitVec3i(), Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.COARSE_DIRT, Blocks.ROOTED_DIRT),
+                        BlockPredicate.matchesBlocks(Direction.DOWN.getUnitVec3i(), Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.ROOTED_DIRT),
                         BlockPredicate.ONLY_IN_AIR_PREDICATE
                     )
                 ),
@@ -89,7 +91,7 @@ public final class VanilifePlacedFeatures {
                 HeightmapPlacement.onHeightmap(Heightmap.Types.WORLD_SURFACE_WG),
                 BlockPredicateFilter.forPredicate(
                     BlockPredicate.allOf(
-                        BlockPredicate.matchesBlocks(Direction.DOWN.getUnitVec3i(), Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.COARSE_DIRT, Blocks.ROOTED_DIRT),
+                        BlockPredicate.matchesBlocks(Direction.DOWN.getUnitVec3i(), Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.ROOTED_DIRT),
                         BlockPredicate.ONLY_IN_AIR_PREDICATE
                     )
                 ),
@@ -107,7 +109,7 @@ public final class VanilifePlacedFeatures {
                 HeightmapPlacement.onHeightmap(Heightmap.Types.WORLD_SURFACE_WG),
                 BlockPredicateFilter.forPredicate(
                     BlockPredicate.allOf(
-                        BlockPredicate.matchesBlocks(Direction.DOWN.getUnitVec3i(), Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.COARSE_DIRT, Blocks.ROOTED_DIRT),
+                        BlockPredicate.matchesBlocks(Direction.DOWN.getUnitVec3i(), Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.ROOTED_DIRT),
                         BlockPredicate.ONLY_IN_AIR_PREDICATE
                     )
                 ),

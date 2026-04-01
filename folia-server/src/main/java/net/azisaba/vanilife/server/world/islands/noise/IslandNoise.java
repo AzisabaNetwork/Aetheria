@@ -1,17 +1,24 @@
 package net.azisaba.vanilife.server.world.islands.noise;
 
 import net.azisaba.vanilife.server.world.islands.IslandsGeneratorSettings;
+import net.azisaba.vanilife.world.IslandPosition;
 import net.azisaba.vanilife.world.IslandsWorld;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
+import io.papermc.paper.math.BlockPosition;
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
 public final class IslandNoise {
-    public static IslandNoise createDefault(final long seed) {
+    private static final double SPAWN_BEACH_HEIGHT_RADIUS = 14.0;
+    private static final double SPAWN_BEACH_STABILITY_RADIUS = 22.0;
+    private static final double SPAWN_TARGET_SIGNED_DISTANCE = -2.5;
+
+    public static IslandNoise createDefault(final long levelSeed, final IslandPosition islandPos) {
         return new IslandNoise(
-            seed,
+            islandPos,
+            levelSeed,
             IslandsWorld.ISLAND_SIZE_X_BLOCKS,
             IslandsWorld.ISLAND_SIZE_Z_BLOCKS,
             IslandNoiseSettings.createDefault()
@@ -22,6 +29,8 @@ public final class IslandNoise {
     private final double halfHeight;
     private final double cliffDirectionX;
     private final double cliffDirectionZ;
+    private final int spawnBlockOffsetX;
+    private final int spawnBlockOffsetZ;
 
     private final IslandNoiseSettings settings;
 
@@ -32,12 +41,16 @@ public final class IslandNoise {
     private final NormalNoise cliffNoise;
     private final NormalNoise landDetailNoise;
 
-    public IslandNoise(final long seed, final int width, final int height, final IslandNoiseSettings noiseSettings) {
+    public IslandNoise(final IslandPosition position, final long levelSeed, final int width, final int height, final IslandNoiseSettings noiseSettings) {
+        final long seed = position.computeSeed(levelSeed);
         this.halfWidth = width / 2.0;
         this.halfHeight = height / 2.0;
         final double cliffDirectionAngle = ((seed >>> 8) & 1023L) / 1024.0 * Math.PI * 2.0;
         this.cliffDirectionX = Math.cos(cliffDirectionAngle);
         this.cliffDirectionZ = Math.sin(cliffDirectionAngle);
+        final BlockPosition spawnBlock = position.spawnBlock(levelSeed);
+        this.spawnBlockOffsetX = spawnBlock.blockX() - position.centerBlockX();
+        this.spawnBlockOffsetZ = spawnBlock.blockZ() - position.centerBlockZ();
         this.settings = noiseSettings;
         this.coastNoise = createNoise(seed, -2, 1.0, 0.5, 0.25, 0.125);
         this.cornerNoise = createNoise(seed ^ 0x9E3779B97F4A7C15L, -1, 1.0, 0.55, 0.3);
@@ -58,7 +71,8 @@ public final class IslandNoise {
         final double coastNoiseSample = sample2d(this.coastNoise, x, z, 48.0);
         final double coastlineOffset = coastNoiseSample * this.settings.coastlineNoiseAmplitude() * coastInfluence;
 
-        return baseSignedDistance + coastlineOffset;
+        final double signedDistance = baseSignedDistance + coastlineOffset;
+        return Mth.lerp(this.spawnStability(x, z, SPAWN_BEACH_STABILITY_RADIUS), signedDistance, SPAWN_TARGET_SIGNED_DISTANCE);
     }
 
     public double cornerInfluence(final double x, final double z) {
@@ -68,13 +82,21 @@ public final class IslandNoise {
     public double computeBeachTransitionNoise(final double x, final double z) {
         final double coastSample = sample2d(this.coastNoise, x - 37.0, z + 29.0, 14.0);
         final double detailSample = sample2d(this.landDetailNoise, x + 13.0, z - 17.0, 10.0);
-        return Mth.clamp((coastSample * 0.65) + (detailSample * 0.35), -1.0, 1.0);
+        return Mth.lerp(
+            this.spawnStability(x, z, SPAWN_BEACH_STABILITY_RADIUS),
+            Mth.clamp((coastSample * 0.65) + (detailSample * 0.35), -1.0, 1.0),
+            0.0
+        );
     }
 
     public double computeBeachBlendNoise(final double x, final double z) {
         final double macro = sample2d(this.coastNoise, x + 19.0, z - 23.0, 8.0);
         final double micro = sample2d(this.landDetailNoise, x - 11.0, z + 7.0, 4.5);
-        return Mth.clamp((macro * 0.45) + (micro * 0.55), -1.0, 1.0);
+        return Mth.lerp(
+            this.spawnStability(x, z, SPAWN_BEACH_STABILITY_RADIUS),
+            Mth.clamp((macro * 0.45) + (micro * 0.55), -1.0, 1.0),
+            0.0
+        );
     }
 
     public int computeBaseHighestY(
@@ -145,7 +167,9 @@ public final class IslandNoise {
         final int coastY = generatorSettings.seaLevel() + 1;
         final int centerY = Math.max(generatorSettings.landTopY() - 1, coastY + 1);
         final int span = centerY - coastY;
-        return coastY + (int) Math.round(noisyProgress * span);
+        final int highestY = coastY + (int) Math.round(noisyProgress * span);
+        final double spawnBeachHeightStability = this.spawnStability(x, z, SPAWN_BEACH_HEIGHT_RADIUS);
+        return (int) Math.round(Mth.lerp(spawnBeachHeightStability, highestY, coastY));
     }
 
     private double cornerMask(final double x, final double z) {
@@ -174,11 +198,23 @@ public final class IslandNoise {
         return outside + inside - r;
     }
 
+    private double spawnStability(final double x, final double z, final double radius) {
+        final double dx = x - this.spawnBlockOffsetX;
+        final double dz = z - this.spawnBlockOffsetZ;
+        final double distance = Math.sqrt(dx * dx + dz * dz);
+        final double progress = 1.0 - Mth.clamp(distance / radius, 0.0, 1.0);
+        return Mth.smoothstep(progress);
+    }
+
     private static NormalNoise createNoise(final long seed, final int firstOctave, final double amplitude, final double... otherAmplitudes) {
         final double[] amplitudes = new double[otherAmplitudes.length + 1];
         amplitudes[0] = amplitude;
         System.arraycopy(otherAmplitudes, 0, amplitudes, 1, otherAmplitudes.length);
         return NormalNoise.create(new LegacyRandomSource(seed), firstOctave, amplitudes);
+    }
+
+    public double sample2d(final double x, final double z, final double scale) {
+        return sample2d(this.landDetailNoise, x, z, scale);
     }
 
     private static double sample2d(final NormalNoise noise, final double x, final double z, final double scale) {

@@ -23,6 +23,7 @@ public final class IslandSurfaceBlender {
         final int highestY,
         final double riverStrength,
         final double riverBankThreshold,
+        final double spawnPointDistance,
         final int y
     ) {
         final double beachBand = Math.max(1.0, this.settings.beachWidth() - 1.0) + cornerInfluence * 1.5;
@@ -41,7 +42,29 @@ public final class IslandSurfaceBlender {
             }
             return Blocks.DIRT.defaultBlockState();
         }
+        final double wastelandNoise = (beachTransitionNoise + beachBlendNoise) * 2.0;
+        final double wastelandThreshold = 10.0 + wastelandNoise;
         if (y == highestY) {
+            final boolean isWasteland = spawnPointDistance < wastelandThreshold;
+            if (isWasteland) {
+                final double wastelandChoice = (beachBlendNoise + 1.0) * 0.5;
+                if (wastelandChoice < 0.25) {
+                    return Blocks.COARSE_DIRT.defaultBlockState();
+                } else if (wastelandChoice < 0.45) {
+                    return Blocks.PODZOL.defaultBlockState();
+                } else if (wastelandChoice < 0.6) {
+                    return Blocks.GRAVEL.defaultBlockState();
+                } else if (wastelandChoice < 0.72) {
+                    return Blocks.COBBLESTONE.defaultBlockState();
+                } else if (wastelandChoice < 0.82) {
+                    return Blocks.MOSSY_COBBLESTONE.defaultBlockState();
+                } else if (wastelandChoice < 0.91) {
+                    return Blocks.BASALT.defaultBlockState();
+                } else {
+                    return Blocks.TUFF.defaultBlockState();
+                }
+            }
+
             final boolean placeSand = beachCore
                 || this.shouldPlaceSandOnSurface(beachMixProgress, beachTransitionNoise, beachBlendNoise, riverBank);
             if (placeSand) {

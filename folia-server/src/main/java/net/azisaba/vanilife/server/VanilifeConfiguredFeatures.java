@@ -43,6 +43,7 @@ public final class VanilifeConfiguredFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> ISLAND_BEACH_PATCH = ResourceKey.create(Registries.CONFIGURED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_beach_patch"));
     public static final ResourceKey<ConfiguredFeature<?, ?>> ISLAND_CONIFER_TREE = ResourceKey.create(Registries.CONFIGURED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_conifer_tree"));
     public static final ResourceKey<ConfiguredFeature<?, ?>> ISLAND_GROUND_PATCH = ResourceKey.create(Registries.CONFIGURED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_ground_patch"));
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ISLAND_SPAWN_WRECKAGE = ResourceKey.create(Registries.CONFIGURED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_spawn_wreckage"));
     public static final ResourceKey<ConfiguredFeature<?, ?>> ISLAND_PRISMARINE_PORTAL_FRAME = ResourceKey.create(Registries.CONFIGURED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_prismarine_portal_frame"));
     public static final ResourceKey<ConfiguredFeature<?, ?>> ISLAND_WHEAT_PATCH = ResourceKey.create(Registries.CONFIGURED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_wheat_patch"));
 
@@ -61,6 +62,7 @@ public final class VanilifeConfiguredFeatures {
         writable.register(ISLAND_BEACH_PATCH, islandBeachPatch(), RegistrationInfo.BUILT_IN);
         writable.register(ISLAND_CONIFER_TREE, islandConiferTree(), RegistrationInfo.BUILT_IN);
         writable.register(ISLAND_GROUND_PATCH, islandGroundPatch(), RegistrationInfo.BUILT_IN);
+        writable.register(ISLAND_SPAWN_WRECKAGE, islandSpawnWreckage(features), RegistrationInfo.BUILT_IN);
         writable.register(ISLAND_PRISMARINE_PORTAL_FRAME, islandPrismarinePortalFrame(features), RegistrationInfo.BUILT_IN);
         writable.register(ISLAND_WHEAT_PATCH, islandWheatPatch(features), RegistrationInfo.BUILT_IN);
     }
@@ -240,6 +242,11 @@ public final class VanilifeConfiguredFeatures {
                 1
             )
         );
+    }
+
+    private static ConfiguredFeature<?, ?> islandSpawnWreckage(final HolderGetter<Feature<?>> features) {
+        final Feature<NoneFeatureConfiguration> feature = (Feature<NoneFeatureConfiguration>) features.getOrThrow((ResourceKey) VanilifeFeatures.ISLAND_SPAWN_WRECKAGE).value();
+        return new ConfiguredFeature<>(feature, NoneFeatureConfiguration.INSTANCE);
     }
 
     @SuppressWarnings("unchecked")

@@ -1,8 +1,10 @@
 package net.azisaba.vanilife.island
 
 import net.azisaba.vanilife.ConfigurationHolder
+import net.azisaba.vanilife.Vanilife
 import net.azisaba.vanilife.island.wrack.WrackConfiguration
 import net.azisaba.vanilife.world.IslandPosition
+import net.azisaba.vanilife.world.IslandsWorld
 import org.bukkit.plugin.Plugin
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -10,6 +12,7 @@ import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
+import org.jetbrains.exposed.v1.jdbc.update
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
@@ -66,6 +69,9 @@ internal class IslandCacheMap(
         lookup(owner)?.let { return it }
 
         val position = insertToDatabase(owner)
+        val levelSeed = Vanilife.getIslandsWorld().seed
+        val spawnBlock = position.spawnBlock(levelSeed)
+        val spawnYaw = position.spawnYaw(levelSeed)
         cacheOwnerPosition(owner, position)
         return islandByPosition.computeIfAbsent(position) {
             Island(
@@ -74,10 +80,10 @@ internal class IslandCacheMap(
                 Island.MIN_LEVEL,
                 score = 0.0,
                 displayName = null,
-                spawnOffsetX = 0.0,
-                spawnOffsetY = 0.0,
-                spawnOffsetZ = 0.0,
-                spawnYaw = 90f,
+                spawnOffsetX = spawnBlock.blockX().toDouble() + 0.5,
+                spawnOffsetY = (IslandsWorld.SEA_LEVEL + 2).toDouble(),
+                spawnOffsetZ = spawnBlock.blockZ().toDouble() + 0.5,
+                spawnYaw = spawnYaw,
                 spawnPitch = 0f,
                 spawnLimit = wrackConfig.map(WrackConfiguration::spawnLimit),
                 spawnIntervalTicks = wrackConfig.map(WrackConfiguration::spawnIntervalTicks),
@@ -131,7 +137,7 @@ internal class IslandCacheMap(
     }
 
     private suspend fun insertToDatabase(owner: UUID): IslandPosition = suspendTransaction(database) {
-        IslandsTable.insertAndGetId {
+        val id = IslandsTable.insertAndGetId {
             it[IslandsTable.owner] = owner
             it[IslandsTable.level] = Island.MIN_LEVEL
             it[IslandsTable.score] = 0.0
@@ -141,6 +147,19 @@ internal class IslandCacheMap(
             it[IslandsTable.spawnOffsetZ] = 0.0
             it[IslandsTable.spawnYaw] = 0f
             it[IslandsTable.spawnPitch] = 0f
-        }.value.let(IslandPosition::fromLong)
+        }
+        val position = IslandPosition.fromLong(id.value)
+        val levelSeed = Vanilife.getIslandsWorld().seed
+        val spawnBlock = position.spawnBlock(levelSeed)
+        val spawnYaw = position.spawnYaw(levelSeed)
+
+        IslandsTable.update(where = { IslandsTable.id eq position.toLong() }) {
+            it[IslandsTable.spawnOffsetX] = spawnBlock.blockX().toDouble() + 0.5
+            it[IslandsTable.spawnOffsetY] = (IslandsWorld.SEA_LEVEL + 2).toDouble()
+            it[IslandsTable.spawnOffsetZ] = spawnBlock.blockZ().toDouble() + 0.5
+            it[IslandsTable.spawnYaw] = spawnYaw
+        }
+
+        position
     }
 }

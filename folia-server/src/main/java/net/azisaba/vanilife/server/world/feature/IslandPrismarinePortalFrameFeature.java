@@ -3,7 +3,6 @@ package net.azisaba.vanilife.server.world.feature;
 import com.mojang.serialization.Codec;
 import net.azisaba.vanilife.world.IslandPosition;
 import net.azisaba.vanilife.world.IslandsWorld;
-import net.azisaba.vanilife.server.world.islands.IslandPortalLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
@@ -27,18 +26,21 @@ public final class IslandPrismarinePortalFrameFeature extends Feature<NoneFeatur
     public boolean place(final FeaturePlaceContext<NoneFeatureConfiguration> context) {
         final WorldGenLevel level = context.level();
         final ChunkPos currentChunk = new ChunkPos(context.origin());
+        final long levelSeed = level.getSeed();
         for (final IslandPosition islandPos : candidateIslands(currentChunk)) {
-            final IslandPortalLayout layout = IslandPortalLayout.create(islandPos.computeSeed(level.getSeed()));
-            final BlockPos anchor = new BlockPos(
-                islandPos.centerBlockX() + layout.blockOffsetX(),
-                IslandsWorld.SEA_LEVEL,
-                islandPos.centerBlockZ() + layout.blockOffsetZ()
-            );
-            if (!isSameChunk(anchor, currentChunk) || !fitsChunk(anchor, layout.axisX())) {
+            final int portalX = islandPos.portalBlock(levelSeed).blockX();
+            final int portalZ = islandPos.portalBlock(levelSeed).blockZ();
+
+            if (SectionPos.blockToSectionCoord(portalX) != currentChunk.x || SectionPos.blockToSectionCoord(portalZ) != currentChunk.z) {
                 continue;
             }
-            final BlockPos base = level.getHeightmapPos(Heightmap.Types.WORLD_SURFACE_WG, anchor);
-            return placeFrame(level, base, layout.axisX());
+
+            final BlockPos base = level.getHeightmapPos(Heightmap.Types.WORLD_SURFACE_WG, new BlockPos(portalX, 0, portalZ));
+            final boolean axisX = islandPos.portalAxisX(levelSeed);
+            if (!fitsChunk(base, axisX)) {
+                continue;
+            }
+            return placeFrame(level, base, axisX);
         }
         return false;
     }

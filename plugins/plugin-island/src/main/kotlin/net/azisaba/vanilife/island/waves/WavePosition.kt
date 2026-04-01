@@ -38,10 +38,10 @@ data class WavePosition(val islandPosition: IslandPosition, val coastSide: Coast
         const val WAVES_PER_COAST_SIDE = 15
         const val WAVES_PER_ISLAND = WAVES_PER_COAST_SIDE * 4
 
-        fun posSet(islandPos: IslandPosition): Set<WavePosition> = buildSet(WAVES_PER_COAST_SIDE * CoastSide.entries.size) {
+        fun posSet(islandPosition: IslandPosition): Set<WavePosition> = buildSet(WAVES_PER_COAST_SIDE * CoastSide.entries.size) {
             for (coastSide in CoastSide.entries) {
                 for (index in 0 until WAVES_PER_COAST_SIDE) {
-                    add(WavePosition(islandPos, coastSide, index))
+                    add(WavePosition(islandPosition, coastSide, index))
                 }
             }
         }

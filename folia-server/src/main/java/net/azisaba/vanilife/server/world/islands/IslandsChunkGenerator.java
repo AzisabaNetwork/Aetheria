@@ -181,6 +181,7 @@ public final class IslandsChunkGenerator extends ChunkGenerator {
             sample.highestY(),
             sample.riverStrength(),
             IslandTerrainSampler.RIVER_BANK_THRESHOLD,
+            sample.spawnPointDistance(),
             y
         ) : this.surfaceBlender.oceanBlockStateAtY(sample.highestY(), y);
     }

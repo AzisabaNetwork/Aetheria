@@ -48,7 +48,7 @@ private class LevelDataAccessorImpl(
             it[IslandsTable.score] = 0.0
         }
         this@LevelDataAccessorImpl.level = level
-        this@LevelDataAccessorImpl.score = score
+        this@LevelDataAccessorImpl.score = 0.0
     }
 
     override suspend fun score(score: Double) = suspendTransaction(database) {

@@ -41,9 +41,9 @@ final class RiverPathSampler {
             return IslandRiverLayout.RiverSample.NONE;
         }
 
-        IslandRiverLayout.RiverSample best = this.computeRiverTrunkSample(riverNetwork.trunk(), x, z, progress, channelBand);
+        IslandRiverLayout.RiverSample best = this.computeRiverTrunkSample(riverNetwork, riverNetwork.trunk(), x, z, progress, channelBand);
         for (final RiverNetwork.Mouth mouth : riverNetwork.mouths()) {
-            final IslandRiverLayout.RiverSample sample = this.computeRiverMouthSample(mouth, x, z, channelBand);
+            final IslandRiverLayout.RiverSample sample = this.computeRiverMouthSample(riverNetwork, mouth, x, z, channelBand);
             if (sample.relevance() > best.relevance()) {
                 best = sample;
             }
@@ -52,19 +52,58 @@ final class RiverPathSampler {
     }
 
     private IslandRiverLayout.RiverSample computeRiverMouthSample(
+        final RiverNetwork riverNetwork,
         final RiverNetwork.Mouth mouth,
         final double x,
         final double z,
         final double channelBand
     ) {
-        final double localX = x - mouth.x();
-        final double localZ = z - mouth.z();
-        final double along = localX * mouth.directionX() + localZ * mouth.directionZ();
+        final double localX = x - mouth.startX();
+        final double localZ = z - mouth.startZ();
+
+        double minDistanceSq = Double.MAX_VALUE;
+        double closestAlong = 0;
+        double closestAcross = 0;
+        double totalAlong = 0;
+        double prevX = mouth.startX();
+        double prevZ = mouth.startZ();
+
+        for (int i = 0; i < mouth.waypointsX().length; i++) {
+            final double currX = mouth.waypointsX()[i];
+            final double currZ = mouth.waypointsZ()[i];
+
+            final double segmentVecX = currX - prevX;
+            final double segmentVecZ = currZ - prevZ;
+            final double segmentLenSq = segmentVecX * segmentVecX + segmentVecZ * segmentVecZ;
+            final double segmentLen = Math.sqrt(segmentLenSq);
+
+            final double pointVecX = x - prevX;
+            final double pointVecZ = z - prevZ;
+
+            double t = segmentLenSq < 1e-4 ? 0 : (pointVecX * segmentVecX + pointVecZ * segmentVecZ) / segmentLenSq;
+            t = Mth.clamp(t, 0.0, 1.0);
+
+            final double closestX = prevX + t * segmentVecX;
+            final double closestZ = prevZ + t * segmentVecZ;
+            final double distSq = Math.pow(x - closestX, 2) + Math.pow(z - closestZ, 2);
+
+            if (distSq < minDistanceSq) {
+                minDistanceSq = distSq;
+                closestAlong = totalAlong + t * segmentLen;
+                closestAcross = (z - closestZ) * (segmentVecX / segmentLen) - (x - closestX) * (segmentVecZ / segmentLen);
+            }
+
+            totalAlong += segmentLen;
+            prevX = currX;
+            prevZ = currZ;
+        }
+
+        final double along = closestAlong;
         if (along < -28.0 || along > mouth.length()) {
             return IslandRiverLayout.RiverSample.NONE;
         }
 
-        final double alongProgress = along / mouth.length();
+        final double alongProgress = Mth.clamp(along / mouth.length(), 0.0, 1.0);
         final double seaConnection = Mth.smoothstep(Mth.clamp((along + 28.0) / 28.0, 0.0, 1.0));
         final double inlandFade = Mth.smoothstep(Mth.clamp(1.0 - Math.max(0.0, alongProgress - 0.68) / 0.32, 0.0, 1.0));
         final double alongMask = seaConnection * inlandFade;
@@ -72,12 +111,11 @@ final class RiverPathSampler {
             return IslandRiverLayout.RiverSample.NONE;
         }
 
-        final double across = -localX * mouth.directionZ() + localZ * mouth.directionX();
+        final double across = closestAcross;
         final double endpointTaper = computeEndpointTaper(alongProgress, 0.18);
-        final double centerline = (
-            Math.sin(along / 18.0 + mouth.phase()) * mouth.meanderAmplitude()
-                + sample2d(this.riverNoise, x + mouth.phase() * 7.0, z - mouth.phase() * 5.0, 30.0) * 3.0
-        ) * endpointTaper;
+        final double centerlineOffset = Math.sin(along / 18.0 + mouth.phase()) * mouth.meanderAmplitude()
+                + sample2d(this.riverNoise, x + mouth.phase() * 7.0, z - mouth.phase() * 5.0, 30.0) * 3.0;
+        final double centerline = centerlineOffset * endpointTaper * this.computeObstacleMeanderReduction(riverNetwork, x, z);
         final double mouthFlare = 1.25 + Mth.smoothstep(Mth.clamp(1.0 - Math.max(-16.0, along + 16.0) / 30.0, 0.0, 1.0)) * 2.2;
         final double inlandWidthTaper = 0.35 + inlandFade * 0.65;
         final double confluenceApproach = Mth.smoothstep(Mth.clamp((alongProgress - 0.55) / 0.45, 0.0, 1.0));
@@ -91,15 +129,54 @@ final class RiverPathSampler {
     }
 
     private IslandRiverLayout.RiverSample computeRiverTrunkSample(
+        final RiverNetwork riverNetwork,
         final RiverNetwork.Trunk trunk,
         final double x,
         final double z,
         final double progress,
         final double channelBand
     ) {
-        final double localX = x - trunk.x();
-        final double localZ = z - trunk.z();
-        final double along = localX * trunk.directionX() + localZ * trunk.directionZ();
+        final double localX = x - trunk.startX();
+        final double localZ = z - trunk.startZ();
+
+        double minDistanceSq = Double.MAX_VALUE;
+        double closestAlong = 0;
+        double closestAcross = 0;
+        double totalAlong = 0;
+        double prevX = trunk.startX();
+        double prevZ = trunk.startZ();
+
+        for (int i = 0; i < trunk.waypointsX().length; i++) {
+            final double currX = trunk.waypointsX()[i];
+            final double currZ = trunk.waypointsZ()[i];
+
+            final double segmentVecX = currX - prevX;
+            final double segmentVecZ = currZ - prevZ;
+            final double segmentLenSq = segmentVecX * segmentVecX + segmentVecZ * segmentVecZ;
+            final double segmentLen = Math.sqrt(segmentLenSq);
+
+            final double pointVecX = x - prevX;
+            final double pointVecZ = z - prevZ;
+
+            double t = segmentLenSq < 1e-4 ? 0 : (pointVecX * segmentVecX + pointVecZ * segmentVecZ) / segmentLenSq;
+            t = Mth.clamp(t, 0.0, 1.0);
+
+            final double closestX = prevX + t * segmentVecX;
+            final double closestZ = prevZ + t * segmentVecZ;
+            final double distSq = Math.pow(x - closestX, 2) + Math.pow(z - closestZ, 2);
+
+            if (distSq < minDistanceSq) {
+                minDistanceSq = distSq;
+                closestAlong = totalAlong + t * segmentLen;
+                closestAcross = (z - closestZ) * (segmentVecX / segmentLen) - (x - closestX) * (segmentVecZ / segmentLen);
+            }
+
+            totalAlong += segmentLen;
+            prevX = currX;
+            prevZ = currZ;
+        }
+
+        final double along = closestAlong;
         if (along < -6.0 || along > trunk.length()) {
             return IslandRiverLayout.RiverSample.NONE;
         }
@@ -112,12 +189,11 @@ final class RiverPathSampler {
             return IslandRiverLayout.RiverSample.NONE;
         }
 
-        final double across = -localX * trunk.directionZ() + localZ * trunk.directionX();
+        final double across = closestAcross;
         final double endpointTaper = computeEndpointTaper(alongProgress, 0.22);
-        final double centerline = (
-            Math.sin(along / 16.0 + trunk.phase()) * trunk.meanderAmplitude()
-                + sample2d(this.riverNoise, x - trunk.phase() * 4.0, z + trunk.phase() * 6.0, 30.0) * 2.5
-        ) * endpointTaper;
+        final double centerlineOffset = Math.sin(along / 16.0 + trunk.phase()) * trunk.meanderAmplitude()
+                + sample2d(this.riverNoise, x - trunk.phase() * 4.0, z + trunk.phase() * 6.0, 30.0) * 2.5;
+        final double centerline = centerlineOffset * endpointTaper * this.computeObstacleMeanderReduction(riverNetwork, x, z);
         final double confluenceFlare = 1.25 + Mth.smoothstep(Mth.clamp(1.0 - Math.max(0.0, along) / 20.0, 0.0, 1.0)) * 0.55;
         final double widthTaper = 0.8 + endFade * 0.2;
         final double riverWidth = trunk.width() * (0.95 + channelBand * 0.3) * widthTaper * confluenceFlare;
@@ -145,6 +221,21 @@ final class RiverPathSampler {
         final double startTaper = Mth.smoothstep(Mth.clamp(alongProgress / taperPortion, 0.0, 1.0));
         final double endTaper = Mth.smoothstep(Mth.clamp((1.0 - alongProgress) / taperPortion, 0.0, 1.0));
         return startTaper * endTaper;
+    }
+
+    private double computeObstacleMeanderReduction(final RiverNetwork riverNetwork, final double x, final double z) {
+        double reduction = 1.0;
+        for (final RiverNetwork.Obstacle obstacle : riverNetwork.obstacles()) {
+            final double dx = x - obstacle.x();
+            final double dz = z - obstacle.z();
+            final double distanceSq = dx * dx + dz * dz;
+            final double influenceRadius = obstacle.safeRadius() + 16.0;
+            if (distanceSq < influenceRadius * influenceRadius) {
+                final double distance = Math.sqrt(distanceSq);
+                reduction = Math.min(reduction, Mth.smoothstep(Mth.clamp((distance - obstacle.safeRadius() + 4.0) / 20.0, 0.0, 1.0)));
+            }
+        }
+        return reduction;
     }
 
     private static double sample2d(final NormalNoise noise, final double x, final double z, final double scale) {

@@ -1,6 +1,7 @@
 package net.azisaba.vanilife.server.world.feature;
 
 import com.mojang.serialization.Codec;
+import io.papermc.paper.math.BlockPosition;
 import net.azisaba.vanilife.world.IslandPosition;
 import net.azisaba.vanilife.world.IslandsWorld;
 import net.minecraft.core.BlockPos;
@@ -29,6 +30,7 @@ public final class IslandWheatPatchFeature extends Feature<NoneFeatureConfigurat
         final long seed = islandPos.computeSeed(level.getSeed()) ^ 0x51C2E6B4D9A3F17BL;
         final RandomSource random = RandomSource.create(seed);
         final ChunkPos currentChunk = new ChunkPos(context.origin());
+        final BlockPosition spawnBlock = islandPos.spawnBlock(level.getSeed());
         boolean placed = false;
 
         final int wheatCount = 12 + random.nextInt(7);
@@ -41,6 +43,12 @@ public final class IslandWheatPatchFeature extends Feature<NoneFeatureConfigurat
             if (!isSameChunk(anchor, currentChunk) || !hasChunkMargin(anchor, 0)) {
                 continue;
             }
+
+            final double spawnDistanceSq = Math.pow(anchor.getX() - spawnBlock.blockX(), 2) + Math.pow(anchor.getZ() - spawnBlock.blockZ(), 2);
+            if (spawnDistanceSq < 15.0 * 15.0) {
+                continue;
+            }
+
             final BlockPos surface = level.getHeightmapPos(Heightmap.Types.WORLD_SURFACE_WG, anchor);
             final BlockPos base = surface.below();
             placed |= placeSingleWheat(level, random, base);

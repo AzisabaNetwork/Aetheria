@@ -59,6 +59,7 @@ public final class VanilifeBiomes {
 
         final BiomeGenerationSettings.Builder generationSettings = new BiomeGenerationSettings.Builder(placedFeatures, worldCarvers);
         BiomeDefaultFeatures.addDefaultSoftDisks(generationSettings);
+        generationSettings.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, VanilifePlacedFeatures.ISLAND_SPAWN_WRECKAGE);
         generationSettings.addFeature(GenerationStep.Decoration.LOCAL_MODIFICATIONS, VanilifePlacedFeatures.ISLAND_GROUND_PATCH);
         generationSettings.addFeature(GenerationStep.Decoration.LOCAL_MODIFICATIONS, VanilifePlacedFeatures.ISLAND_BEACH_PATCH);
         generationSettings.addFeature(GenerationStep.Decoration.LOCAL_MODIFICATIONS, VanilifePlacedFeatures.ISLAND_WHEAT_PATCH);

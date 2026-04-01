@@ -22,7 +22,7 @@ import org.koin.core.component.inject
 
 class WrackEntity internal constructor(
     private val wrackType: WrackType,
-    private val islandPos: IslandPosition,
+    private val islandPosition: IslandPosition,
     private val world: IslandsWorld,
     private val path: DriftPath,
     private val spawnTime: Long,
@@ -87,7 +87,7 @@ class WrackEntity internal constructor(
 
         val dropLocation = Location(world, path.endPos.x(), path.endPos.y(), path.endPos.z())
         plugin.launch(plugin.regionDispatcher(dropLocation)) {
-            wrackType.drop(path.random, player, world.getIslandAt(islandPos)!!, this@WrackEntity)
+            wrackType.drop(path.random, player, world.getIslandAt(islandPosition)!!, this@WrackEntity)
         }
 
         tracker.close()

@@ -37,7 +37,9 @@ internal object SettingsDialog {
                         RegistrySet.valueSet(
                             RegistryKey.DIALOG,
                             buildList {
-                                add(DisplayNameDialog.create())
+                                island?.let {
+                                    add(DisplayNameDialog.create(it))
+                                }
 
                                 if (island?.canChangeSpawnPoint() == true) {
                                     add(SpawnLocationDialog.create(island))

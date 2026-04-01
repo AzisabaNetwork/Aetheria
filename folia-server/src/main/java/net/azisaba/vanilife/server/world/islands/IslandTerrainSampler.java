@@ -2,9 +2,11 @@ package net.azisaba.vanilife.server.world.islands;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import io.papermc.paper.math.BlockPosition;
 import net.azisaba.vanilife.server.world.islands.noise.IslandNoise;
 import net.azisaba.vanilife.server.world.islands.river.IslandRiverLayout;
 import net.azisaba.vanilife.server.world.islands.river.IslandRiverLayout.RiverSample;
+import net.azisaba.vanilife.server.world.islands.river.RiverNetwork;
 import net.azisaba.vanilife.world.IslandPosition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
@@ -31,8 +33,8 @@ final class IslandTerrainSampler {
     TerrainSample sample(final long levelSeed, final int blockX, final int blockZ) {
         final IslandPosition islandPos = IslandPosition.fromBlockXZ(blockX, blockZ);
         final long islandSeed = islandPos.computeSeed(levelSeed);
-        final IslandNoise islandNoise = this.getIslandNoise(islandSeed);
-        final IslandRiverLayout riverLayout = this.getIslandRiverLayout(islandSeed);
+        final IslandNoise islandNoise = this.getIslandNoise(levelSeed, islandPos);
+        final IslandRiverLayout riverLayout = this.getIslandRiverLayout(levelSeed, islandPos);
 
         final double localX = blockX - islandPos.centerBlockX();
         final double localZ = blockZ - islandPos.centerBlockZ();
@@ -41,9 +43,39 @@ final class IslandTerrainSampler {
         final double beachTransitionNoise = islandNoise.computeBeachTransitionNoise(localX, localZ);
         final double beachBlendNoise = islandNoise.computeBeachBlendNoise(localX, localZ);
         final int baseHighestY = islandNoise.computeBaseHighestY(localX, localZ, signedDistance, this.settings);
-        final int resolvedHighestY = this.resolveHighestY(levelSeed, blockX, blockZ, baseHighestY);
+        int resolvedHighestY = this.resolveHighestY(levelSeed, blockX, blockZ, baseHighestY);
         final int riverWaterY = this.settings.seaLevel();
-        final RiverSample riverSample = riverLayout.sample(localX, localZ, signedDistance, this.settings);
+        final RiverSample baseRiverSample = riverLayout.sample(localX, localZ, signedDistance, this.settings);
+
+        final RiverNetwork riverNetwork = riverLayout.getRiverNetwork();
+        double obstacleReduction = 1.0;
+        for (final RiverNetwork.Obstacle obstacle : riverNetwork.obstacles()) {
+            final double dx = localX - obstacle.x();
+            final double dz = localZ - obstacle.z();
+            final double distanceSq = dx * dx + dz * dz;
+            final double safeRadius = obstacle.safeRadius();
+            if (distanceSq < safeRadius * safeRadius) {
+                final double distance = Math.sqrt(distanceSq);
+                obstacleReduction = Math.min(obstacleReduction, Mth.smoothstep(Mth.clamp((distance - (safeRadius - 16.0)) / 20.0, 0.0, 1.0)));
+            }
+        }
+
+        final RiverSample riverSample = obstacleReduction < 1.0
+            ? new RiverSample(baseRiverSample.strength() * obstacleReduction, baseRiverSample.bankInfluence() * obstacleReduction, baseRiverSample.coreInfluence() * obstacleReduction)
+            : baseRiverSample;
+
+        final BlockPosition spawnBlock = islandPos.spawnBlock(levelSeed);
+        final double spawnPointDistance = Math.sqrt(Math.pow(blockX - spawnBlock.blockX(), 2) + Math.pow(blockZ - spawnBlock.blockZ(), 2));
+
+        final double wastelandThreshold = 12.0 + (beachTransitionNoise + beachBlendNoise) * 2.0;
+        if (spawnPointDistance < wastelandThreshold) {
+            final double heightNoise = islandNoise.sample2d(blockX, blockZ, 4.0);
+            if (heightNoise > 0.4) {
+                resolvedHighestY++;
+            } else if (heightNoise < -0.4) {
+                resolvedHighestY--;
+            }
+        }
 
         if (riverSample.relevance() <= 0.0) {
             return this.createTerrainSampleWithoutRiver(
@@ -52,7 +84,8 @@ final class IslandTerrainSampler {
                 beachTransitionNoise,
                 beachBlendNoise,
                 resolvedHighestY,
-                riverWaterY
+                riverWaterY,
+                spawnPointDistance
             );
         }
 
@@ -63,7 +96,8 @@ final class IslandTerrainSampler {
             beachBlendNoise,
             resolvedHighestY,
             riverSample,
-            riverWaterY
+            riverWaterY,
+            spawnPointDistance
         );
     }
 
@@ -73,7 +107,8 @@ final class IslandTerrainSampler {
         final double beachTransitionNoise,
         final double beachBlendNoise,
         final int resolvedHighestY,
-        final int riverWaterY
+        final int riverWaterY,
+        final double spawnPointDistance
     ) {
         return new TerrainSample(
             signedDistance,
@@ -84,7 +119,8 @@ final class IslandTerrainSampler {
             0.0,
             0.0,
             0.0,
-            riverWaterY
+            riverWaterY,
+            spawnPointDistance
         );
     }
 
@@ -95,7 +131,8 @@ final class IslandTerrainSampler {
         final double beachBlendNoise,
         final int resolvedHighestY,
         final RiverSample riverSample,
-        final int riverWaterY
+        final int riverWaterY,
+        final double spawnPointDistance
     ) {
         final int highestY = this.computeRiverAdjustedHighestY(signedDistance, resolvedHighestY, riverSample, riverWaterY);
         return new TerrainSample(
@@ -107,7 +144,8 @@ final class IslandTerrainSampler {
             riverSample.strength(),
             riverSample.bankInfluence(),
             riverSample.coreInfluence(),
-            riverWaterY
+            riverWaterY,
+            spawnPointDistance
         );
     }
 
@@ -174,12 +212,12 @@ final class IslandTerrainSampler {
         return riverStrength > 0.1 && signedDistance >= -this.settings.beachWidth() - 4.0;
     }
 
-    private IslandNoise getIslandNoise(final long islandSeed) {
-        return this.islandNoiseCache.computeIfAbsent(islandSeed, IslandNoise::createDefault);
+    private IslandNoise getIslandNoise(final long levelSeed, final IslandPosition islandPos) {
+        return this.islandNoiseCache.computeIfAbsent(islandPos.computeSeed(levelSeed), seed -> IslandNoise.createDefault(levelSeed, islandPos));
     }
 
-    private IslandRiverLayout getIslandRiverLayout(final long islandSeed) {
-        return this.islandRiverLayoutCache.computeIfAbsent(islandSeed, IslandRiverLayout::createDefault);
+    private IslandRiverLayout getIslandRiverLayout(final long levelSeed, final IslandPosition islandPos) {
+        return this.islandRiverLayoutCache.computeIfAbsent(islandPos.computeSeed(levelSeed), k -> IslandRiverLayout.createDefault(levelSeed, islandPos));
     }
 
     private NormalNoise getDeepOceanNoise(final long levelSeed) {
@@ -202,7 +240,8 @@ final class IslandTerrainSampler {
         double riverStrength,
         double riverBankInfluence,
         double riverCoreInfluence,
-        int riverWaterY
+        int riverWaterY,
+        double spawnPointDistance
     ) {
     }
 }
