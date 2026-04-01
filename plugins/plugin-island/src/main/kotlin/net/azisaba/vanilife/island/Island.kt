@@ -3,8 +3,8 @@ package net.azisaba.vanilife.island
 import net.azisaba.serialization.IntProvider
 import net.azisaba.vanilife.ConfigurationHolder
 import net.azisaba.vanilife.island.enchantment.EnchantmentAccessor
+import net.azisaba.vanilife.island.leveling.LevelDataAccessor
 import net.azisaba.vanilife.island.leveling.score.ScoreSource
-import net.azisaba.vanilife.island.leveling.score.ScoringManager
 import net.azisaba.vanilife.island.visitors.VisitorsAccessor
 import net.azisaba.vanilife.island.waves.WaveAccessor
 import net.azisaba.vanilife.island.wrack.WrackAccessor
@@ -19,8 +19,8 @@ import org.jetbrains.exposed.v1.jdbc.Database
 import java.util.*
 
 class Island internal constructor(
-    val position: IslandPosition,
-    val owner: UUID,
+    position: IslandPosition,
+    owner: UUID,
     level: Int,
     score: Double,
     displayName: Component?,
@@ -46,24 +46,26 @@ class Island internal constructor(
     ),
     PrimaryDataAccessor by PrimaryDataAccessor.create(
         position,
-        database,
-        level,
-        score,
+        owner,
         displayName,
+        database,
+    ),
+    SpawnDataAccessor by SpawnDataAccessor.create(
+        position,
+        database,
         spawnOffsetX,
         spawnOffsetY,
         spawnOffsetZ,
         spawnYaw,
         spawnPitch,
+    ),
+    LevelDataAccessor by LevelDataAccessor.create(
+        position,
+        level,
+        score,
+        database,
     ) {
-    private val scoringManager: ScoringManager = ScoringManager()
-
     override fun audiences(): Iterable<Audience> = IslandPlayerMap.collect(this).mapNotNull(Bukkit::getPlayer)
-
-    suspend fun updateScore(source: ScoreSource) {
-        val score = scoringManager.computeScore(source)
-        score(this.score + score)
-    }
 
     internal suspend fun addPlayer(player: Player) {
         if (canFly()) {

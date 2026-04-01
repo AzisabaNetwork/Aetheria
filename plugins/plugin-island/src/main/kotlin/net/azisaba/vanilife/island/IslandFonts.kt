@@ -43,6 +43,18 @@ object IslandFonts {
     fun islandIcons(): PackFont = PackFont(
         listOf(
             PackBitmapFontProvider(
+                file = Key.key("item/name_tag.png"),
+                chars = listOf(IslandIcons.DISPLAY_NAME.toString()),
+                ascent = 8,
+                height = 9,
+            ),
+            PackBitmapFontProvider(
+                file = Key.key(Vanilife.NAMESPACE, "icon/island/sky_color.png"),
+                chars = listOf(IslandIcons.SKY_COLOR.toString()),
+                ascent = 8,
+                height = 9,
+            ),
+            PackBitmapFontProvider(
                 file = Key.key(Vanilife.NAMESPACE, "icon/island/spawn_location.png"),
                 chars = listOf(IslandIcons.SPAWN_LOCATION.toString()),
                 ascent = 8,
@@ -194,6 +206,8 @@ object IslandFonts {
     }
 
     object IslandIcons : CharCodeFactory() {
+        val DISPLAY_NAME: Char = nextChar()
+        val SKY_COLOR: Char = nextChar()
         val SPAWN_LOCATION: Char = nextChar()
     }
 

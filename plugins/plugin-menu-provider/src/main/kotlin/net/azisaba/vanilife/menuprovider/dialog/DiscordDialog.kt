@@ -17,30 +17,35 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 internal object DiscordDialog : KoinComponent {
+    val TITLE: Component = Component.text()
+        .append(
+            Component.text(MenuProviderFonts.MenuIcons.DISCORD)
+                .shadowColor(ShadowColor.none())
+                .font(MenuProviderFonts.MENU_ICONS)
+        )
+        .appendSpace()
+        .append(Component.translatable(MenuProviderTranslations.DIALOG_VANILIFE_DISCORD))
+        .build()
+
     private val config: ReloadableConfiguration<Configuration> by inject()
 
     fun create(): Dialog = Dialog.create { builder ->
         builder.empty()
             .base(
-                DialogBase.builder(
-                    Component.text()
-                        .append(
-                            Component.text(MenuProviderFonts.MenuIcons.DISCORD)
-                                .shadowColor(ShadowColor.none())
-                                .font(MenuProviderFonts.MENU_ICONS)
+                DialogBase.builder(TITLE)
+                    .body(
+                        listOf(
+                            DialogBody.plainMessage(
+                                Component.text(
+                                    config.value().discordUrl,
+                                    NamedTextColor.BLUE,
+                                    TextDecoration.UNDERLINED
+                                )
+                                    .clickEvent(ClickEvent.openUrl(config.value().discordUrl))
+                            ),
                         )
-                        .appendSpace()
-                        .append(Component.translatable(MenuProviderTranslations.DIALOG_VANILIFE_DISCORD))
-                        .build()
-                ).body(
-                    listOf(
-                        DialogBody.plainMessage(
-                            Component.text(config.value().discordUrl, NamedTextColor.BLUE, TextDecoration.UNDERLINED)
-                                .clickEvent(ClickEvent.openUrl(config.value().discordUrl))
-                        )
-                    )
-                ).build()
+                    ).build()
             )
-            .type(DialogType.notice())
+            .type(DialogType.notice(MenuDialog.backToMenuButton()))
     }
 }
