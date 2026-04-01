@@ -14,7 +14,7 @@ import net.azisaba.serialization.KeySerializer
 import net.azisaba.vanilife.DynamicContents
 import net.azisaba.vanilife.ItemStackProvider
 import net.azisaba.vanilife.island.Island
-import net.azisaba.vanilife.island.leveling.LevelPredicate
+import net.azisaba.vanilife.island.leveling.IslandLevelPredicate
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.sound.Sound
 import org.bukkit.entity.Player
@@ -24,7 +24,7 @@ import kotlin.random.Random
 sealed interface WrackType {
     val weight: Int
 
-    val targetLevel: LevelPredicate
+    val targetLevel: IslandLevelPredicate
 
     val modelName: String
         get() = "bottle"
@@ -59,7 +59,7 @@ sealed interface WrackType {
     data class Item(
         val item: ItemStackProvider,
         override val weight: Int,
-        override val targetLevel: LevelPredicate,
+        override val targetLevel: IslandLevelPredicate,
     ) :
         WrackType {
         override suspend fun drop(random: Random, player: Player, island: Island, entity: WrackEntity) {
@@ -76,7 +76,7 @@ sealed interface WrackType {
     data class Enchantment(
         val id: @Serializable(with = KeySerializer::class) Key,
         override val weight: Int,
-        override val targetLevel: LevelPredicate,
+        override val targetLevel: IslandLevelPredicate,
     ) : WrackType {
         override suspend fun drop(random: Random, player: Player, island: Island, entity: WrackEntity) {
             RegistryAccess.registryAccess()

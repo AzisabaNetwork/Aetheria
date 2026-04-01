@@ -5,7 +5,7 @@ import io.papermc.paper.event.player.AsyncChatEvent
 import io.papermc.paper.registry.keys.EnchantmentKeys
 import net.azisaba.vanilife.island.IslandCacheMap
 import net.azisaba.vanilife.island.IslandPlayerMap
-import net.azisaba.vanilife.island.leveling.LevelPredicate
+import net.azisaba.vanilife.island.leveling.IslandLevelPredicate
 import net.azisaba.vanilife.island.wrack.WrackType
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.event.EventHandler
@@ -41,7 +41,7 @@ internal class PlayerListener(private val cacheMap: IslandCacheMap, private val 
                     WrackType.Enchantment(
                         EnchantmentKeys.AQUA_AFFINITY,
                         1,
-                        LevelPredicate.Always,
+                        IslandLevelPredicate.Always,
                     )
                 )
             }

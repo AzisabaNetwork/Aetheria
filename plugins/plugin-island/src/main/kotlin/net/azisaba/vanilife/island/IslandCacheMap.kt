@@ -8,6 +8,7 @@ import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.select
+import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -26,23 +27,26 @@ internal class IslandCacheMap(
     suspend fun lookup(position: IslandPosition): Island? {
         islandByPosition[position]?.let { return it }
         val row = suspendTransaction(database) {
-            IslandsTable.select(IslandsTable.owner, IslandsTable.level, IslandsTable.score, IslandsTable.displayName)
+            IslandsTable.selectAll()
                 .where { IslandsTable.id eq position.toLong() }
                 .singleOrNull()
         } ?: return null
 
         val owner = row[IslandsTable.owner]
         val level = row[IslandsTable.level]
-        val score = row[IslandsTable.score]
-        val displayName = row[IslandsTable.displayName]
 
         val island = islandByPosition.computeIfAbsent(position) {
             Island(
-                it,
+                position = it,
                 owner,
                 level,
-                score,
-                displayName,
+                score = row[IslandsTable.score],
+                displayName = row[IslandsTable.displayName],
+                spawnOffsetX = row[IslandsTable.spawnOffsetX],
+                spawnOffsetY = row[IslandsTable.spawnOffsetY],
+                spawnOffsetZ = row[IslandsTable.spawnOffsetZ],
+                spawnYaw = row[IslandsTable.spawnYaw],
+                spawnPitch = row[IslandsTable.spawnPitch],
                 spawnLimit = wrackConfig.map(WrackConfiguration::spawnLimit),
                 spawnIntervalTicks = wrackConfig.map(WrackConfiguration::spawnIntervalTicks),
                 database,
@@ -70,6 +74,11 @@ internal class IslandCacheMap(
                 Island.MIN_LEVEL,
                 score = 0.0,
                 displayName = null,
+                spawnOffsetX = 0.0,
+                spawnOffsetY = 0.0,
+                spawnOffsetZ = 0.0,
+                spawnYaw = 90f,
+                spawnPitch = 0f,
                 spawnLimit = wrackConfig.map(WrackConfiguration::spawnLimit),
                 spawnIntervalTicks = wrackConfig.map(WrackConfiguration::spawnIntervalTicks),
                 database,
@@ -127,6 +136,11 @@ internal class IslandCacheMap(
             it[IslandsTable.level] = Island.MIN_LEVEL
             it[IslandsTable.score] = 0.0
             it[IslandsTable.displayName] = null
+            it[IslandsTable.spawnOffsetX] = 0.0
+            it[IslandsTable.spawnOffsetY] = 0.0
+            it[IslandsTable.spawnOffsetZ] = 0.0
+            it[IslandsTable.spawnYaw] = 0f
+            it[IslandsTable.spawnPitch] = 0f
         }.value.let(IslandPosition::fromLong)
     }
 }

@@ -15,7 +15,7 @@ internal class FlightListener(private val plugin: Plugin) : Listener {
     fun onPlayerGameModeChange(event: PlayerGameModeChangeEvent) {
         val player = event.player
         val island = player.currentIsland ?: return
-        if (island.canFlight(player.uniqueId)) {
+        if (island.canFly()) {
             val isFlying = player.isFlying
             plugin.launch(plugin.entityDispatcher(player)) {
                 delay(1L.milliseconds)

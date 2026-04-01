@@ -13,6 +13,7 @@ object IslandFonts {
     private const val WAVE_HEIGHT: Int = 512
 
     val ENCHANTS: PackedKey<PackFont> = PackedKey.font(Vanilife.NAMESPACE, "enchants")
+    val ISLAND_ICONS: PackedKey<PackFont> = PackedKey.font(Vanilife.NAMESPACE, "island_icons")
     val LEVEL_ICONS: PackedKey<PackFont> = PackedKey.font(Vanilife.NAMESPACE, "level_icons")
     val WAVES: PackedKey<PackFont> = PackedKey.font(Vanilife.NAMESPACE, "waves")
 
@@ -35,6 +36,17 @@ object IslandFonts {
                 chars = listOf(Enchants.BOOK.toString()),
                 ascent = 0,
                 height = 52,
+            ),
+        )
+    )
+
+    fun islandIcons(): PackFont = PackFont(
+        listOf(
+            PackBitmapFontProvider(
+                file = Key.key(Vanilife.NAMESPACE, "icon/island/spawn_location.png"),
+                chars = listOf(IslandIcons.SPAWN_LOCATION.toString()),
+                ascent = 8,
+                height = 9,
             ),
         )
     )
@@ -179,6 +191,10 @@ object IslandFonts {
         val ENCHANTING_TABLE: Char = nextChar()
         val ENCHANTED_BOOK: Char = nextChar()
         val BOOK: Char = nextChar()
+    }
+
+    object IslandIcons : CharCodeFactory() {
+        val SPAWN_LOCATION: Char = nextChar()
     }
 
     object LevelIcons : CharCodeFactory() {

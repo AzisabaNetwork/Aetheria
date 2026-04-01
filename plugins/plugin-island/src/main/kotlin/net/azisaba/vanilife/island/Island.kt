@@ -13,7 +13,6 @@ import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.audience.ForwardingAudience
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
-import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -25,13 +24,17 @@ class Island internal constructor(
     level: Int,
     score: Double,
     displayName: Component?,
+    spawnOffsetX: Double,
+    spawnOffsetY: Double,
+    spawnOffsetZ: Double,
+    spawnYaw: Float,
+    spawnPitch: Float,
     private val spawnLimit: ConfigurationHolder<Int>,
     private val spawnIntervalTicks: ConfigurationHolder<IntProvider>,
     private val database: Database,
     private val plugin: Plugin,
 ) :
-    ForwardingAudience,
-    PrimaryDataAccessor by PrimaryDataAccessor.create(position, database, level, score, displayName),
+    ForwardingAudience, IslandFeatureHolder,
     EnchantmentAccessor by EnchantmentAccessor.fromDatabase(position, database),
     VisitorsAccessor by VisitorsAccessor.fromDatabase(position, database),
     WaveAccessor by WaveAccessor.create(position),
@@ -40,6 +43,18 @@ class Island internal constructor(
         spawnLimit,
         spawnIntervalTicks,
         plugin,
+    ),
+    PrimaryDataAccessor by PrimaryDataAccessor.create(
+        position,
+        database,
+        level,
+        score,
+        displayName,
+        spawnOffsetX,
+        spawnOffsetY,
+        spawnOffsetZ,
+        spawnYaw,
+        spawnPitch,
     ) {
     private val scoringManager: ScoringManager = ScoringManager()
 
@@ -50,12 +65,8 @@ class Island internal constructor(
         score(this.score + score)
     }
 
-    fun isOwner(uuid: UUID): Boolean = uuid == owner
-
-    fun canFlight(uuid: UUID): Boolean = level == MAX_LEVEL && isOwner(uuid)
-
     internal suspend fun addPlayer(player: Player) {
-        if (canFlight(player.uniqueId)) {
+        if (canFly()) {
             player.allowFlight = true
         }
 

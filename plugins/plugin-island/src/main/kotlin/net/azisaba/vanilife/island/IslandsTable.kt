@@ -16,4 +16,14 @@ internal object IslandsTable : LongIdTable("islands", "position") {
     val score: Column<Double> = double("score")
 
     val displayName: Column<Component?> = component("display_name").nullable()
+
+    val spawnOffsetX: Column<Double> = double("spawn_offset_x")
+
+    val spawnOffsetY: Column<Double> = double("spawn_offset_y")
+
+    val spawnOffsetZ: Column<Double> = double("spawn_offset_z")
+
+    val spawnYaw: Column<Float> = float("spawn_yaw")
+
+    val spawnPitch: Column<Float> = float("spawn_pitch")
 }

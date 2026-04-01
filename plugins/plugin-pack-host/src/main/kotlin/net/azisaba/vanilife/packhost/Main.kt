@@ -20,6 +20,8 @@ import net.azisaba.vanilife.forestry.ForestryTranslations
 import net.azisaba.vanilife.island.IslandFonts
 import net.azisaba.vanilife.island.IslandSoundEvents
 import net.azisaba.vanilife.island.IslandTranslations
+import net.azisaba.vanilife.menuprovider.MenuProviderFonts
+import net.azisaba.vanilife.menuprovider.MenuProviderTranslations
 import net.azisaba.vanilife.mining.MiningItemModels
 import net.azisaba.vanilife.mining.MiningModels
 import net.azisaba.vanilife.mining.MiningTranslations
@@ -45,8 +47,10 @@ internal class Main : JavaPlugin() {
             font {
                 FishingFonts.FISH_SHADOWS to FishingFonts.fishShadows()
                 IslandFonts.ENCHANTS to IslandFonts.enchants()
+                IslandFonts.ISLAND_ICONS to IslandFonts.islandIcons()
                 IslandFonts.LEVEL_ICONS to IslandFonts.levelIcons()
                 IslandFonts.WAVES to IslandFonts.waves()
+                MenuProviderFonts.MENU_ICONS to MenuProviderFonts.menuIcons()
                 NpcFonts.NPC_ICONS to NpcFonts.npcIcons()
                 GeneralFonts.DEFAULT to GeneralFonts.default()
             }
@@ -161,11 +165,11 @@ internal class Main : JavaPlugin() {
                 PackedKey.lang(
                     Vanilife.NAMESPACE,
                     Locale.US
-                ) to (CookingTranslations.us() + FarmingTranslations.us() + FishingTranslations.us() + ForestryTranslations.us() + IslandTranslations.us() + MiningTranslations.us() + NpcTranslations.us() + PortalTranslations.us() + ToolSwapTranslations.us() + GeneralTranslations.us())
+                ) to (CookingTranslations.us() + FarmingTranslations.us() + FishingTranslations.us() + ForestryTranslations.us() + IslandTranslations.us() + MenuProviderTranslations.us() + MiningTranslations.us() + NpcTranslations.us() + PortalTranslations.us() + ToolSwapTranslations.us() + GeneralTranslations.us())
                 PackedKey.lang(
                     Vanilife.NAMESPACE,
                     Locale.JAPAN
-                ) to (CookingTranslations.jp() + FarmingTranslations.jp() + FishingTranslations.jp() + ForestryTranslations.jp() + IslandTranslations.jp() + MiningTranslations.jp() + NpcTranslations.jp() + PortalTranslations.jp() + ToolSwapTranslations.jp() + GeneralTranslations.jp())
+                ) to (CookingTranslations.jp() + FarmingTranslations.jp() + FishingTranslations.jp() + ForestryTranslations.jp() + IslandTranslations.jp() + MenuProviderTranslations.jp() + MiningTranslations.jp() + NpcTranslations.jp() + PortalTranslations.jp() + ToolSwapTranslations.jp() + GeneralTranslations.jp())
             }
 
             models {
@@ -278,14 +282,10 @@ internal class Main : JavaPlugin() {
                 IslandSoundEvents.ISLAND_LEVEL_UP to IslandSoundEvents.levelUp()
             }
 
-            includeJavaResources(net.azisaba.vanilife.cooking.Main::class)
-            includeJavaResources(net.azisaba.vanilife.farming.Main::class)
-            includeJavaResources(net.azisaba.vanilife.fishing.Main::class)
-            includeJavaResources(net.azisaba.vanilife.forestry.Main::class)
-            includeJavaResources(net.azisaba.vanilife.island.Main::class)
-            includeJavaResources(net.azisaba.vanilife.mining.Main::class)
-            includeJavaResources(net.azisaba.vanilife.npc.Main::class)
             includeJavaResources(Main::class)
+            pluginMeta.pluginDependencies.forEach { dependency ->
+                includeJavaResources(server.pluginManager.getPlugin(dependency)!!::class)
+            }
 
             includeZip(server.pluginsFolder.toPath().resolve("BetterModel/build.zip"), "assets", "assets")
             includeZip(
