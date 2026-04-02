@@ -3,6 +3,7 @@ package net.azisaba.vanilife.island.listener
 import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import kotlinx.coroutines.delay
+import net.azisaba.vanilife.island.IslandFeature
 import net.azisaba.vanilife.island.currentIsland
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -15,7 +16,7 @@ internal class FlightListener(private val plugin: Plugin) : Listener {
     fun onPlayerGameModeChange(event: PlayerGameModeChangeEvent) {
         val player = event.player
         val island = player.currentIsland ?: return
-        if (island.canFly()) {
+        if (island.isEnabled(IslandFeature.FLIGHT)) {
             val isFlying = player.isFlying
             plugin.launch(plugin.entityDispatcher(player)) {
                 delay(1L.milliseconds)

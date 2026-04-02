@@ -149,7 +149,7 @@ internal object MenuDialog : KoinComponent {
                     val player = audience as? Player ?: return@customClick
                     plugin.launch(plugin.entityDispatcher(player)) {
                         val island = player.ownedIsland() ?: return@launch
-                        player.openInventory(StorageInventory(island, plugin).inventory)
+                        player.openInventory(StorageInventory(island, island.storageSize, plugin).inventory)
                     }
                 },
                 ClickCallback.Options.builder()

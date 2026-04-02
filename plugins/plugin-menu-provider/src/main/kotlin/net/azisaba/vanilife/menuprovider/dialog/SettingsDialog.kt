@@ -5,6 +5,7 @@ import io.papermc.paper.registry.RegistryKey
 import io.papermc.paper.registry.data.dialog.DialogBase
 import io.papermc.paper.registry.data.dialog.type.DialogType
 import io.papermc.paper.registry.set.RegistrySet
+import net.azisaba.vanilife.island.IslandFeature
 import net.azisaba.vanilife.island.dialog.DisplayNameDialog
 import net.azisaba.vanilife.island.dialog.SkyColorDialog
 import net.azisaba.vanilife.island.dialog.SpawnLocationDialog
@@ -41,11 +42,11 @@ internal object SettingsDialog {
                                     add(DisplayNameDialog.create(it))
                                 }
 
-                                if (island?.canChangeSpawnPoint() == true) {
+                                if (island?.isEnabled(IslandFeature.CUSTOM_SPAWN_POINT) == true) {
                                     add(SpawnLocationDialog.create(island))
                                 }
 
-                                if (island?.canChangeSkyColor() == true) {
+                                if (island?.isEnabled(IslandFeature.CUSTOM_SKY_COLOR) == true) {
                                     add(SkyColorDialog.create())
                                 }
                             }

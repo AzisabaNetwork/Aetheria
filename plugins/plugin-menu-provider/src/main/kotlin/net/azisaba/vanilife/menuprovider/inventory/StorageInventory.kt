@@ -11,8 +11,10 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryHolder
 import org.bukkit.plugin.Plugin
 
-internal class StorageInventory(private val storage: StorageAccessor, private val plugin: Plugin) : InventoryHolder {
-    private val inventory: Inventory = Bukkit.createInventory(this, 54, TITLE)
+internal class StorageInventory(
+    private val storage: StorageAccessor, val size: Int, private val plugin: Plugin,
+) : InventoryHolder {
+    private val inventory: Inventory = Bukkit.createInventory(this, size, TITLE)
 
     override fun getInventory(): Inventory = inventory
 

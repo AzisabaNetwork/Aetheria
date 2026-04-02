@@ -1,11 +1,16 @@
 package net.azisaba.vanilife.island
 
 import net.azisaba.vanilife.island.leveling.IslandLevelPredicate
+import net.kyori.adventure.translation.Translatable
 
-enum class IslandFeature(val level: IslandLevelPredicate) {
-    VISIT_OTHER_ISLANDS(IslandLevelPredicate.AtLeast(10)),
-    CHANGE_SPAWN_POINT(IslandLevelPredicate.AtLeast(20)),
-    EXPAND_BUILD_HEIGHT(IslandLevelPredicate.AtLeast(30)),
-    CHANGE_SKY_COLOR(IslandLevelPredicate.AtLeast(40)),
-    ENABLE_FLIGHT(IslandLevelPredicate.AtLeast(50));
+enum class IslandFeature(val requiredLevel: Int, private val translationKey: String) : Translatable {
+    VISIT_OTHER_ISLANDS(10, "island.feature.visit_other_islands"),
+    CUSTOM_SPAWN_POINT(20, "island.feature.custom_spawn_point"),
+    EXPAND_STORAGE(30, "island.feature.expand_storage"),
+    CUSTOM_SKY_COLOR(40, "island.feature.custom_sky_color"),
+    FLIGHT(50, "island.feature.flight");
+
+    override fun translationKey(): String = translationKey
+
+    fun asLevelPredicate(): IslandLevelPredicate = IslandLevelPredicate.AtLeast(requiredLevel)
 }

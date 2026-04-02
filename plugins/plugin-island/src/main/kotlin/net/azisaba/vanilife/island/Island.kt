@@ -70,7 +70,7 @@ class Island internal constructor(
     override fun audiences(): Iterable<Audience> = IslandPlayerMap.collect(this).mapNotNull(Bukkit::getPlayer)
 
     internal suspend fun addPlayer(player: Player) {
-        if (canFly()) {
+        if (isEnabled(IslandFeature.FLIGHT)) {
             player.allowFlight = true
         }
 

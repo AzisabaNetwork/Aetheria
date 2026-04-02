@@ -8,6 +8,7 @@ import kotlinx.coroutines.withContext
 import me.tofaa.entitylib.container.EntityContainer
 import net.azisaba.vanilife.Vanilife
 import net.azisaba.vanilife.island.Island
+import net.azisaba.vanilife.island.IslandFeature
 import net.azisaba.vanilife.island.IslandFonts
 import net.azisaba.vanilife.island.IslandSoundEvents
 import net.azisaba.vanilife.island.IslandTranslations
@@ -52,9 +53,14 @@ internal object LevelUpAnimator {
             .appendSpace()
             .append(Component.translatable(IslandTranslations.ISLAND_LEVEL_UP, NamedTextColor.YELLOW))
 
-        if (newLevel % 10 == 0) {
+        for (newFeature in IslandFeature.entries.filter { it.requiredLevel == newLevel }) {
             componentBuilder.appendNewline()
-                .append(Component.translatable("island.level_up.unlocked.feature.lv$newLevel"))
+                .append(
+                    Component.translatable(
+                        IslandTranslations.ISLAND_LEVEL_UP_UNLOCKED_FEATURE,
+                        Component.translatable(newFeature, NamedTextColor.YELLOW),
+                    )
+                )
         }
 
         val oldWrackTypes = WrackType.all(oldLevel)
