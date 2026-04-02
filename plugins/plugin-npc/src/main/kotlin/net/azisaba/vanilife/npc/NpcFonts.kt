@@ -16,26 +16,26 @@ object NpcFonts {
             PackBitmapFontProvider(
                 file = Key.key(Vanilife.NAMESPACE, "icon/npc/caveman.png"),
                 chars = listOf("${NpcIcons.CAVEMAN}"),
-                ascent = 8,
-                height = 9,
+                ascent = 7,
+                height = 8,
             ),
             PackBitmapFontProvider(
                 file = Key.key(Vanilife.NAMESPACE, "icon/npc/creeper.png"),
                 chars = listOf("${NpcIcons.CREEPER}"),
-                ascent = 8,
-                height = 9,
+                ascent = 7,
+                height = 8,
             ),
             PackBitmapFontProvider(
                 file = Key.key(Vanilife.NAMESPACE, "icon/npc/ender.png"),
                 chars = listOf("${NpcIcons.ENDER}"),
-                ascent = 8,
-                height = 9,
+                ascent = 7,
+                height = 8,
             ),
             PackBitmapFontProvider(
                 file = Key.key(Vanilife.NAMESPACE, "icon/npc/neko.png"),
                 chars = listOf("${NpcIcons.NEKO}"),
-                ascent = 8,
-                height = 9,
+                ascent = 7,
+                height = 8,
             ),
         )
     )

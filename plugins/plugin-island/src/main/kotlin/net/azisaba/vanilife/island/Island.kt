@@ -1,8 +1,12 @@
 package net.azisaba.vanilife.island
 
+import io.papermc.paper.registry.TypedKey
+import io.papermc.paper.registry.RegistryKey
 import net.azisaba.serialization.IntProvider
 import net.azisaba.vanilife.ConfigurationHolder
 import net.azisaba.vanilife.island.enchantment.EnchantmentAccessor
+import net.azisaba.vanilife.island.event.IslandEnchantmentAddEvent
+import net.azisaba.vanilife.island.event.IslandEnchantmentRemoveEvent
 import net.azisaba.vanilife.island.leveling.LevelDataAccessor
 import net.azisaba.vanilife.island.leveling.score.ScoreSource
 import net.azisaba.vanilife.island.storage.StorageAccessor
@@ -12,72 +16,63 @@ import net.azisaba.vanilife.island.wrack.WrackAccessor
 import net.azisaba.vanilife.world.IslandPosition
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.audience.ForwardingAudience
-import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
+import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import org.jetbrains.exposed.v1.jdbc.Database
-import java.util.*
 
 class Island internal constructor(
     position: IslandPosition,
-    owner: UUID,
-    level: Int,
-    score: Double,
-    displayName: Component?,
-    spawnOffsetX: Double,
-    spawnOffsetY: Double,
-    spawnOffsetZ: Double,
-    spawnYaw: Float,
-    spawnPitch: Float,
-    private val spawnLimit: ConfigurationHolder<Int>,
-    private val spawnIntervalTicks: ConfigurationHolder<IntProvider>,
+    private val wrackSpawnLimit: ConfigurationHolder<Int>,
+    private val wrackSpawnIntervalTicks: ConfigurationHolder<IntProvider>,
     private val database: Database,
     private val plugin: Plugin,
+    private val primaryDataAccessor: PrimaryDataAccessor = PrimaryDataAccessor.fromDatabase(position, database),
+    private val spawnDataAccessor: SpawnDataAccessor = SpawnDataAccessor.fromDatabase(position, database),
+    private val levelDataAccessor: LevelDataAccessor = LevelDataAccessor.fromDatabase(position, database),
+    private val enchantmentAccessor: EnchantmentAccessor = EnchantmentAccessor.fromDatabase(position, database),
+    private val storageAccessor: StorageAccessor = StorageAccessor.fromDatabase(position, database),
+    private val visitorsAccessor: VisitorsAccessor = VisitorsAccessor.fromDatabase(position, database),
+    private val waveAccessor: WaveAccessor = WaveAccessor.create(position),
+    private val wrackAccessor: WrackAccessor = WrackAccessor.create(position, wrackSpawnLimit, wrackSpawnIntervalTicks, plugin),
 ) :
     ForwardingAudience, IslandFeatureHolder,
-    EnchantmentAccessor by EnchantmentAccessor.fromDatabase(position, database),
-    StorageAccessor by StorageAccessor.fromDatabase(position, database),
-    VisitorsAccessor by VisitorsAccessor.fromDatabase(position, database),
-    WaveAccessor by WaveAccessor.create(position),
-    WrackAccessor by WrackAccessor.create(
-        position,
-        spawnLimit,
-        spawnIntervalTicks,
-        plugin,
-    ),
-    PrimaryDataAccessor by PrimaryDataAccessor.create(
-        position,
-        owner,
-        displayName,
-        database,
-    ),
-    SpawnDataAccessor by SpawnDataAccessor.create(
-        position,
-        database,
-        spawnOffsetX,
-        spawnOffsetY,
-        spawnOffsetZ,
-        spawnYaw,
-        spawnPitch,
-    ),
-    LevelDataAccessor by LevelDataAccessor.create(
-        position,
-        level,
-        score,
-        database,
-    ) {
+    PrimaryDataAccessor by primaryDataAccessor,
+    SpawnDataAccessor by spawnDataAccessor,
+    LevelDataAccessor by levelDataAccessor,
+    EnchantmentAccessor by enchantmentAccessor,
+    StorageAccessor by storageAccessor,
+    VisitorsAccessor by visitorsAccessor,
+    WaveAccessor by waveAccessor,
+    WrackAccessor by wrackAccessor {
     override fun audiences(): Iterable<Audience> = IslandPlayerMap.collect(this).mapNotNull(Bukkit::getPlayer)
+
+    override suspend fun addEnchantment(enchantment: TypedKey<Enchantment>): Boolean {
+        if (!IslandEnchantmentAddEvent(this, enchantment).callEvent()) return false
+        return enchantmentAccessor.addEnchantment(enchantment)
+    }
+
+    override suspend fun addEnchantment(enchantment: Enchantment): Boolean =
+        addEnchantment(RegistryKey.ENCHANTMENT.typedKey(enchantment.key()))
+
+    override suspend fun removeEnchantment(enchantment: TypedKey<Enchantment>): Boolean {
+        if (!IslandEnchantmentRemoveEvent(this, enchantment).callEvent()) return false
+        return enchantmentAccessor.removeEnchantment(enchantment)
+    }
+
+    override suspend fun removeEnchantment(enchantment: Enchantment): Boolean =
+        removeEnchantment(RegistryKey.ENCHANTMENT.typedKey(enchantment.key()))
 
     internal suspend fun addPlayer(player: Player) {
         if (isEnabled(IslandFeature.FLIGHT)) {
             player.allowFlight = true
         }
 
-        if (ScoreSource.all().any { it is ScoreSource.VisitPlayer }) {
+        if (ScoreSource.any { it is ScoreSource.VisitPlayer }) {
             val isFirstVisit = hasVisited(player)
 
-            ScoreSource.all(level)
+            ScoreSource.byLevel(level)
                 .filterIsInstance<ScoreSource.VisitPlayer>()
                 .filter { !it.firstVisitOnly || isFirstVisit }
                 .forEach { source ->
@@ -101,6 +96,10 @@ class Island internal constructor(
     }
 
     internal suspend fun bootstrap() {
+        bootstrapPrimaryData()
+        bootstrapSpawnData()
+        bootstrapLevelData()
+        bootstrapEnchantments()
         bootstrapStorage()
     }
 

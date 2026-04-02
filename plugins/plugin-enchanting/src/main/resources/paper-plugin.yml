@@ -2,8 +2,14 @@ name: AzisabaNetwork.Vanilife.Enchanting
 version: 0.0.0
 api-version: 1.21.11
 main: net.azisaba.vanilife.enchanting.Main
+bootstrapper: net.azisaba.vanilife.enchanting.Bootstrap
 folia-supported: true
 dependencies:
+  bootstrap:
+    AzisabaNetwork.Vanilife.Runtime:
+      load: BEFORE
   server:
+    AzisabaNetwork.Vanilife.Island:
+      load: BEFORE
     AzisabaNetwork.Vanilife.Runtime:
       load: BEFORE

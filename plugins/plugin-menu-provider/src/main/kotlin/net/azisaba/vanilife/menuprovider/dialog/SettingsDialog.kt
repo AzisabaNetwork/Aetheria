@@ -38,15 +38,13 @@ internal object SettingsDialog {
                         RegistrySet.valueSet(
                             RegistryKey.DIALOG,
                             buildList {
-                                island?.let {
-                                    add(DisplayNameDialog.create(it))
-                                }
+                                add(DisplayNameDialog.create(island))
 
-                                if (island?.isEnabled(IslandFeature.CUSTOM_SPAWN_POINT) == true) {
+                                if (island.isEnabled(IslandFeature.CUSTOM_SPAWN_POINT)) {
                                     add(SpawnLocationDialog.create(island))
                                 }
 
-                                if (island?.isEnabled(IslandFeature.CUSTOM_SKY_COLOR) == true) {
+                                if (island.isEnabled(IslandFeature.CUSTOM_SKY_COLOR)) {
                                     add(SkyColorDialog.create())
                                 }
                             }

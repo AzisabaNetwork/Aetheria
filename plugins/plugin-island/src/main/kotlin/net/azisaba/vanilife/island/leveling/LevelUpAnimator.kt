@@ -63,8 +63,8 @@ internal object LevelUpAnimator {
                 )
         }
 
-        val oldWrackTypes = WrackType.all(oldLevel)
-        val newWrackTypes = WrackType.all(newLevel)
+        val oldWrackTypes = WrackType.byLevel(oldLevel)
+        val newWrackTypes = WrackType.byLevel(newLevel)
         val unlockedWrackTypes = newWrackTypes - oldWrackTypes
         if (unlockedWrackTypes.isNotEmpty()) {
             componentBuilder.appendNewline()

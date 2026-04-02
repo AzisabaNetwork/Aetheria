@@ -8,22 +8,22 @@ import org.jetbrains.exposed.v1.core.dao.id.LongIdTable
 import org.jetbrains.exposed.v1.core.java.javaUUID
 import java.util.*
 
-internal object IslandsTable : LongIdTable("islands", "position") {
+object IslandsTable : LongIdTable("islands", "position") {
     val owner: Column<UUID> = javaUUID("owner").uniqueIndex()
 
-    val level: Column<Int> = integer("level").check { it.between(Island.MIN_LEVEL, Island.MAX_LEVEL) }
+    val level: Column<Int> = integer("level").default(Island.MIN_LEVEL).check { it.between(Island.MIN_LEVEL, Island.MAX_LEVEL) }
 
-    val score: Column<Double> = double("score")
+    val score: Column<Double> = double("score").default(0.0)
 
-    val displayName: Column<Component?> = component("display_name").nullable()
+    val displayName: Column<Component> = component("display_name").default(Component.text("Untitled"))
 
-    val spawnOffsetX: Column<Double> = double("spawn_offset_x")
+    val spawnOffsetX: Column<Double> = double("spawn_offset_x").default(0.0)
 
-    val spawnOffsetY: Column<Double> = double("spawn_offset_y")
+    val spawnOffsetY: Column<Double> = double("spawn_offset_y").default(0.0)
 
-    val spawnOffsetZ: Column<Double> = double("spawn_offset_z")
+    val spawnOffsetZ: Column<Double> = double("spawn_offset_z").default(0.0)
 
-    val spawnYaw: Column<Float> = float("spawn_yaw")
+    val spawnYaw: Column<Float> = float("spawn_yaw").default(90f)
 
-    val spawnPitch: Column<Float> = float("spawn_pitch")
+    val spawnPitch: Column<Float> = float("spawn_pitch").default(0f)
 }

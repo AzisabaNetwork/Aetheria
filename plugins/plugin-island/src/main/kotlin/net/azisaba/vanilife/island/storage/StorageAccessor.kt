@@ -141,5 +141,6 @@ private class StorageAccessorImpl(position: IslandPosition, private val database
         this.cacheMap = cacheMap
     }
 
-    private fun checkLoaded(): MutableMap<Int, ItemStack> = cacheMap ?: error("Storage has not been loaded yet")
+    private fun checkLoaded(): MutableMap<Int, ItemStack> = cacheMap
+        ?: throw IllegalStateException("Storage has not loaded yet")
 }

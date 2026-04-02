@@ -17,8 +17,6 @@ abstract class DynamicContents<T>(
 
     override fun byKey(key: Key): T? = requireLoaded()[key]
 
-    override fun all(): Set<T> = requireLoaded().values.toSet()
-
     fun bootstrap(plugin: Plugin) {
         val contentsRoot = plugin.dataFolder.toPath().resolve(name)
         contentsRoot.createDirectories()
@@ -27,24 +25,27 @@ abstract class DynamicContents<T>(
             "Path is not a directory: $contentsRoot"
         }
 
-        val newMap = contentsRoot.listDirectoryEntries()
-            .filter(Path::isDirectory)
-            .flatMap { namespaceDir ->
-                namespaceDir.listDirectoryEntries("*.yml")
-                    .sortedBy(Path::name)
-                    .map { file -> file.key() to file.deserialized() }
-            }
-            .toMap()
+        val newMap = contentsRoot.walk()
+            .filter { it.isRegularFile() && it.extension == "yml" }
+            .associate { file -> file.keyFromRoot(contentsRoot) to file.deserialized() }
 
         mapReference.set(newMap)
     }
 
-    private fun requireLoaded(): Map<Key, T> =
-        mapReference.get() ?: throw IllegalStateException("You are trying to access contents '$name' too early")
+    override fun iterator(): Iterator<T> = requireLoaded().values.iterator()
 
-    private fun Path.key(): Key {
-        val namespace = parent?.name ?: throw IllegalArgumentException("Cannot derive namespace from path: $this")
-        val value = nameWithoutExtension
+    private fun requireLoaded(): Map<Key, T> = mapReference.get()
+        ?: throw IllegalStateException("You are trying to access contents '$name' too early")
+
+    private fun Path.keyFromRoot(root: Path): Key {
+        val relative = root.relativize(this)
+
+        val namespace = relative.getName(0).toString()
+
+        val value = (1 until relative.nameCount)
+            .joinToString("/") { relative.getName(it).toString() }
+            .removeSuffix(".yml")
+
         return try {
             Key.key(namespace, value)
         } catch (e: Exception) {

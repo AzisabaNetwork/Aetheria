@@ -21,7 +21,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class WrackEntity internal constructor(
-    private val wrackType: WrackType,
+    val wrackType: WrackType,
     private val islandPosition: IslandPosition,
     private val world: IslandsWorld,
     private val path: DriftPath,

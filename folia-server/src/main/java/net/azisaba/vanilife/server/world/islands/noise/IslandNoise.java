@@ -48,7 +48,7 @@ public final class IslandNoise {
         final double cliffDirectionAngle = ((seed >>> 8) & 1023L) / 1024.0 * Math.PI * 2.0;
         this.cliffDirectionX = Math.cos(cliffDirectionAngle);
         this.cliffDirectionZ = Math.sin(cliffDirectionAngle);
-        final BlockPosition spawnBlock = position.spawnBlock(levelSeed);
+        final BlockPosition spawnBlock = position.defaultSpawnPosition(levelSeed);
         this.spawnBlockOffsetX = spawnBlock.blockX() - position.centerBlockX();
         this.spawnBlockOffsetZ = spawnBlock.blockZ() - position.centerBlockZ();
         this.settings = noiseSettings;

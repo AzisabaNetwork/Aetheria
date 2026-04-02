@@ -1,24 +1,22 @@
 package net.azisaba.vanilife.island.wrack
 
-import io.papermc.paper.registry.RegistryAccess
-import io.papermc.paper.registry.RegistryKey
-import io.papermc.paper.registry.keys.SoundEventKeys
-import io.papermc.paper.registry.TypedKey
 import io.github.retrooper.packetevents.util.SpigotConversionUtil
+import io.papermc.paper.registry.keys.SoundEventKeys
 import kotlinx.coroutines.delay
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kr.toxicity.model.api.BetterModel
 import kr.toxicity.model.api.data.renderer.ModelRenderer
-import net.azisaba.serialization.KeySerializer
+import net.azisaba.serialization.EnchantmentSerializer
 import net.azisaba.vanilife.DynamicContents
 import net.azisaba.vanilife.ItemStackProvider
 import net.azisaba.vanilife.island.Island
+import net.azisaba.vanilife.island.enchantment.EnchantmentAccessor
 import net.azisaba.vanilife.island.leveling.IslandLevelPredicate
-import net.kyori.adventure.key.Key
 import net.kyori.adventure.sound.Sound
 import org.bukkit.entity.Player
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.milliseconds
 
 @Serializable
 sealed interface WrackType {
@@ -34,13 +32,14 @@ sealed interface WrackType {
     suspend fun drop(random: Random, player: Player, island: Island, entity: WrackEntity)
 
     companion object : DynamicContents<WrackType>("wrack_type", lazy { WrackType.serializer() }) {
-        fun all(level: Int): Set<WrackType> = all().filter {
+        fun byLevel(level: Int): Set<WrackType> = filter {
             it.targetLevel.matches(level)
         }.toSet()
 
-        fun roll(random: Random, level: Int): WrackType? {
-            val entries = all(level)
+        fun roll(random: Random, level: Int, enchantments: EnchantmentAccessor): WrackType? {
+            val entries = byLevel(level)
                 .filter { it.weight > 0 }
+                .filter { it !is Enchantment || !enchantments.has(it.enchantment) }
                 .takeIf(List<WrackType>::isNotEmpty) ?: return null
 
             val totalWeight = entries.sumOf(WrackType::weight)
@@ -74,16 +73,11 @@ sealed interface WrackType {
     @Serializable
     @SerialName("Enchantment")
     data class Enchantment(
-        val id: @Serializable(with = KeySerializer::class) Key,
+        val enchantment: @Serializable(with = EnchantmentSerializer::class) org.bukkit.enchantments.Enchantment,
         override val weight: Int,
         override val targetLevel: IslandLevelPredicate,
     ) : WrackType {
         override suspend fun drop(random: Random, player: Player, island: Island, entity: WrackEntity) {
-            RegistryAccess.registryAccess()
-                .getRegistry(RegistryKey.ENCHANTMENT)
-                .getOrThrow(id)
-
-            val enchantmentKey: TypedKey<org.bukkit.enchantments.Enchantment> = RegistryKey.ENCHANTMENT.typedKey(id)
             val displayLocation = entity.location.clone().add(0.0, 0.35, 0.0)
             val display = WrapperWrackEnchantmentDisplay(displayLocation)
             display.spawn(SpigotConversionUtil.fromBukkitLocation(displayLocation))
@@ -97,12 +91,12 @@ sealed interface WrackType {
 
             repeat(20) { tick ->
                 display.tick(tick, 20)
-                delay(50L)
+                delay(50L.milliseconds)
             }
             display.finish()
 
-            if (enchantmentKey !in island.enchantments()) {
-                island.addEnchantment(enchantmentKey)
+            if (!island.has(enchantment)) {
+                island.addEnchantment(enchantment)
             }
 
             player.playSound(Sound.sound(SoundEventKeys.ENTITY_ITEM_PICKUP, Sound.Source.PLAYER, 0.6f, 1.4f))

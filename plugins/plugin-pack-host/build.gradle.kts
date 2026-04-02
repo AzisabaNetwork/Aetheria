@@ -1,5 +1,6 @@
 dependencies {
     compileOnly(project(":plugins:plugin-cooking"))
+    compileOnly(project(":plugins:plugin-enchanting"))
     compileOnly(project(":plugins:plugin-farming"))
     compileOnly(project(":plugins:plugin-fishing"))
     compileOnly(project(":plugins:plugin-forestry"))

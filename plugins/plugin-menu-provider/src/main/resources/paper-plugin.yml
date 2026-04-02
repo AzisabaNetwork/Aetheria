@@ -6,9 +6,13 @@ bootstrapper: net.azisaba.vanilife.menuprovider.Bootstrap
 folia-supported: true
 dependencies:
   bootstrap:
+    AzisabaNetwork.Vanilife.Enchanting:
+      load: BEFORE
     AzisabaNetwork.Vanilife.Runtime:
       load: BEFORE
   server:
+    AzisabaNetwork.Vanilife.Enchanting:
+      load: BEFORE
     AzisabaNetwork.Vanilife.Island:
       load: BEFORE
     AzisabaNetwork.Vanilife.Runtime:

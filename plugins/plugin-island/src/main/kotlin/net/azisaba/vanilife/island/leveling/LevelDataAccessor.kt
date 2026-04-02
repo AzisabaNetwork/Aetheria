@@ -5,8 +5,10 @@ import net.azisaba.vanilife.island.IslandsTable
 import net.azisaba.vanilife.island.leveling.score.ScoreSource
 import net.azisaba.vanilife.island.leveling.score.ScoringManager
 import net.azisaba.vanilife.world.IslandPosition
+import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 import org.jetbrains.exposed.v1.jdbc.update
 
@@ -21,22 +23,26 @@ interface LevelDataAccessor {
 
     suspend fun updateScore(source: ScoreSource)
 
+    @ApiStatus.Internal
+    suspend fun bootstrapLevelData()
+
     companion object {
-        fun create(
-            position: IslandPosition,
-            level: Int,
-            score: Double,
-            database: Database,
-        ): LevelDataAccessor = LevelDataAccessorImpl(position, level, score, database)
+        fun fromDatabase(position: IslandPosition, database: Database): LevelDataAccessor =
+            LevelDataAccessorImpl(position, database)
     }
 }
 
 private class LevelDataAccessorImpl(
-    private val position: IslandPosition,
-    override var level: Int,
-    override var score: Double,
-    private val database: Database,
+    private val position: IslandPosition, private val database: Database,
 ) : LevelDataAccessor {
+    override val level: Int
+        get() = requireLoaded().level
+
+    override val score: Double
+        get() = requireLoaded().score
+
+    private var cacheData: CacheData? = null
+
     private val scoringManager: ScoringManager = ScoringManager()
 
     override suspend fun level(level: Int) = suspendTransaction(database) {
@@ -47,21 +53,32 @@ private class LevelDataAccessorImpl(
             it[IslandsTable.level] = level
             it[IslandsTable.score] = 0.0
         }
-        this@LevelDataAccessorImpl.level = level
-        this@LevelDataAccessorImpl.score = 0.0
+        cacheData = requireLoaded().copy(level = level, score = 0.0)
     }
 
     override suspend fun score(score: Double) = suspendTransaction(database) {
         IslandsTable.update(where = { IslandsTable.id eq position.toLong() }) {
             it[IslandsTable.score] = score
         }
-        this@LevelDataAccessorImpl.score = score
+        cacheData = requireLoaded().copy(score = score)
     }
 
     override suspend fun updateScore(source: ScoreSource) {
         val give = scoringManager.computeScore(source)
         val newScore = score + give
         score(newScore)
-        score = newScore
     }
+
+    override suspend fun bootstrapLevelData() = suspendTransaction(database) {
+        val row = IslandsTable.select(IslandsTable.level, IslandsTable.score).single()
+        cacheData = CacheData(
+            level = row[IslandsTable.level],
+            score = row[IslandsTable.score],
+        )
+    }
+
+    private fun requireLoaded(): CacheData = cacheData
+        ?: throw IllegalStateException("Level data has not yet been loaded")
+
+    private data class CacheData(val level: Int, val score: Double)
 }

@@ -24,7 +24,7 @@ internal class PortalEnterListener(private val forcer: ExitForcer, private val p
         }
 
         plugin.launch(plugin.regionDispatcher(forcer.world, 0, 0)) {
-            val island = player.ownedIsland() ?: return@launch
+            val island = player.ownedIsland()
             val exitAnchor = forcer.world.getExitAnchor(player)
             if (exitAnchor?.teleportOrClear(forcer.world, player) != true) {
                 val safeLocation = forcer.findSafeLocation(island.position, plugin)

@@ -5,6 +5,7 @@ import net.azisaba.serialization.IntProvider
 import net.azisaba.vanilife.ConfigurationHolder
 import net.azisaba.vanilife.Vanilife
 import net.azisaba.vanilife.island.CoastSide
+import net.azisaba.vanilife.island.enchantment.EnchantmentAccessor
 import net.azisaba.vanilife.world.IslandPosition
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
@@ -17,7 +18,7 @@ interface WrackAccessor {
 
     fun spawnWrack(wrackType: WrackType)
 
-    suspend fun wrackTick(time: Long, level: Int)
+    suspend fun wrackTick(time: Long, level: Int, enchantments: EnchantmentAccessor)
 
     companion object {
         fun create(
@@ -58,11 +59,11 @@ private class WrackAccessorImpl(
         }
     }
 
-    override suspend fun wrackTick(time: Long, level: Int) {
+    override suspend fun wrackTick(time: Long, level: Int, enchantments: EnchantmentAccessor) {
         tickingWrackEntities.removeIf { !it.tick(time) }
 
         if (time >= nextSpawnTime && wrackEntities.size <= spawnLimit.value()) {
-            spawnTick(time, level)
+            spawnTick(time, level, enchantments)
         }
 
         while (true) {
@@ -75,10 +76,17 @@ private class WrackAccessorImpl(
         }
     }
 
-    private fun spawnTick(time: Long, level: Int) {
+    private fun spawnTick(time: Long, level: Int, enchantments: EnchantmentAccessor) {
         viewers.removeIf { !it.isValid }
         if (viewers.isNotEmpty()) {
-            WrackType.roll(random, level)?.let(::spawnWrack)
+            WrackType.roll(random, level, enchantments)
+                ?.takeIf { rolled ->
+                    rolled !is WrackType.Enchantment || wrackEntities.none { wrackEntity ->
+                        val type = wrackEntity.wrackType
+                        type !is WrackType.Enchantment || type.enchantment != rolled
+                    }
+                }
+                ?.let(::spawnWrack)
         }
 
         nextSpawnTime = time + spawnIntervalTicks.value().sample(random)

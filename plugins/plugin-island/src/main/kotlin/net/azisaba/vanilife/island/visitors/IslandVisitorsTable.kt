@@ -11,7 +11,7 @@ import java.util.*
 import kotlin.time.Duration
 import kotlin.time.Instant
 
-internal object IslandVisitorsTable : Table("island_visitors") {
+object IslandVisitorsTable : Table("island_visitors") {
     val position: Column<EntityID<Long>> = reference("position", IslandsTable)
 
     val visitor: Column<UUID> = javaUUID("visitor")

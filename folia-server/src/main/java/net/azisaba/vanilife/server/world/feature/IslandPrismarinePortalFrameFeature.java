@@ -2,7 +2,6 @@ package net.azisaba.vanilife.server.world.feature;
 
 import com.mojang.serialization.Codec;
 import net.azisaba.vanilife.world.IslandPosition;
-import net.azisaba.vanilife.world.IslandsWorld;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
@@ -28,15 +27,15 @@ public final class IslandPrismarinePortalFrameFeature extends Feature<NoneFeatur
         final ChunkPos currentChunk = new ChunkPos(context.origin());
         final long levelSeed = level.getSeed();
         for (final IslandPosition islandPos : candidateIslands(currentChunk)) {
-            final int portalX = islandPos.portalBlock(levelSeed).blockX();
-            final int portalZ = islandPos.portalBlock(levelSeed).blockZ();
+            final int portalX = islandPos.defaultPortalPosition(levelSeed).blockX();
+            final int portalZ = islandPos.defaultPortalPosition(levelSeed).blockZ();
 
             if (SectionPos.blockToSectionCoord(portalX) != currentChunk.x || SectionPos.blockToSectionCoord(portalZ) != currentChunk.z) {
                 continue;
             }
 
             final BlockPos base = level.getHeightmapPos(Heightmap.Types.WORLD_SURFACE_WG, new BlockPos(portalX, 0, portalZ));
-            final boolean axisX = islandPos.portalAxisX(levelSeed);
+            final boolean axisX = islandPos.defaultPortalAxisX(levelSeed);
             if (!fitsChunk(base, axisX)) {
                 continue;
             }

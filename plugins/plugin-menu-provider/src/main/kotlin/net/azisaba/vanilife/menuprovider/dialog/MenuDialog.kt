@@ -9,6 +9,7 @@ import io.papermc.paper.registry.data.dialog.DialogBase
 import io.papermc.paper.registry.data.dialog.DialogRegistryEntry
 import io.papermc.paper.registry.data.dialog.action.DialogAction
 import io.papermc.paper.registry.data.dialog.type.DialogType
+import net.azisaba.vanilife.enchanting.dialog.EnchantmentsDialog
 import net.azisaba.vanilife.island.ownedIsland
 import net.azisaba.vanilife.menuprovider.MenuProviderDialogs
 import net.azisaba.vanilife.menuprovider.MenuProviderFonts
@@ -88,20 +89,26 @@ internal object MenuDialog : KoinComponent {
                     .build()
             )
             .type(
-                DialogType.multiAction(listOf(settingsButton(), trashButton(), storageButton(), discordButton()))
-                    .columns(1)
-                    .exitAction(
-                        ActionButton.builder(Component.translatable("gui.done"))
-                            .action(
-                                DialogAction.customClick(
-                                    { _, audience -> audience.closeDialog() },
-                                    ClickCallback.Options.builder()
-                                        .uses(ClickCallback.UNLIMITED_USES)
-                                        .build()
-                                )
+                DialogType.multiAction(
+                    listOf(
+                        settingsButton(),
+                        enchantments(),
+                        trashButton(),
+                        storageButton(),
+                        discordButton(),
+                    )
+                ).exitAction(
+                    ActionButton.builder(Component.translatable("gui.done"))
+                        .action(
+                            DialogAction.customClick(
+                                { _, audience -> audience.closeDialog() },
+                                ClickCallback.Options.builder()
+                                    .uses(ClickCallback.UNLIMITED_USES)
+                                    .build()
                             )
-                            .build()
-                    ).build()
+                        )
+                        .build()
+                ).columns(1).build()
             )
     }
 
@@ -132,6 +139,23 @@ internal object MenuDialog : KoinComponent {
         )
     ).build()
 
+    private fun enchantments(): ActionButton = ActionButton.builder(EnchantmentsDialog.TITLE)
+        .action(
+            DialogAction.customClick(
+                { _, audience ->
+                    val player = audience as? Player ?: return@customClick
+                    plugin.launch {
+                        val island = player.ownedIsland()
+                        audience.showDialog(EnchantmentsDialog.create(island))
+                    }
+                },
+                ClickCallback.Options.builder()
+                    .uses(ClickCallback.UNLIMITED_USES)
+                    .build()
+            )
+        )
+        .build()
+
     private fun trashButton(): ActionButton = ActionButton.builder(TRASH)
         .action(
             DialogAction.customClick(
@@ -148,7 +172,7 @@ internal object MenuDialog : KoinComponent {
                 { _, audience ->
                     val player = audience as? Player ?: return@customClick
                     plugin.launch(plugin.entityDispatcher(player)) {
-                        val island = player.ownedIsland() ?: return@launch
+                        val island = player.ownedIsland()
                         player.openInventory(StorageInventory(island, island.storageSize, plugin).inventory)
                     }
                 },

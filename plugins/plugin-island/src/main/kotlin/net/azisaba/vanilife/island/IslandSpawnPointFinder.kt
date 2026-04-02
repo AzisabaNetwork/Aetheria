@@ -33,8 +33,8 @@ internal object IslandSpawnPointFinder : KoinComponent {
 
     suspend fun find(position: IslandPosition): Location? {
         val levelSeed = Vanilife.getIslandsWorld().seed
-        val spawnBlock = position.spawnBlock(levelSeed)
-        val spawnYaw = position.spawnYaw(levelSeed)
+        val spawnBlock = position.defaultSpawnPosition(levelSeed)
+        val spawnYaw = position.defaultSpawnYaw(levelSeed)
         val minBlockX = position.minBlockX() + SEARCH_MARGIN_BLOCKS
         val maxBlockX = position.maxBlockX() - SEARCH_MARGIN_BLOCKS
         val minBlockZ = position.minBlockZ() + SEARCH_MARGIN_BLOCKS

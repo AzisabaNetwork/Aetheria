@@ -6,6 +6,7 @@ import me.tofaa.entitylib.APIConfig
 import me.tofaa.entitylib.EntityLib
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform
 import net.azisaba.vanilife.ReloadableConfiguration
+import net.azisaba.vanilife.island.cache.IslandCacheMap
 import net.azisaba.vanilife.island.leveling.LevelingConfiguration
 import net.azisaba.vanilife.island.leveling.score.ScoreSource
 import net.azisaba.vanilife.island.wrack.WrackType
@@ -18,7 +19,7 @@ import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import org.koin.dsl.onClose
 
-class Main : JavaPlugin() {
+internal class Main : JavaPlugin() {
     private lateinit var koinApp: KoinApplication
 
     override fun onLoad() {
@@ -28,7 +29,7 @@ class Main : JavaPlugin() {
 
     override fun onEnable() {
         val config = reloadableConfig(Configuration(), Configuration.serializer())
-        val database = setupDatabase(config.value().database).setupTables()
+        val database = config.value().database.createConnection().setupTables()
 
         PacketEvents.getAPI().init()
         EntityLib.init(SpigotEntityLibPlatform(this), APIConfig(PacketEvents.getAPI()))

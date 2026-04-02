@@ -1,5 +1,6 @@
 package net.azisaba.vanilife.island
 
+import net.azisaba.vanilife.island.cache.IslandCacheMap
 import net.azisaba.vanilife.world.IslandPosition
 import net.azisaba.vanilife.world.IslandsWorld
 import org.koin.core.context.GlobalContext

@@ -59,7 +59,7 @@ internal object ReturnDialog : KoinComponent {
     }
 
     private suspend fun returnToIsland(player: Player) {
-        val island = player.ownedIsland() ?: return
+        val island = player.ownedIsland()
         player.teleport(island)
     }
 }

@@ -9,6 +9,10 @@ import net.azisaba.vanilife.Vanilife
 import net.azisaba.vanilife.cooking.CookingItemModels
 import net.azisaba.vanilife.cooking.CookingModels
 import net.azisaba.vanilife.cooking.CookingTranslations
+import net.azisaba.vanilife.enchanting.EnchantingFonts
+import net.azisaba.vanilife.enchanting.EnchantingItemModels
+import net.azisaba.vanilife.enchanting.EnchantingModels
+import net.azisaba.vanilife.enchanting.EnchantingTranslations
 import net.azisaba.vanilife.farming.FarmingItemModels
 import net.azisaba.vanilife.farming.FarmingModels
 import net.azisaba.vanilife.farming.FarmingTranslations
@@ -45,6 +49,7 @@ internal class Main : JavaPlugin() {
             }
 
             font {
+                EnchantingFonts.ENCHANTING_ICONS to EnchantingFonts.enchantingIcons()
                 FishingFonts.FISH_SHADOWS to FishingFonts.fishShadows()
                 IslandFonts.ENCHANTS to IslandFonts.enchants()
                 IslandFonts.ISLAND_ICONS to IslandFonts.islandIcons()
@@ -130,6 +135,9 @@ internal class Main : JavaPlugin() {
                 CookingItemModels.UDON_ITEM to CookingItemModels.udonItem()
                 CookingItemModels.YAKISOBA_ITEM to CookingItemModels.yakisobaItem()
 
+                EnchantingItemModels.DIALOG_ENCHANTMENT_LOCKED to EnchantingItemModels.locked()
+                EnchantingItemModels.DIALOG_ENCHANTMENT_UNLOCKED to EnchantingItemModels.unlocked()
+
                 FarmingItemModels.FERTILIZER to FarmingItemModels.wateringCan()
 
                 FishingItemModels.CLAM to FishingItemModels.clamItem()
@@ -165,11 +173,11 @@ internal class Main : JavaPlugin() {
                 PackedKey.lang(
                     Vanilife.NAMESPACE,
                     Locale.US
-                ) to (CookingTranslations.us() + FarmingTranslations.us() + FishingTranslations.us() + ForestryTranslations.us() + IslandTranslations.us() + MenuProviderTranslations.us() + MiningTranslations.us() + NpcTranslations.us() + PortalTranslations.us() + ToolSwapTranslations.us() + GeneralTranslations.us())
+                ) to (CookingTranslations.us() + EnchantingTranslations.us() + FarmingTranslations.us() + FishingTranslations.us() + ForestryTranslations.us() + IslandTranslations.us() + MenuProviderTranslations.us() + MiningTranslations.us() + NpcTranslations.us() + PortalTranslations.us() + ToolSwapTranslations.us() + GeneralTranslations.us())
                 PackedKey.lang(
                     Vanilife.NAMESPACE,
                     Locale.JAPAN
-                ) to (CookingTranslations.jp() + FarmingTranslations.jp() + FishingTranslations.jp() + ForestryTranslations.jp() + IslandTranslations.jp() + MenuProviderTranslations.jp() + MiningTranslations.jp() + NpcTranslations.jp() + PortalTranslations.jp() + ToolSwapTranslations.jp() + GeneralTranslations.jp())
+                ) to (CookingTranslations.jp() + EnchantingTranslations.jp() + FarmingTranslations.jp() + FishingTranslations.jp() + ForestryTranslations.jp() + IslandTranslations.jp() + MenuProviderTranslations.jp() + MiningTranslations.jp() + NpcTranslations.jp() + PortalTranslations.jp() + ToolSwapTranslations.jp() + GeneralTranslations.jp())
             }
 
             models {
@@ -246,6 +254,9 @@ internal class Main : JavaPlugin() {
                 CookingModels.TUNA_SUSHI to CookingModels.tunaSushi()
                 CookingModels.UDON to CookingModels.udon()
                 CookingModels.YAKISOBA to CookingModels.yakisoba()
+
+                EnchantingModels.DIALOG_ENCHANTMENT_LOCKED to EnchantingModels.locked()
+                EnchantingModels.DIALOG_ENCHANTMENT_UNLOCKED to EnchantingModels.unlocked()
 
                 FarmingModels.FERTILIZER to FarmingModels.wateringCan()
 

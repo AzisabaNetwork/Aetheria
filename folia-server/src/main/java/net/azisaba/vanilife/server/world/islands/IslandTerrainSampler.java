@@ -64,7 +64,7 @@ final class IslandTerrainSampler {
             ? new RiverSample(baseRiverSample.strength() * obstacleReduction, baseRiverSample.bankInfluence() * obstacleReduction, baseRiverSample.coreInfluence() * obstacleReduction)
             : baseRiverSample;
 
-        final BlockPosition spawnBlock = islandPos.spawnBlock(levelSeed);
+        final BlockPosition spawnBlock = islandPos.defaultSpawnPosition(levelSeed);
         final double spawnPointDistance = Math.sqrt(Math.pow(blockX - spawnBlock.blockX(), 2) + Math.pow(blockZ - spawnBlock.blockZ(), 2));
 
         final double wastelandThreshold = 12.0 + (beachTransitionNoise + beachBlendNoise) * 2.0;

@@ -14,36 +14,28 @@ import org.jetbrains.exposed.v1.jdbc.update
 interface SpawnDataAccessor {
     val spawnPoint: Location
 
-    suspend fun spawnPoint(): Location
-
     suspend fun spawnPoint(spawnPoint: Location)
 
+    suspend fun bootstrapSpawnData()
+
     companion object {
-        fun create(
-            position: IslandPosition,
-            database: Database,
-            offsetX: Double,
-            offsetY: Double,
-            offsetZ: Double,
-            yaw: Float,
-            pitch: Float,
-        ): SpawnDataAccessor = SpawnDataAccessorImpl(position, database, offsetX, offsetY, offsetZ, yaw, pitch)
+        fun fromDatabase(position: IslandPosition, database: Database): SpawnDataAccessor =
+            SpawnDataAccessorImpl(position, database)
     }
 }
 
 private class SpawnDataAccessorImpl(
-    private val position: IslandPosition,
-    private val database: Database,
-    private var offsetX: Double,
-    private var offsetY: Double,
-    private var offsetZ: Double,
-    private var yaw: Float,
-    private var pitch: Float,
+    private val position: IslandPosition, private val database: Database,
 ) : SpawnDataAccessor {
-    override val spawnPoint: Location = centerLocation().apply {
-        add(offsetX, offsetY, offsetZ)
-        setRotation(yaw, pitch)
-    }
+    override val spawnPoint: Location
+        get() = centerLocation().apply {
+            add(requireLoaded().offsetX, requireLoaded().offsetY, requireLoaded().offsetZ)
+            setRotation(requireLoaded().yaw, requireLoaded().pitch)
+        }
+
+    private val positionId: Long = position.toLong()
+
+    private var cacheData: CacheData? = null
 
     private val columns: List<Column<*>> = listOf(
         IslandsTable.spawnOffsetX,
@@ -53,48 +45,15 @@ private class SpawnDataAccessorImpl(
         IslandsTable.spawnPitch,
     )
 
-    override suspend fun spawnPoint(): Location = suspendTransaction(database) {
-        val resultRow = IslandsTable.select(columns)
-            .where { IslandsTable.id eq position.toLong() }
-            .single()
-
-        val offsetX = resultRow[IslandsTable.spawnOffsetX].also {
-            this@SpawnDataAccessorImpl.offsetX = it
-        }
-        val offsetY = resultRow[IslandsTable.spawnOffsetY].also {
-            this@SpawnDataAccessorImpl.offsetY = it
-        }
-        val offsetZ = resultRow[IslandsTable.spawnOffsetZ].also {
-            this@SpawnDataAccessorImpl.offsetZ = it
-        }
-        val yaw = resultRow[IslandsTable.spawnYaw].also {
-            this@SpawnDataAccessorImpl.yaw = it
-        }
-        val pitch = resultRow[IslandsTable.spawnPitch].also {
-            this@SpawnDataAccessorImpl.pitch = it
-        }
-
-        centerLocation().apply {
-            add(offsetX, offsetY, offsetZ)
-            setRotation(yaw, pitch)
-        }
-    }
-
     override suspend fun spawnPoint(spawnPoint: Location) = suspendTransaction(database) {
         val centerLocation = centerLocation()
 
-        val offsetX = (spawnPoint.x() - centerLocation.x()).also {
-            this@SpawnDataAccessorImpl.offsetX = it
-        }
-        val offsetY = (spawnPoint.y() - centerLocation.y()).also {
-            this@SpawnDataAccessorImpl.offsetY = it
-        }
-        val offsetZ = (spawnPoint.z() - centerLocation.z()).also {
-            this@SpawnDataAccessorImpl.offsetZ = it
-        }
+        val offsetX = (spawnPoint.x() - centerLocation.x())
+        val offsetY = (spawnPoint.y() - centerLocation.y())
+        val offsetZ = (spawnPoint.z() - centerLocation.z())
 
-        this@SpawnDataAccessorImpl.yaw = spawnPoint.yaw
-        this@SpawnDataAccessorImpl.pitch = spawnPoint.pitch
+        val yaw = spawnPoint.yaw
+        val pitch = spawnPoint.pitch
 
         IslandsTable.update(where = { IslandsTable.id eq position.toLong() }) {
             it[IslandsTable.spawnOffsetX] = offsetX
@@ -104,13 +63,38 @@ private class SpawnDataAccessorImpl(
             it[IslandsTable.spawnPitch] = pitch
         }
 
-        Unit
+        cacheData = CacheData(offsetX, offsetY, offsetZ, yaw, pitch)
     }
+
+    override suspend fun bootstrapSpawnData() = suspendTransaction(database) {
+        val row = IslandsTable.select(columns)
+            .where { IslandsTable.id eq positionId }
+            .single()
+
+        cacheData = CacheData(
+            offsetX = row[IslandsTable.spawnOffsetX],
+            offsetY = row[IslandsTable.spawnOffsetY],
+            offsetZ = row[IslandsTable.spawnOffsetZ],
+            yaw = row[IslandsTable.spawnYaw],
+            pitch = row[IslandsTable.spawnPitch],
+        )
+    }
+
+    private fun requireLoaded(): CacheData = cacheData
+        ?: throw IllegalStateException("Spawn data has not yet been loaded")
 
     private fun centerLocation(): Location = Location(
         Vanilife.getIslandsWorld(),
         position.centerBlockX().toDouble(),
         IslandsWorld.MIN_Y.toDouble(),
         position.centerBlockZ().toDouble(),
+    )
+
+    private data class CacheData(
+        val offsetX: Double,
+        val offsetY: Double,
+        val offsetZ: Double,
+        val yaw: Float,
+        val pitch: Float,
     )
 }

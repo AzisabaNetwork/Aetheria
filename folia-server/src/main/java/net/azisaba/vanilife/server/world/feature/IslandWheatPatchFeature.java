@@ -30,7 +30,7 @@ public final class IslandWheatPatchFeature extends Feature<NoneFeatureConfigurat
         final long seed = islandPos.computeSeed(level.getSeed()) ^ 0x51C2E6B4D9A3F17BL;
         final RandomSource random = RandomSource.create(seed);
         final ChunkPos currentChunk = new ChunkPos(context.origin());
-        final BlockPosition spawnBlock = islandPos.spawnBlock(level.getSeed());
+        final BlockPosition spawnBlock = islandPos.defaultSpawnPosition(level.getSeed());
         boolean placed = false;
 
         final int wheatCount = 12 + random.nextInt(7);

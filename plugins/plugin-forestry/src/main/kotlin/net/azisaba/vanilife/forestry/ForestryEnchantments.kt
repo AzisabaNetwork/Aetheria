@@ -14,12 +14,12 @@ import org.bukkit.inventory.EquipmentSlotGroup
 object ForestryEnchantments {
     val ACACIA_TIMBER: TypedKey<Enchantment> = RegistryKey.ENCHANTMENT.typedKey(Key.key(Vanilife.NAMESPACE, "acacia_timber"))
     val AUTO_SAPLING: TypedKey<Enchantment> = RegistryKey.ENCHANTMENT.typedKey(Key.key(Vanilife.NAMESPACE, "auto_sapling"))
-    val BIRCH_TIMBER: TypedKey<Enchantment> = RegistryKey.ENCHANTMENT.typedKey(Key.key(Vanilife.NAMESPACE, "birch_timer"))
-    val DARK_OAK_TIMBER: TypedKey<Enchantment> = RegistryKey.ENCHANTMENT.typedKey(Key.key(Vanilife.NAMESPACE, "dark_oak_timer"))
-    val JUNGLE_TIMBER: TypedKey<Enchantment> = RegistryKey.ENCHANTMENT.typedKey(Key.key(Vanilife.NAMESPACE, "jungle_timer"))
+    val BIRCH_TIMBER: TypedKey<Enchantment> = RegistryKey.ENCHANTMENT.typedKey(Key.key(Vanilife.NAMESPACE, "birch_timber"))
+    val DARK_OAK_TIMBER: TypedKey<Enchantment> = RegistryKey.ENCHANTMENT.typedKey(Key.key(Vanilife.NAMESPACE, "dark_oak_timber"))
+    val JUNGLE_TIMBER: TypedKey<Enchantment> = RegistryKey.ENCHANTMENT.typedKey(Key.key(Vanilife.NAMESPACE, "jungle_timber"))
     val OAK_TIMBER: TypedKey<Enchantment> = RegistryKey.ENCHANTMENT.typedKey(Key.key(Vanilife.NAMESPACE, "oak_timber"))
     val PALE_OAK_TIMBER: TypedKey<Enchantment> = RegistryKey.ENCHANTMENT.typedKey(Key.key(Vanilife.NAMESPACE, "pale_oak_timber"))
-    val SPRUCE_TIMBER: TypedKey<Enchantment> = RegistryKey.ENCHANTMENT.typedKey(Key.key(Vanilife.NAMESPACE, "spruce_timer"))
+    val SPRUCE_TIMBER: TypedKey<Enchantment> = RegistryKey.ENCHANTMENT.typedKey(Key.key(Vanilife.NAMESPACE, "spruce_timber"))
 
     internal fun bootstrap(event: RegistryComposeEvent<Enchantment, EnchantmentRegistryEntry.Builder>) {
         event.registry().register(ACACIA_TIMBER) { acaciaTimber(event, it) }

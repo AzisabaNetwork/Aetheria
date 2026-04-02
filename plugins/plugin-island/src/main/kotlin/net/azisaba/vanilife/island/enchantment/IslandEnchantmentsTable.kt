@@ -7,7 +7,7 @@ import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 
-internal object IslandEnchantmentsTable : Table("island_enchantments") {
+object IslandEnchantmentsTable : Table("island_enchantments") {
     val position: Column<EntityID<Long>> = reference("position", IslandsTable)
 
     val enchantment: Column<Key> = key("enchantment")

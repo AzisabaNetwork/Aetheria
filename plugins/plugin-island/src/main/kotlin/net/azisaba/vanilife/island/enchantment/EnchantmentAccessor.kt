@@ -4,6 +4,7 @@ import io.papermc.paper.registry.RegistryKey
 import io.papermc.paper.registry.TypedKey
 import net.azisaba.vanilife.world.IslandPosition
 import org.bukkit.enchantments.Enchantment
+import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -13,13 +14,26 @@ import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 
 interface EnchantmentAccessor {
-    suspend fun enchantments(): Set<TypedKey<Enchantment>>
+    val enchantments: Set<TypedKey<Enchantment>>
+
+    fun has(enchantment: TypedKey<Enchantment>): Boolean = enchantment in enchantments
+
+    fun has(enchantment: Enchantment): Boolean = has(RegistryKey.ENCHANTMENT.typedKey(enchantment.key()))
 
     suspend fun addEnchantment(enchantment: TypedKey<Enchantment>): Boolean
 
+    suspend fun addEnchantment(enchantment: Enchantment): Boolean =
+        addEnchantment(RegistryKey.ENCHANTMENT.typedKey(enchantment.key()))
+
     suspend fun removeEnchantment(enchantment: TypedKey<Enchantment>): Boolean
 
+    suspend fun removeEnchantment(enchantment: Enchantment): Boolean =
+        removeEnchantment(RegistryKey.ENCHANTMENT.typedKey(enchantment.key()))
+
     suspend fun clearEnchantments()
+
+    @ApiStatus.Internal
+    suspend fun bootstrapEnchantments()
 
     companion object {
         fun fromDatabase(position: IslandPosition, database: Database): EnchantmentAccessor =
@@ -27,31 +41,49 @@ interface EnchantmentAccessor {
     }
 }
 
-private class EnchantmentAccessorImpl(
-    private val position: IslandPosition, private val database: Database,
-) : EnchantmentAccessor {
-    override suspend fun enchantments(): Set<TypedKey<Enchantment>> = suspendTransaction(database) {
-        IslandEnchantmentsTable.select(IslandEnchantmentsTable.enchantment)
-            .where { IslandEnchantmentsTable.position eq position.toLong() }
-            .map { RegistryKey.ENCHANTMENT.typedKey(it[IslandEnchantmentsTable.enchantment]) }
-            .toSet()
-    }
+private class EnchantmentAccessorImpl(position: IslandPosition, private val database: Database) : EnchantmentAccessor {
+    override val enchantments: Set<TypedKey<Enchantment>>
+        get() = requireLoaded().toSet()
 
-    override suspend fun addEnchantment(enchantment: TypedKey<Enchantment>) = suspendTransaction(database) {
+    private val positionId: Long = position.toLong()
+
+    private var cacheSet: MutableSet<TypedKey<Enchantment>>? = null
+
+    override suspend fun addEnchantment(enchantment: TypedKey<Enchantment>): Boolean = suspendTransaction(database) {
+        requireLoaded().add(enchantment)
         IslandEnchantmentsTable.insertIgnore {
-            it[IslandEnchantmentsTable.position] = this@EnchantmentAccessorImpl.position.toLong()
+            it[IslandEnchantmentsTable.position] = positionId
             it[IslandEnchantmentsTable.enchantment] = enchantment
         }.insertedCount > 0
     }
 
-    override suspend fun removeEnchantment(enchantment: TypedKey<Enchantment>) = suspendTransaction(database) {
+    override suspend fun removeEnchantment(enchantment: TypedKey<Enchantment>): Boolean = suspendTransaction(database) {
+        requireLoaded().remove(enchantment)
         IslandEnchantmentsTable.deleteWhere {
-            (IslandEnchantmentsTable.position eq this@EnchantmentAccessorImpl.position.toLong()) and (IslandEnchantmentsTable.enchantment eq enchantment)
+            (IslandEnchantmentsTable.position eq positionId) and (IslandEnchantmentsTable.enchantment eq enchantment)
         } > 0
     }
 
     override suspend fun clearEnchantments() = suspendTransaction(database) {
-        IslandEnchantmentsTable.deleteWhere { IslandEnchantmentsTable.position eq this@EnchantmentAccessorImpl.position.toLong() }
+        requireLoaded().clear()
+        IslandEnchantmentsTable.deleteWhere { IslandEnchantmentsTable.position eq positionId }
         Unit
     }
+
+    override suspend fun bootstrapEnchantments() = suspendTransaction(database) {
+        val cacheSet = mutableSetOf<TypedKey<Enchantment>>()
+
+        val rows = IslandEnchantmentsTable.select(IslandEnchantmentsTable.enchantment)
+            .where { IslandEnchantmentsTable.position eq positionId }
+
+        for (row in rows) {
+            val enchantmentKey = RegistryKey.ENCHANTMENT.typedKey(row[IslandEnchantmentsTable.enchantment])
+            cacheSet.add(enchantmentKey)
+        }
+
+        this@EnchantmentAccessorImpl.cacheSet = cacheSet
+    }
+
+    private fun requireLoaded(): MutableSet<TypedKey<Enchantment>> = cacheSet
+        ?: throw IllegalStateException("Enchantments has not yet been loaded")
 }

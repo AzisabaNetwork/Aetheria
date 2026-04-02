@@ -29,8 +29,8 @@ final class RiverNetworkPlanner {
     RiverNetwork create(final long levelSeed, final IslandPosition islandPos) {
         final long islandSeed = islandPos.computeSeed(levelSeed);
         final Random random = new Random(islandSeed ^ 0x24A31D7BE19C54D3L);
-        final BlockPosition portalBlock = islandPos.portalBlock(levelSeed);
-        final BlockPosition spawnBlock = islandPos.spawnBlock(levelSeed);
+        final BlockPosition portalBlock = islandPos.defaultPortalPosition(levelSeed);
+        final BlockPosition spawnBlock = islandPos.defaultSpawnPosition(levelSeed);
 
         final Obstacle[] obstacles = {
             new Obstacle(portalBlock.blockX() - islandPos.centerBlockX(), portalBlock.blockZ() - islandPos.centerBlockZ(), PORTAL_RIVER_SAFE_RADIUS, PORTAL_RIVER_DETOUR_DISTANCE),

@@ -1,7 +1,7 @@
 package net.azisaba.vanilife.island.listener
 
 import com.github.shynixn.mccoroutine.folia.launch
-import net.azisaba.vanilife.island.IslandCacheMap
+import net.azisaba.vanilife.island.cache.IslandCacheMap
 import net.azisaba.vanilife.island.leveling.score.ScoreSource
 import net.azisaba.vanilife.world.IslandPosition
 import net.azisaba.vanilife.world.IslandsWorld
@@ -16,7 +16,7 @@ import org.bukkit.plugin.Plugin
 internal class ScoreSourceListener(private val cacheMap: IslandCacheMap, private val plugin: Plugin) : Listener {
     @EventHandler
     fun onBlockBreak(event: BlockBreakEvent) {
-        if (event.block.world !is IslandsWorld || ScoreSource.all().none { it is ScoreSource.BreakBlock }) return
+        if (event.block.world !is IslandsWorld) return
 
         val blockState = event.block.state
         val position = IslandPosition.fromPosition(blockState.location)
@@ -24,7 +24,7 @@ internal class ScoreSourceListener(private val cacheMap: IslandCacheMap, private
         plugin.launch {
             val island = cacheMap.lookup(position) ?: return@launch
 
-            ScoreSource.all(island.level)
+            ScoreSource.byLevel(island.level)
                 .filterIsInstance<ScoreSource.BreakBlock>()
                 .filter { it.containsBlock(blockState) }
                 .forEach { source ->
@@ -35,7 +35,7 @@ internal class ScoreSourceListener(private val cacheMap: IslandCacheMap, private
 
     @EventHandler
     fun onBlockPlace(event: BlockPlaceEvent) {
-        if (event.block.world !is IslandsWorld || ScoreSource.all().none { it is ScoreSource.PlaceBlock }) return
+        if (event.block.world !is IslandsWorld) return
 
         val blockState = event.block.state
         val position = IslandPosition.fromPosition(blockState.location)
@@ -43,7 +43,7 @@ internal class ScoreSourceListener(private val cacheMap: IslandCacheMap, private
         plugin.launch {
             val island = cacheMap.lookup(position) ?: return@launch
 
-            ScoreSource.all(island.level)
+            ScoreSource.byLevel(island.level)
                 .filterIsInstance<ScoreSource.PlaceBlock>()
                 .filter { it.containsBlock(blockState) }
                 .forEach { source ->
@@ -54,14 +54,14 @@ internal class ScoreSourceListener(private val cacheMap: IslandCacheMap, private
 
     @EventHandler
     fun onEntityBreed(event: EntityBreedEvent) {
-        if (event.entity.world !is IslandsWorld || ScoreSource.all().none { it is ScoreSource.Breed }) return
+        if (event.entity.world !is IslandsWorld) return
 
         val position = IslandPosition.fromPosition(event.entity.location)
 
         plugin.launch {
             val island = cacheMap.lookup(position) ?: return@launch
 
-            ScoreSource.all(island.level)
+            ScoreSource.byLevel(island.level)
                 .filterIsInstance<ScoreSource.Breed>()
                 .filter { it.containsEntity(event.entity) }
                 .forEach { source ->
@@ -72,7 +72,7 @@ internal class ScoreSourceListener(private val cacheMap: IslandCacheMap, private
 
     @EventHandler
     fun onPlayerHarvestBlock(event: PlayerHarvestBlockEvent) {
-        if (event.harvestedBlock.world !is IslandsWorld || ScoreSource.all().none { it is ScoreSource.Harvest }) return
+        if (event.harvestedBlock.world !is IslandsWorld) return
 
         val blockState = event.harvestedBlock.state
         val position = IslandPosition.fromPosition(blockState.location)
@@ -80,7 +80,7 @@ internal class ScoreSourceListener(private val cacheMap: IslandCacheMap, private
         plugin.launch {
             val island = cacheMap.lookup(position) ?: return@launch
 
-            ScoreSource.all(island.level)
+            ScoreSource.byLevel(island.level)
                 .filterIsInstance<ScoreSource.Harvest>()
                 .filter { it.containsCrop(blockState) }
                 .forEach { source ->

@@ -3,6 +3,7 @@ package net.azisaba.vanilife.world;
 import com.google.common.base.Preconditions;
 import io.papermc.paper.math.BlockPosition;
 import io.papermc.paper.math.Position;
+import java.util.Random;
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
@@ -65,19 +66,9 @@ public sealed interface IslandPosition permits IslandPositionImpl {
         return this.z() * IslandsWorld.SPACING_BLOCKS;
     }
 
-    default long computeSeed(final long levelSeed) {
-        long s = (((long) this.x() << 32) ^ ((long) this.z() & 0xffffffffL)) ^ levelSeed;
-        s ^= (s >>> 30);
-        s *= 0xBF58476D1CE4E5B9L;
-        s ^= (s >>> 27);
-        s *= 0x94D049BB133111EBL;
-        s ^= (s >>> 31);
-        return s;
-    }
-
-    default BlockPosition spawnBlock(final long levelSeed) {
-        final long islandSeed = this.computeSeed(levelSeed);
-        final java.util.Random random = new java.util.Random(islandSeed ^ 0x63A7B4F5D91EC24AL);
+    default BlockPosition defaultSpawnPosition(final long seed) {
+        final long islandSeed = this.computeSeed(seed);
+        final Random random = new Random(islandSeed ^ 0x63A7B4F5D91EC24AL);
         final int side = random.nextInt(4);
         final int maxOffsetX = (IslandsWorld.ISLAND_SIZE_X_BLOCKS / 2) - 18;
         final int maxOffsetZ = (IslandsWorld.ISLAND_SIZE_Z_BLOCKS / 2) - 18;
@@ -89,16 +80,28 @@ public sealed interface IslandPosition permits IslandPositionImpl {
         final int offsetX;
         final int offsetZ;
         switch (side) {
-            case 0 -> { offsetX = alongX; offsetZ = -shoreZ; }
-            case 1 -> { offsetX = shoreX; offsetZ = alongZ; }
-            case 2 -> { offsetX = alongX; offsetZ = shoreZ; }
-            default -> { offsetX = -shoreX; offsetZ = alongZ; }
+            case 0 -> {
+                offsetX = alongX;
+                offsetZ = -shoreZ;
+            }
+            case 1 -> {
+                offsetX = shoreX;
+                offsetZ = alongZ;
+            }
+            case 2 -> {
+                offsetX = alongX;
+                offsetZ = shoreZ;
+            }
+            default -> {
+                offsetX = -shoreX;
+                offsetZ = alongZ;
+            }
         }
         return Position.block(this.centerBlockX() + offsetX, IslandsWorld.SEA_LEVEL, this.centerBlockZ() + offsetZ);
     }
 
-    default float spawnYaw(final long levelSeed) {
-        final long islandSeed = this.computeSeed(levelSeed);
+    default float defaultSpawnYaw(final long seed) {
+        final long islandSeed = this.computeSeed(seed);
         final java.util.Random random = new java.util.Random(islandSeed ^ 0x63A7B4F5D91EC24AL);
         final int side = random.nextInt(4);
         return switch (side) {
@@ -109,8 +112,8 @@ public sealed interface IslandPosition permits IslandPositionImpl {
         };
     }
 
-    default BlockPosition portalBlock(final long levelSeed) {
-        final long islandSeed = this.computeSeed(levelSeed);
+    default BlockPosition defaultPortalPosition(final long seed) {
+        final long islandSeed = this.computeSeed(seed);
         final java.util.Random random = new java.util.Random(islandSeed ^ 0x2F7A46D1B0C8E51AL);
         final boolean axisX = random.nextBoolean();
         final int chunkOffsetX = random.nextBoolean() ? -1 : 0;
@@ -122,10 +125,20 @@ public sealed interface IslandPosition permits IslandPositionImpl {
         return Position.block(this.centerBlockX() + offsetX, IslandsWorld.SEA_LEVEL, this.centerBlockZ() + offsetZ);
     }
 
-    default boolean portalAxisX(final long levelSeed) {
-        final long islandSeed = this.computeSeed(levelSeed);
+    default boolean defaultPortalAxisX(final long seed) {
+        final long islandSeed = this.computeSeed(seed);
         final java.util.Random random = new java.util.Random(islandSeed ^ 0x2F7A46D1B0C8E51AL);
         return random.nextBoolean();
+    }
+
+    default long computeSeed(final long salt) {
+        long s = (((long) this.x() << 32) ^ ((long) this.z() & 0xffffffffL)) ^ salt;
+        s ^= (s >>> 30);
+        s *= 0xBF58476D1CE4E5B9L;
+        s ^= (s >>> 27);
+        s *= 0x94D049BB133111EBL;
+        s ^= (s >>> 31);
+        return s;
     }
 
     default long toLong() {

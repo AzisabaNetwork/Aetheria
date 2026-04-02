@@ -5,6 +5,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import net.azisaba.vanilife.ConfigurationHolder
+import net.azisaba.vanilife.island.cache.IslandCacheMap
 import net.azisaba.vanilife.island.leveling.requirements.LevelUpRequirementProvider
 import net.azisaba.vanilife.island.leveling.tryLevelUp
 import org.bukkit.Bukkit
@@ -53,19 +54,19 @@ internal class IslandTicker(
         ACTIVE(1L) {
             override suspend fun tick(island: Island, time: Long) {
                 if (IslandPlayerMap.lookup(island.owner) === island) {
-                    island.wrackTick(time, island.level)
+                    island.wrackTick(time, island.level, enchantments = island)
                 }
                 island.waveTick(time)
             }
         },
         OWNER_ONLINE(3L) {
             override suspend fun tick(island: Island, time: Long) {
-                island.wrackTick(time, island.level)
+                island.wrackTick(time, island.level, enchantments = island)
             }
         },
         IDLE(20L * 5) {
             override suspend fun tick(island: Island, time: Long) {
-                island.wrackTick(time, island.level)
+                island.wrackTick(time, island.level, enchantments = island)
             }
         };
 

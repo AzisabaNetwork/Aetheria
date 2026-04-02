@@ -9,7 +9,7 @@ import net.azisaba.vanilife.island.listener.SpawnLocationListener
 import org.koin.core.Koin
 
 internal fun Main.setupEventListeners(koin: Koin) {
-    server.pluginManager.registerEvents(EnchantingTableListener(EnchantingTableBehaviour.Default), this)
+    // server.pluginManager.registerEvents(EnchantingTableListener(EnchantingTableBehaviour.Default), this)
     server.pluginManager.registerEvents(FlightListener(koin.get()), this)
     server.pluginManager.registerEvents(PlayerListener(koin.get(), koin.get()), this)
     server.pluginManager.registerEvents(ScoreSourceListener(koin.get(), koin.get()), this)

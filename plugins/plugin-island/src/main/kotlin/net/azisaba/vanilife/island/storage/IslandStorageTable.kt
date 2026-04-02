@@ -8,7 +8,7 @@ import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.between
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 
-internal object IslandStorageTable : Table("island_storage") {
+object IslandStorageTable : Table("island_storage") {
     val position: Column<EntityID<Long>> = reference("position", IslandsTable)
 
     val index: Column<Int> = integer("index").check { it.between(0, 53) }
