@@ -55,7 +55,7 @@ internal class IslandCacheMap(
                 database,
                 plugin,
             )
-        }
+        }.apply { bootstrap() }
         cacheOwnerPosition(owner, position)
         return island
     }
@@ -90,7 +90,7 @@ internal class IslandCacheMap(
                 database,
                 plugin,
             )
-        }
+        }.apply { bootstrap() }
     }
 
     suspend fun lookupPosition(owner: UUID): IslandPosition? {

@@ -5,6 +5,7 @@ import net.azisaba.vanilife.ConfigurationHolder
 import net.azisaba.vanilife.island.enchantment.EnchantmentAccessor
 import net.azisaba.vanilife.island.leveling.LevelDataAccessor
 import net.azisaba.vanilife.island.leveling.score.ScoreSource
+import net.azisaba.vanilife.island.storage.StorageAccessor
 import net.azisaba.vanilife.island.visitors.VisitorsAccessor
 import net.azisaba.vanilife.island.waves.WaveAccessor
 import net.azisaba.vanilife.island.wrack.WrackAccessor
@@ -36,6 +37,7 @@ class Island internal constructor(
 ) :
     ForwardingAudience, IslandFeatureHolder,
     EnchantmentAccessor by EnchantmentAccessor.fromDatabase(position, database),
+    StorageAccessor by StorageAccessor.fromDatabase(position, database),
     VisitorsAccessor by VisitorsAccessor.fromDatabase(position, database),
     WaveAccessor by WaveAccessor.create(position),
     WrackAccessor by WrackAccessor.create(
@@ -96,6 +98,10 @@ class Island internal constructor(
         if (!player.gameMode.isInvulnerable) {
             player.allowFlight = false
         }
+    }
+
+    internal suspend fun bootstrap() {
+        bootstrapStorage()
     }
 
     companion object {

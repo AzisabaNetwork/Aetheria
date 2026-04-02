@@ -32,6 +32,12 @@ object MenuProviderFonts {
                 height = 8,
             ),
             PackBitmapFontProvider(
+                file = Key.key(Vanilife.NAMESPACE, "icon/menu/storage.png"),
+                chars = listOf(MenuIcons.STORAGE.toString()),
+                ascent = 7,
+                height = 8,
+            ),
+            PackBitmapFontProvider(
                 file = Key.key(Vanilife.NAMESPACE, "icon/menu/trash.png"),
                 chars = listOf(MenuIcons.TRASH.toString()),
                 ascent = 7,
@@ -44,6 +50,7 @@ object MenuProviderFonts {
         val MENU: Char = nextChar()
         val DISCORD: Char = nextChar()
         val SETTINGS: Char = nextChar()
+        val STORAGE: Char = nextChar()
         val TRASH: Char = nextChar()
     }
 }

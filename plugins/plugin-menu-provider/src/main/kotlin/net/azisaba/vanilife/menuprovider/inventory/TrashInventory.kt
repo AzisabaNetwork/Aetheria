@@ -16,7 +16,7 @@ import org.bukkit.plugin.Plugin
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
 
-class TrashInventory(private val plugin: Plugin) : InventoryHolder {
+internal class TrashInventory(private val plugin: Plugin) : InventoryHolder {
     private val inventory: Inventory = Bukkit.createInventory(this, 54, TITLE)
 
     override fun getInventory(): Inventory = inventory

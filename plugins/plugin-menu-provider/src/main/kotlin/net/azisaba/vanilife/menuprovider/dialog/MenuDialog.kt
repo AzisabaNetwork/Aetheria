@@ -1,5 +1,6 @@
 package net.azisaba.vanilife.menuprovider.dialog
 
+import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import io.papermc.paper.registry.RegistryAccess
 import io.papermc.paper.registry.RegistryKey
@@ -8,9 +9,11 @@ import io.papermc.paper.registry.data.dialog.DialogBase
 import io.papermc.paper.registry.data.dialog.DialogRegistryEntry
 import io.papermc.paper.registry.data.dialog.action.DialogAction
 import io.papermc.paper.registry.data.dialog.type.DialogType
+import net.azisaba.vanilife.island.ownedIsland
 import net.azisaba.vanilife.menuprovider.MenuProviderDialogs
 import net.azisaba.vanilife.menuprovider.MenuProviderFonts
 import net.azisaba.vanilife.menuprovider.MenuProviderTranslations
+import net.azisaba.vanilife.menuprovider.inventory.StorageInventory
 import net.azisaba.vanilife.menuprovider.inventory.TrashInventory
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickCallback
@@ -41,6 +44,16 @@ internal object MenuDialog : KoinComponent {
         )
         .appendSpace()
         .append(Component.translatable(MenuProviderTranslations.DIALOG_VANILIFE_MENU_SETTINGS))
+        .build()
+
+    val STORAGE: Component = Component.text()
+        .append(
+            Component.text(MenuProviderFonts.MenuIcons.STORAGE)
+                .shadowColor(ShadowColor.none())
+                .font(MenuProviderFonts.MENU_ICONS)
+        )
+        .appendSpace()
+        .append(Component.translatable(MenuProviderTranslations.DIALOG_VANILIFE_MENU_STORAGE))
         .build()
 
     val TRASH: Component = Component.text()
@@ -75,7 +88,7 @@ internal object MenuDialog : KoinComponent {
                     .build()
             )
             .type(
-                DialogType.multiAction(listOf(settingsButton(), trashButton(), discordButton()))
+                DialogType.multiAction(listOf(settingsButton(), trashButton(), storageButton(), discordButton()))
                     .columns(1)
                     .exitAction(
                         ActionButton.builder(Component.translatable("gui.done"))
@@ -123,6 +136,22 @@ internal object MenuDialog : KoinComponent {
         .action(
             DialogAction.customClick(
                 { _, audience -> (audience as? Player)?.openInventory(TrashInventory(plugin).inventory) },
+                ClickCallback.Options.builder()
+                    .uses(ClickCallback.UNLIMITED_USES)
+                    .build()
+            )
+        ).build()
+
+    private fun storageButton(): ActionButton = ActionButton.builder(STORAGE)
+        .action(
+            DialogAction.customClick(
+                { _, audience ->
+                    val player = audience as? Player ?: return@customClick
+                    plugin.launch(plugin.entityDispatcher(player)) {
+                        val island = player.ownedIsland() ?: return@launch
+                        player.openInventory(StorageInventory(island, plugin).inventory)
+                    }
+                },
                 ClickCallback.Options.builder()
                     .uses(ClickCallback.UNLIMITED_USES)
                     .build()
