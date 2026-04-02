@@ -7,7 +7,7 @@ interface IslandFeatureHolder {
         get() = IslandFeature.entries.filter(::isEnabled).toSet()
 
     val storageSize: Int
-        get() = if (isEnabled(IslandFeature.EXPAND_STORAGE)) 57 else 18
+        get() = if (isEnabled(IslandFeature.EXPAND_STORAGE)) 54 else 18
 
     fun isEnabled(feature: IslandFeature): Boolean = feature.requiredLevel <= level
 }
