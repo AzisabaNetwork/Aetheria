@@ -13,3 +13,5 @@ dependencies:
       load: BEFORE
     AzisabaNetwork.Vanilife.Runtime:
       load: BEFORE
+    packetevents:
+      load: BEFORE

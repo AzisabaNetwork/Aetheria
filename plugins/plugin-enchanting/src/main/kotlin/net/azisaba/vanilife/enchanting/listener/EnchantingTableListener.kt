@@ -1,14 +1,13 @@
-package net.azisaba.vanilife.island.listener
+package net.azisaba.vanilife.enchanting.listener
 
-import com.destroystokyo.paper.event.server.ServerTickStartEvent
-import net.azisaba.vanilife.island.enchantment.EnchantingTableBehaviour
+import net.azisaba.vanilife.enchanting.tables.EnchantingTableBehaviour
 import org.bukkit.Material
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
 
-internal class EnchantingTableListener(private val behaviour: EnchantingTableBehaviour) : Listener {
+internal class EnchantingTableListener : Listener {
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
         val enchantingTable = event.clickedBlock
@@ -20,15 +19,9 @@ internal class EnchantingTableListener(private val behaviour: EnchantingTableBeh
         event.setUseItemInHand(Event.Result.DENY)
 
         if (event.action.isRightClick) {
-            val itemStack = event.item ?: return
-            behaviour.use(event.player, enchantingTable, itemStack)
+            EnchantingTableBehaviour.handleRightInteract(event.player, enchantingTable, event.item)
         } else if (event.action.isLeftClick) {
-            behaviour.pickup(event.player, enchantingTable)
+            EnchantingTableBehaviour.handleLeftInteract(event.player, enchantingTable)
         }
-    }
-
-    @EventHandler
-    fun onServerTickStart(event: ServerTickStartEvent) {
-        behaviour.tick(event.tickNumber.toLong())
     }
 }

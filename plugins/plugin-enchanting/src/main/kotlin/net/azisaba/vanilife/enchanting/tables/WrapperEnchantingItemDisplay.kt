@@ -1,4 +1,4 @@
-package net.azisaba.vanilife.island.enchantment
+package net.azisaba.vanilife.enchanting.tables
 
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
 import com.github.retrooper.packetevents.protocol.world.Location
@@ -18,11 +18,13 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-internal class WrapperEnchantingTableItemDisplay(
-    private val enchantingTable: Block, private val itemStack: ItemStack,
+internal class WrapperEnchantingItemDisplay(
+    private val enchantingTable: Block,
+    private val itemStack: ItemStack,
 ) : WrapperEntity(EntityTypes.ITEM_DISPLAY) {
     override fun spawn(location: Location, parent: EntityContainer): Boolean {
         if (!super.spawn(location, parent)) return false
+
         consumeEntityMeta(ItemDisplayMeta::class.java) { meta ->
             meta.item = SpigotConversionUtil.fromBukkitItemStack(itemStack)
             meta.displayType = ItemDisplayMeta.DisplayType.GROUND
@@ -130,5 +132,4 @@ internal class WrapperEnchantingTableItemDisplay(
         val tableCenter = enchantingTable.location.toCenterLocation()
         return atan2(player.z - tableCenter.z, player.x - tableCenter.x).toFloat()
     }
-
 }

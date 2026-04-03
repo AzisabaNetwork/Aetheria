@@ -1,8 +1,9 @@
 package net.azisaba.vanilife.enchanting
 
+import net.azisaba.vanilife.enchanting.listener.EnchantingTableListener
 import net.azisaba.vanilife.enchanting.listener.UnlockRateSourceListener
-import org.koin.core.Koin
 
-internal fun Main.setupEventListeners(koin: Koin) {
+internal fun Main.setupEventListeners() {
+    server.pluginManager.registerEvents(EnchantingTableListener(), this)
     server.pluginManager.registerEvents(UnlockRateSourceListener, this)
 }
