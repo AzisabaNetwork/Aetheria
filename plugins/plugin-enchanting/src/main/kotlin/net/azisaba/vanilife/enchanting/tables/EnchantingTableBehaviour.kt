@@ -36,6 +36,11 @@ internal object EnchantingTableBehaviour {
             EnchantingTableInstance(enchantingTable)
         }
 
+        if (instance.hasItem()) {
+            instance.openInventory(player)
+            return
+        }
+
         if (player.isSneaking) {
             instance.pickup(player)
             return

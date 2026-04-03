@@ -2,6 +2,7 @@ package net.azisaba.vanilife.enchanting.tables
 
 import io.github.retrooper.packetevents.util.SpigotConversionUtil
 import io.papermc.paper.registry.keys.SoundEventKeys
+import net.azisaba.vanilife.enchanting.inventory.EnchantingInventory
 import net.kyori.adventure.sound.Sound
 import org.bukkit.Material
 import org.bukkit.Particle
@@ -46,6 +47,10 @@ internal class EnchantingTableInstance(private val enchantingTable: Block) {
         resetState()
         player.playSound(Sound.sound(SoundEventKeys.ENTITY_ITEM_PICKUP, Sound.Source.PLAYER, 0.5f, 0.1f))
         return true
+    }
+
+    fun openInventory(player: Player) {
+        player.openInventory(EnchantingInventory(player).inventory)
     }
 
     fun tick(time: Long): Boolean {
