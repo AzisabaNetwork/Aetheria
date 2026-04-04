@@ -67,13 +67,13 @@ internal class RecipeBookPacketListener(private val plugin: Plugin) : PacketList
         event.isCancelled = true
         val holder = player.openInventory.topInventory.holder as? EnchantingInventory ?: return
         val centerItem = holder.snapshotCenterItem()
-        if (!recipe.canApplyTo(centerItem)) return
+        val level = recipe.targetLevelFor(centerItem) ?: return
         EnchantingRecipeBook.handleSelection(
             player,
             plugin,
             recipe,
             windowId,
-            recipe.toPreviewDisplay(centerItem?.let(SpigotConversionUtil::fromBukkitItemStack)),
+            recipe.toPreviewDisplay(centerItem?.let(SpigotConversionUtil::fromBukkitItemStack), level),
         )
     }
 

@@ -139,6 +139,7 @@ internal class EnchantingInventory : InventoryHolder {
     private fun hasRequiredIngredients(): Boolean {
         val centerItem = inventory.getItem(CENTER_SLOT) ?: return false
         if (centerItem.type == Material.AIR) return false
+        if (selectedRecipe.targetLevelFor(centerItem) == null) return false
         return ALL_CRAFT_SLOTS.all { slot ->
             val item = inventory.getItem(slot) ?: return@all false
             item.isSimilar(requiredItemForSlot(slot))
@@ -148,7 +149,8 @@ internal class EnchantingInventory : InventoryHolder {
     private fun createResultItem(): ItemStack? {
         val centerItem = inventory.getItem(CENTER_SLOT) ?: return null
         if (centerItem.type == Material.AIR) return null
-        return selectedRecipe.createResultItem(centerItem)
+        val level = selectedRecipe.targetLevelFor(centerItem) ?: return null
+        return selectedRecipe.createResultItem(centerItem, level)
     }
 
     private fun clearRecipeInputs() {

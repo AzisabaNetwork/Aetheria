@@ -35,8 +35,12 @@ internal object EnchantingRecipeBook {
     suspend fun sync(player: Player, centerItem: ItemStack?) {
         val island = (player.world as? IslandsWorld)?.getIslandAt(Position.fine(player.location))
         RecipeBookStates.runWithoutCaching(player) {
-            val recipes = EnchantingRecipe.toList().withIndex().filter { (_, recipe) ->
-                recipe.canApplyTo(centerItem) && (island?.has(recipe.enchantment) != false)
+            val recipes = EnchantingRecipe.toList().withIndex().mapNotNull { (index, recipe) ->
+                val level = recipe.targetLevelFor(centerItem) ?: return@mapNotNull null
+                if (island?.has(recipe.enchantment) == false) {
+                    return@mapNotNull null
+                }
+                RecipeCandidate(index, recipe, level)
             }
             if (recipes.isEmpty()) {
                 clear(player)
@@ -105,11 +109,17 @@ internal object EnchantingRecipeBook {
             .sendPacket(WrapperPlayServerRecipeBookAdd(emptyList(), true))
     }
 
-    private fun show(player: Player, recipes: List<IndexedValue<EnchantingRecipe>>) {
+    private fun show(player: Player, recipes: List<RecipeCandidate>) {
         val user = PacketEvents.getAPI().playerManager.getUser(player)
         user.sendPacket(WrapperPlayServerDeclareRecipes(emptyMap(), emptyList()))
-        user.sendPacket(WrapperPlayServerRecipeBookAdd(recipes.map { (index, recipe) ->
-            recipe.toRecipeBookEntry(index)
+        user.sendPacket(WrapperPlayServerRecipeBookAdd(recipes.map { recipe ->
+            recipe.recipe.toRecipeBookEntry(recipe.index, recipe.level)
         }, true))
     }
+
+    private data class RecipeCandidate(
+        val index: Int,
+        val recipe: EnchantingRecipe,
+        val level: Int,
+    )
 }

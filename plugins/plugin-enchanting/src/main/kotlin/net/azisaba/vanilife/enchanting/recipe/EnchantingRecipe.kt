@@ -36,11 +36,23 @@ data class EnchantingRecipe(
     @Serializable(with = KeySerializer::class)
     val ingredientItemId: Key,
 ) {
-    fun canApplyTo(centerItem: ItemStack?): Boolean {
-        val item = centerItem ?: return false
-        if (item.type == Material.BOOK || item.type == Material.ENCHANTED_BOOK) return true
-        return enchantment.canEnchantItem(item)
+    fun targetLevelFor(centerItem: ItemStack?): Int? {
+        val item = centerItem ?: return null
+        if (item.type == Material.AIR) return null
+
+        val currentLevel = item.getEnchantmentLevel(enchantment)
+        if (item.type == Material.BOOK || item.type == Material.ENCHANTED_BOOK) {
+            return if (currentLevel == 0) 1 else null
+        }
+
+        return when {
+            currentLevel == 0 -> 1
+            currentLevel < enchantment.maxLevel -> currentLevel + 1
+            else -> null
+        }
     }
+
+    fun canApplyTo(centerItem: ItemStack?): Boolean = targetLevelFor(centerItem) != null
 
     fun createIngredientItem(): ItemStack {
         return resolveIngredientItem().clone().apply {
@@ -62,17 +74,17 @@ data class EnchantingRecipe(
         ).map { type -> mappedSet(type) }
     }
 
-    fun createResultItem(sourceItem: ItemStack): ItemStack {
+    fun createResultItem(sourceItem: ItemStack, level: Int): ItemStack {
         val result = sourceItem.clone()
-        result.addUnsafeEnchantment(enchantment, 1)
+        result.addUnsafeEnchantment(enchantment, level)
         return result
     }
 
-    fun toRecipeBookEntry(index: Int): WrapperPlayServerRecipeBookAdd.AddEntry {
+    fun toRecipeBookEntry(index: Int, level: Int): WrapperPlayServerRecipeBookAdd.AddEntry {
         return WrapperPlayServerRecipeBookAdd.AddEntry(
             RecipeDisplayEntry(
                 RecipeDisplayId(index),
-                toBookDisplay(),
+                toBookDisplay(level),
                 null,
                 RecipeBookCategories.CRAFTING_MISC,
                 toCraftingRequirements(),
@@ -82,22 +94,22 @@ data class EnchantingRecipe(
         )
     }
 
-    fun toBookDisplay(): ShapedCraftingRecipeDisplay {
-        val book = createBookDisplayItem()
+    fun toBookDisplay(level: Int): ShapedCraftingRecipeDisplay {
+        val book = createBookDisplayItem(level)
         return createDisplay(
             centerDisplay = ItemStackSlotDisplay(book),
             resultDisplay = ItemStackSlotDisplay(book.copy()),
         )
     }
 
-    fun toPreviewDisplay(centerItem: PacketItemStack?): ShapedCraftingRecipeDisplay {
+    fun toPreviewDisplay(centerItem: PacketItemStack?, level: Int): ShapedCraftingRecipeDisplay {
         val ingredientDisplay = ItemStackSlotDisplay(createDisplayItem(SpigotConversionUtil.fromBukkitItemStack(createIngredientItem()).type))
         val lapisDisplay = ItemStackSlotDisplay(createDisplayItem(ItemTypes.LAPIS_LAZULI))
         val centerDisplay = centerItem?.let {
             ItemStackSlotDisplay(it)
         } ?: EmptySlotDisplay.INSTANCE
         val resultDisplay = centerItem?.let {
-            ItemStackSlotDisplay(createResultDisplayItem(it))
+            ItemStackSlotDisplay(createResultDisplayItem(it, level))
         } ?: EmptySlotDisplay.INSTANCE
 
         return ShapedCraftingRecipeDisplay(
@@ -138,23 +150,23 @@ data class EnchantingRecipe(
             .build()
     }
 
-    private fun createBookDisplayItem(): PacketItemStack {
+    private fun createBookDisplayItem(level: Int): PacketItemStack {
         return createDisplayItem(ItemTypes.ENCHANTED_BOOK).apply {
             setComponent(
                 ComponentTypes.CUSTOM_NAME,
-                enchantment.displayName(1),
+                enchantment.displayName(level),
             )
         }
     }
 
-    private fun createResultDisplayItem(sourceItem: PacketItemStack): PacketItemStack {
+    private fun createResultDisplayItem(sourceItem: PacketItemStack, level: Int): PacketItemStack {
         val packetEnchantment = enchantment.toPacketEnchantmentType()
         return sourceItem.copy().apply {
 
             enchantments = listOf(
                 PacketEnchantment.builder()
                     .type(packetEnchantment)
-                    .level(1)
+                    .level(level)
                     .build(),
             )
         }
