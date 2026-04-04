@@ -24,7 +24,7 @@ internal object EnchantingRecipeBook {
     fun hide(player: Player) {
         RecipeBookStates.cacheDiscovered(player)
         RecipeBookStates.runWithoutCaching(player) {
-            clear(player)
+            display(player, emptyList())
             RecipeBookStates.lookup(player)?.settings?.let { settings ->
                 PacketEvents.getAPI().playerManager.getUser(player)
                     .sendPacket(WrapperPlayServerRecipeBookSettings(RecipeBookStates.createExpandedSettings(settings)))
@@ -33,20 +33,9 @@ internal object EnchantingRecipeBook {
     }
 
     suspend fun sync(player: Player, centerItem: ItemStack?) {
-        val island = (player.world as? IslandsWorld)?.getIslandAt(Position.fine(player.location))
+        val recipes = visibleCandidates(player, centerItem)
         RecipeBookStates.runWithoutCaching(player) {
-            val recipes = EnchantingRecipe.toList().withIndex().mapNotNull { (index, recipe) ->
-                val level = recipe.targetLevelFor(centerItem) ?: return@mapNotNull null
-                if (island?.has(recipe.enchantment) == false) {
-                    return@mapNotNull null
-                }
-                RecipeCandidate(index, recipe, level)
-            }
-            if (recipes.isEmpty()) {
-                clear(player)
-            } else {
-                show(player, recipes)
-            }
+            display(player, recipes)
         }
     }
 
@@ -74,9 +63,9 @@ internal object EnchantingRecipeBook {
             }
             holder.selectRecipe(recipe)
             val populated = holder.tryPopulateRecipeInputs(player)
-            val craftable = holder.prepareRecipe()
+            holder.prepareRecipe(player)
             player.updateInventory()
-            if (!populated || !craftable) {
+            if (!populated) {
                 val resolvedWindowId = windowId ?: player.openInventory.containerId
                 preview(player, resolvedWindowId, previewDisplay)
             }
@@ -104,20 +93,39 @@ internal object EnchantingRecipeBook {
         }
     }
 
-    private fun clear(player: Player) {
-        PacketEvents.getAPI().playerManager.getUser(player)
-            .sendPacket(WrapperPlayServerRecipeBookAdd(emptyList(), true))
-    }
-
-    private fun show(player: Player, recipes: List<RecipeCandidate>) {
+    internal fun display(player: Player, recipes: List<RecipeCandidate>) {
         val user = PacketEvents.getAPI().playerManager.getUser(player)
-        user.sendPacket(WrapperPlayServerDeclareRecipes(emptyMap(), emptyList()))
-        user.sendPacket(WrapperPlayServerRecipeBookAdd(recipes.map { recipe ->
-            recipe.recipe.toRecipeBookEntry(recipe.index, recipe.level)
-        }, true))
+        if (recipes.isEmpty()) {
+            user.sendPacket(WrapperPlayServerRecipeBookAdd(emptyList(), true))
+        } else {
+            user.sendPacket(WrapperPlayServerDeclareRecipes(emptyMap(), emptyList()))
+            user.sendPacket(WrapperPlayServerRecipeBookAdd(recipes.map { recipe ->
+                recipe.recipe.toRecipeBookEntry(recipe.index, recipe.level)
+            }, true))
+        }
     }
 
-    private data class RecipeCandidate(
+    suspend fun visibleCandidates(player: Player, centerItem: ItemStack?): List<RecipeCandidate> {
+        val island = (player.world as? IslandsWorld)?.getIslandAt(Position.fine(player.location))
+        return candidates(centerItem).filter { candidate ->
+            island?.has(candidate.recipe.enchantment) != false
+        }
+    }
+
+    fun findVisibleRecipe(centerCandidates: List<RecipeCandidate>, centerItem: ItemStack?, ingredientItem: ItemStack?): EnchantingRecipe? {
+        return centerCandidates.firstOrNull { candidate ->
+            candidate.recipe.matches(centerItem, ingredientItem)
+        }?.recipe
+    }
+
+    private fun candidates(centerItem: ItemStack?): List<RecipeCandidate> {
+        return EnchantingRecipe.toList().withIndex().mapNotNull { (index, recipe) ->
+            val level = recipe.targetLevelFor(centerItem) ?: return@mapNotNull null
+            RecipeCandidate(index, recipe, level)
+        }
+    }
+
+    internal data class RecipeCandidate(
         val index: Int,
         val recipe: EnchantingRecipe,
         val level: Int,

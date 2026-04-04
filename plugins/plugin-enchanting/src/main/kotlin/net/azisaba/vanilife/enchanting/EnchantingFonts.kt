@@ -20,6 +20,12 @@ object EnchantingFonts {
                 height = 8,
             ),
             PackBitmapFontProvider(
+                file = Key.key(Vanilife.NAMESPACE, "icon/enchanting/experience.png"),
+                chars = listOf("${EnchantingIcons.EXPERIENCE}"),
+                ascent = 7,
+                height = 8,
+            ),
+            PackBitmapFontProvider(
                 file = Key.key(Vanilife.NAMESPACE, "icon/enchanting/unavailable.png"),
                 chars = listOf("${EnchantingIcons.UNAVAILABLE}"),
                 ascent = 7,
@@ -36,6 +42,7 @@ object EnchantingFonts {
 
     object EnchantingIcons : CharCodeFactory() {
         val ENCHANTING_TABLE: Char = nextChar()
+        val EXPERIENCE: Char = nextChar()
         val UNAVAILABLE: Char = nextChar()
         val UNLOCK_RATE: Char = nextChar()
     }

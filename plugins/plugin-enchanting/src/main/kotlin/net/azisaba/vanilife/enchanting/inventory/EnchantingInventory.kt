@@ -29,6 +29,7 @@ import kotlin.time.Duration.Companion.milliseconds
 internal class EnchantingInventory : InventoryHolder {
     private val inventory: Inventory = Bukkit.createInventory(this, InventoryType.WORKBENCH, TITLE)
     private var selectedRecipe: EnchantingRecipe = EnchantingRecipe.first()
+    private var visibleRecipes: List<EnchantingRecipe> = emptyList()
     private var craftable: Boolean = false
 
     override fun getInventory(): Inventory = inventory
@@ -43,8 +44,8 @@ internal class EnchantingInventory : InventoryHolder {
 
     fun snapshotCenterItem(): ItemStack? = inventory.getItem(CENTER_SLOT)?.clone()
 
-    fun prepareRecipe(): Boolean {
-        updateResult()
+    fun prepareRecipe(player: Player): Boolean {
+        updateResult(player)
         return craftable
     }
 
@@ -65,10 +66,15 @@ internal class EnchantingInventory : InventoryHolder {
     }
 
     fun confirmCraft(player: Player): ItemStack? {
-        if (!craftable || !hasRequiredIngredients()) return null
+        val centerItem = inventory.getItem(CENTER_SLOT) ?: return null
+        val recipe = resolveRecipe(centerItem) ?: return null
+        if (!craftable || !hasRequiredIngredients(recipe)) return null
 
-        val result = createResultItem() ?: return null
+        val resultLevel = recipe.targetLevelFor(centerItem) ?: return null
+        val requiredLevel = recipe.requiredLevel(centerItem) ?: return null
+        val result = recipe.createResultItem(centerItem, resultLevel)
         playCraftEffect(player)
+        consumeExperience(player, requiredLevel)
         clearResult()
         clearRecipeInputs()
         inventory.setItem(CENTER_SLOT, null)
@@ -114,10 +120,13 @@ internal class EnchantingInventory : InventoryHolder {
     fun sync(plugin: Plugin, player: Player) {
         plugin.launch(plugin.entityDispatcher(player)) {
             delay(1L.milliseconds)
-            updateResult()
+            val centerItem = snapshotCenterItem()
+            val recipes = EnchantingRecipeBook.visibleCandidates(player, centerItem)
+            visibleRecipes = recipes.map { it.recipe }
+            updateResult(player)
             player.updateInventory()
             syncPlaceholders(player)
-            EnchantingRecipeBook.sync(player, snapshotCenterItem())
+            EnchantingRecipeBook.display(player, recipes)
         }
     }
 
@@ -136,21 +145,25 @@ internal class EnchantingInventory : InventoryHolder {
         }
     }
 
-    private fun hasRequiredIngredients(): Boolean {
+    private fun hasRequiredIngredients(recipe: EnchantingRecipe): Boolean {
         val centerItem = inventory.getItem(CENTER_SLOT) ?: return false
         if (centerItem.type == Material.AIR) return false
-        if (selectedRecipe.targetLevelFor(centerItem) == null) return false
+        if (recipe.targetLevelFor(centerItem) == null) return false
         return ALL_CRAFT_SLOTS.all { slot ->
             val item = inventory.getItem(slot) ?: return@all false
-            item.isSimilar(requiredItemForSlot(slot))
+            item.isSimilar(requiredItemForSlot(recipe, slot))
         }
     }
 
-    private fun createResultItem(): ItemStack? {
+    private fun createResultItem(player: Player): ItemStack? {
         val centerItem = inventory.getItem(CENTER_SLOT) ?: return null
         if (centerItem.type == Material.AIR) return null
-        val level = selectedRecipe.targetLevelFor(centerItem) ?: return null
-        return selectedRecipe.createResultItem(centerItem, level)
+        val recipe = resolveRecipe(centerItem) ?: return null
+        selectedRecipe = recipe
+        val level = recipe.targetLevelFor(centerItem) ?: return null
+        val requiredLevel = recipe.requiredLevel(centerItem) ?: return null
+        val affordable = player.level >= requiredLevel
+        return recipe.createResultDisplayItem(centerItem, level, requiredLevel, affordable)
     }
 
     private fun clearRecipeInputs() {
@@ -158,7 +171,7 @@ internal class EnchantingInventory : InventoryHolder {
     }
 
     private fun restoreRecipeInputs(player: Player) {
-        ALL_CRAFT_SLOTS.forEach { slot ->
+        (listOf(CENTER_SLOT) + ALL_CRAFT_SLOTS).forEach { slot ->
             val item = inventory.getItem(slot) ?: return@forEach
             player.inventory.addItem(item.clone()).values.forEach { leftover ->
                 player.world.dropItemNaturally(player.location, leftover)
@@ -171,15 +184,15 @@ internal class EnchantingInventory : InventoryHolder {
         inventory.setItem(RESULT_SLOT, null)
     }
 
-    private fun requiredItemForSlot(slot: Int): ItemStack {
+    private fun requiredItemForSlot(recipe: EnchantingRecipe, slot: Int): ItemStack {
         return when (slot) {
-            in INGREDIENT_SLOTS -> selectedRecipe.createIngredientItem()
+            in INGREDIENT_SLOTS -> recipe.createIngredientItem()
             in LAPIS_SLOTS -> LAPIS_TEMPLATE.clone()
             else -> error("Unsupported slot: $slot")
         }
     }
 
-    private fun isCompatibleWithSlot(slot: Int, item: ItemStack): Boolean = item.isSimilar(requiredItemForSlot(slot))
+    private fun isCompatibleWithSlot(slot: Int, item: ItemStack): Boolean = item.isSimilar(requiredItemForSlot(selectedRecipe, slot))
 
     private fun placeItem(slot: Int, item: ItemStack): Boolean {
         if (!isCompatibleWithSlot(slot, item) || !isSlotEmpty(slot)) return false
@@ -212,13 +225,54 @@ internal class EnchantingInventory : InventoryHolder {
         return player.inventory.removeItem(template.clone().apply { amount = 1 }).isEmpty()
     }
 
-    private fun updateResult() {
-        craftable = hasRequiredIngredients()
-        if (craftable) {
-            inventory.setItem(RESULT_SLOT, createResultItem())
-        } else {
+    private fun updateResult(player: Player) {
+        val centerItem = inventory.getItem(CENTER_SLOT) ?: run {
+            craftable = false
             clearResult()
+            return
         }
+        val recipe = resolveRecipe(centerItem) ?: run {
+            craftable = false
+            clearResult()
+            return
+        }
+        selectedRecipe = recipe
+
+        if (!hasRequiredIngredients(recipe)) {
+            craftable = false
+            clearResult()
+            return
+        }
+
+        val result = createResultItem(player) ?: run {
+            craftable = false
+            clearResult()
+            return
+        }
+        inventory.setItem(RESULT_SLOT, result)
+        craftable = isCraftable(player)
+    }
+
+    private fun isCraftable(player: Player): Boolean {
+        val centerItem = inventory.getItem(CENTER_SLOT) ?: return false
+        val recipe = resolveRecipe(centerItem) ?: return false
+        val requiredLevel = recipe.requiredLevel(centerItem) ?: return false
+        return player.level >= requiredLevel
+    }
+
+    private fun resolveRecipe(centerItem: ItemStack): EnchantingRecipe? {
+        val ingredientItem = INGREDIENT_SLOTS
+            .mapNotNull { slot -> inventory.getItem(slot) }
+            .firstOrNull { it.type != Material.AIR }
+            ?: return null
+
+        return visibleRecipes.firstOrNull { recipe ->
+            recipe.matches(centerItem, ingredientItem)
+        }
+    }
+
+    private fun consumeExperience(player: Player, requiredLevel: Int) {
+        player.giveExpLevels(-requiredLevel)
     }
 
     private fun playCraftEffect(player: Player) {

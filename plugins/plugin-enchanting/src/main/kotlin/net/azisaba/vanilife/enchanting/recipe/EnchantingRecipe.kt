@@ -21,8 +21,12 @@ import kotlinx.serialization.Serializable
 import net.azisaba.serialization.EnchantmentSerializer
 import net.azisaba.serialization.KeySerializer
 import net.azisaba.vanilife.DynamicContents
+import net.azisaba.vanilife.enchanting.EnchantingFonts
 import net.azisaba.vanilife.item.ServerItem
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.key.Key
+import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemStack
@@ -51,6 +55,17 @@ data class EnchantingRecipe(
 
     fun canApplyTo(centerItem: ItemStack?): Boolean = targetLevelFor(centerItem) != null
 
+    fun matches(centerItem: ItemStack?, item: ItemStack?): Boolean {
+        val center = centerItem ?: return false
+        val ingredient = item ?: return false
+        return targetLevelFor(center) != null && createIngredientItem().isSimilar(ingredient)
+    }
+
+    fun requiredLevel(centerItem: ItemStack?): Int? {
+        val targetLevel = targetLevelFor(centerItem) ?: return null
+        return enchantment.getMinModifiedCost(targetLevel)
+    }
+
     fun createIngredientItem(): ItemStack {
         return resolveIngredientItem().clone().apply {
             amount = 1
@@ -77,6 +92,12 @@ data class EnchantingRecipe(
         return result
     }
 
+    fun createResultDisplayItem(sourceItem: ItemStack, level: Int, requiredLevel: Int, affordable: Boolean): ItemStack {
+        return createResultItem(sourceItem, level).apply {
+            lore(createResultLore(requiredLevel, affordable))
+        }
+    }
+
     fun toRecipeBookEntry(index: Int, level: Int): WrapperPlayServerRecipeBookAdd.AddEntry {
         return WrapperPlayServerRecipeBookAdd.AddEntry(
             RecipeDisplayEntry(
@@ -100,7 +121,8 @@ data class EnchantingRecipe(
     }
 
     fun toPreviewDisplay(centerItem: PacketItemStack?, level: Int): ShapedCraftingRecipeDisplay {
-        val ingredientDisplay = ItemStackSlotDisplay(createDisplayItem(SpigotConversionUtil.fromBukkitItemStack(createIngredientItem()).type))
+        val ingredientDisplay =
+            ItemStackSlotDisplay(createDisplayItem(SpigotConversionUtil.fromBukkitItemStack(createIngredientItem()).type))
         val lapisDisplay = ItemStackSlotDisplay(createDisplayItem(ItemTypes.LAPIS_LAZULI))
         val centerDisplay = centerItem?.let {
             ItemStackSlotDisplay(it)
@@ -167,6 +189,26 @@ data class EnchantingRecipe(
                     .build(),
             )
         }
+    }
+
+    private fun createResultLore(requiredLevel: Int, affordable: Boolean): List<net.kyori.adventure.text.Component> {
+        val lore = mutableListOf<net.kyori.adventure.text.Component>()
+        lore += net.kyori.adventure.text.Component.text()
+            .color(NamedTextColor.GRAY)
+            .decoration(TextDecoration.ITALIC, false)
+            .append(
+                Component.text(EnchantingFonts.EnchantingIcons.EXPERIENCE, NamedTextColor.WHITE)
+                    .font(EnchantingFonts.ENCHANTING_ICONS)
+            )
+            .appendSpace()
+            .append(net.kyori.adventure.text.Component.text("必要レベル: ", NamedTextColor.WHITE))
+            .append(net.kyori.adventure.text.Component.text(requiredLevel, NamedTextColor.GREEN))
+            .build()
+        if (!affordable) {
+            lore += net.kyori.adventure.text.Component.text("レベルが足りません", NamedTextColor.RED)
+                .decoration(TextDecoration.ITALIC, false)
+        }
+        return lore
     }
 
     private fun Enchantment.toPacketEnchantmentType(): EnchantmentType {
