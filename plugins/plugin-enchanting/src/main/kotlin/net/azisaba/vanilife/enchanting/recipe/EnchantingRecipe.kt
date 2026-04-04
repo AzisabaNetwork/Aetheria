@@ -39,12 +39,9 @@ data class EnchantingRecipe(
     fun targetLevelFor(centerItem: ItemStack?): Int? {
         val item = centerItem ?: return null
         if (item.type == Material.AIR) return null
+        if (!enchantment.canEnchantItem(item)) return null
 
         val currentLevel = item.getEnchantmentLevel(enchantment)
-        if (item.type == Material.BOOK || item.type == Material.ENCHANTED_BOOK) {
-            return if (currentLevel == 0) 1 else null
-        }
-
         return when {
             currentLevel == 0 -> 1
             currentLevel < enchantment.maxLevel -> currentLevel + 1
