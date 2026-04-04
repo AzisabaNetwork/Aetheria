@@ -9,6 +9,7 @@ object EnchantingTranslations {
     const val DIALOG_VANILIFE_ENCHANTMENTS_SECTION: String = "dialog.vanilife.enchantments.section"
     const val DIALOG_VANILIFE_ENCHANTMENTS_SUMMARY: String = "dialog.vanilife.enchantments.summary"
     const val DIALOG_VANILIFE_ENCHANTMENTS_UNLOCK_RATE: String = "dialog.vanilife.enchantments.unlock_rate"
+    const val ENCHANTING_NO_ISLAND: String = "enchanting.no_island"
 
     fun us(): PackLanguage = mapOf(
         DIALOG_VANILIFE_ENCHANTMENTS to Translation.literal("Enchantment Encyclopedia"),
@@ -16,6 +17,7 @@ object EnchantingTranslations {
         DIALOG_VANILIFE_ENCHANTMENTS_SECTION to Translation.placeholder() + Translation.literal("-") + Translation.placeholder(),
         DIALOG_VANILIFE_ENCHANTMENTS_SUMMARY to Translation.placeholder() + Translation.literal(" unlocked"),
         DIALOG_VANILIFE_ENCHANTMENTS_UNLOCK_RATE to Translation.placeholder() + Translation.literal(" percent of players unlocked"),
+        ENCHANTING_NO_ISLAND to Translation.literal("Enchanting can only be done on islands"),
     )
 
     fun jp(): PackLanguage = mapOf(
@@ -24,5 +26,6 @@ object EnchantingTranslations {
         DIALOG_VANILIFE_ENCHANTMENTS_SECTION to Translation.placeholder() + Translation.literal("〜") + Translation.placeholder(),
         DIALOG_VANILIFE_ENCHANTMENTS_SUMMARY to Translation.placeholder() + Translation.literal(" 解放済み"),
         DIALOG_VANILIFE_ENCHANTMENTS_UNLOCK_RATE to Translation.placeholder() + Translation.literal("パーセントのプレイヤーが解放しました"),
+        ENCHANTING_NO_ISLAND to Translation.literal("島でだけエンチャントすることができます"),
     )
 }

@@ -9,7 +9,7 @@ import net.azisaba.vanilife.enchanting.listener.UnlockRateSourceListener
 
 internal fun Main.setupEventListeners() {
     EnchantingInventoryListener.initialize(this)
-    server.pluginManager.registerEvents(EnchantingTableListener, this)
+    server.pluginManager.registerEvents(EnchantingTableListener(this), this)
     server.pluginManager.registerEvents(EnchantingInventoryListener, this)
     server.pluginManager.registerEvents(UnlockRateSourceListener, this)
 

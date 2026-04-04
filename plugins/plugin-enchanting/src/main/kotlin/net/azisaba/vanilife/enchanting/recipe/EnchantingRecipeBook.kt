@@ -8,8 +8,13 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerRe
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerRecipeBookSettings
 import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
+import io.papermc.paper.math.Position
 import kotlinx.coroutines.delay
+import net.azisaba.vanilife.enchanting.EnchantingTranslations
 import net.azisaba.vanilife.enchanting.inventory.EnchantingInventory
+import net.azisaba.vanilife.island.getIslandAt
+import net.azisaba.vanilife.world.IslandsWorld
+import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
@@ -27,10 +32,11 @@ internal object EnchantingRecipeBook {
         }
     }
 
-    fun sync(player: Player, centerItem: ItemStack?) {
+    suspend fun sync(player: Player, centerItem: ItemStack?) {
+        val island = (player.world as? IslandsWorld)?.getIslandAt(Position.fine(player.location))
         RecipeBookStates.runWithoutCaching(player) {
             val recipes = EnchantingRecipe.toList().withIndex().filter { (_, recipe) ->
-                recipe.canApplyTo(centerItem)
+                recipe.canApplyTo(centerItem) && (island?.has(recipe.enchantment) != false)
             }
             if (recipes.isEmpty()) {
                 clear(player)
@@ -58,6 +64,10 @@ internal object EnchantingRecipeBook {
     ) {
         plugin.launch(plugin.entityDispatcher(player)) {
             val holder = player.openInventory.topInventory.holder as? EnchantingInventory ?: return@launch
+            val island = (player.world as? IslandsWorld)?.getIslandAt(Position.fine(player.location)) ?: return@launch
+            if (!island.has(recipe.enchantment)) {
+                return@launch
+            }
             holder.selectRecipe(recipe)
             val populated = holder.tryPopulateRecipeInputs(player)
             val craftable = holder.prepareRecipe()
