@@ -13,6 +13,7 @@ public enum Op {
     MAKE_PUBLIC,
     MAKE_PRIVATE,
     CHANGE_FIELD_INITIALIZATION,
+    CHANGE_CONSTRUCTOR,
     COMPAT,
 
     @Deprecated(forRemoval = true)

@@ -8,9 +8,10 @@ import net.azisaba.vanilife.enchanting.listener.RecipeBookPacketListener
 import net.azisaba.vanilife.enchanting.listener.UnlockRateSourceListener
 
 internal fun Main.setupEventListeners() {
-    server.pluginManager.registerEvents(EnchantingTableListener(), this)
+    EnchantingInventoryListener.initialize(this)
+    server.pluginManager.registerEvents(EnchantingTableListener, this)
     server.pluginManager.registerEvents(EnchantingInventoryListener, this)
     server.pluginManager.registerEvents(UnlockRateSourceListener, this)
 
-    PacketEvents.getAPI().eventManager.registerListener(RecipeBookPacketListener, PacketListenerPriority.NORMAL)
+    PacketEvents.getAPI().eventManager.registerListener(RecipeBookPacketListener(this), PacketListenerPriority.NORMAL)
 }

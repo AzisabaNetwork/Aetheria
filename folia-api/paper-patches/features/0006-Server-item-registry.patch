@@ -379,6 +379,32 @@ index 2151e3bac040b0dd47c67ffe3a9de6dc45e9d62c..c1046afcd37805ed0853ecb0ed6f6adb
       */
      @NotNull
      public Set<ComplexEntityPart> getParts();
+diff --git a/src/main/java/org/bukkit/inventory/InventoryView.java b/src/main/java/org/bukkit/inventory/InventoryView.java
+index 5c5906421d5147c2d12cff9ad837274f086bbad7..9047271aa266272eeade7c3c81a615e920425e5d 100644
+--- a/src/main/java/org/bukkit/inventory/InventoryView.java
++++ b/src/main/java/org/bukkit/inventory/InventoryView.java
+@@ -1,5 +1,8 @@
+ package org.bukkit.inventory;
+ 
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
++import net.azisaba.vanilife.annotations.VanilifoliaApi;
+ import org.bukkit.entity.HumanEntity;
+ import org.bukkit.event.inventory.InventoryType;
+ import org.jetbrains.annotations.ApiStatus;
+@@ -334,4 +337,12 @@ public interface InventoryView {
+      */
+     @ApiStatus.Experimental
+     @Nullable MenuType getMenuType();
++
++    @Modified(Op.ADD_METHOD)
++    @VanilifoliaApi
++    int getContainerId();
++
++    @Modified(Op.ADD_METHOD)
++    @VanilifoliaApi
++    int getStateId();
+ }
 diff --git a/src/main/java/org/bukkit/inventory/ItemStack.java b/src/main/java/org/bukkit/inventory/ItemStack.java
 index f20f072b0978b3ef4b3f36c952d469e0d8d5cd22..c5c2c92eb32b3457c72d89b02c6a5aa827c8bdb4 100644
 --- a/src/main/java/org/bukkit/inventory/ItemStack.java

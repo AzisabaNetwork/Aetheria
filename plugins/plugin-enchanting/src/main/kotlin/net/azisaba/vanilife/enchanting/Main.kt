@@ -6,7 +6,7 @@ import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import me.tofaa.entitylib.APIConfig
 import me.tofaa.entitylib.EntityLib
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform
-import net.azisaba.vanilife.enchanting.tables.EnchantingTableTicker
+import net.azisaba.vanilife.enchanting.recipe.EnchantingRecipe
 import net.azisaba.vanilife.reloadableConfig
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
@@ -14,7 +14,6 @@ import org.jetbrains.exposed.v1.jdbc.Database
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
-import org.koin.dsl.onClose
 
 internal class Main : JavaPlugin() {
     private lateinit var koinApp: KoinApplication
@@ -31,18 +30,16 @@ internal class Main : JavaPlugin() {
         PacketEvents.getAPI().init()
         EntityLib.init(SpigotEntityLibPlatform(this), APIConfig(PacketEvents.getAPI()))
 
-        val tableTicker = EnchantingTableTicker(this)
-
         koinApp = startKoin {
             modules(
                 module {
                     single<Plugin> { this@Main }
                     single<Database> { database }
-                    single<EnchantingTableTicker> { tableTicker } onClose { tableTicker.close() }
                 },
             )
         }
 
+        EnchantingRecipe.bootstrap(this)
         setupEventListeners()
 
         launch {

@@ -214,6 +214,115 @@ index 4b5d39ee38886f504522560f087077a2b81a4b16..17f56c6def27dc43030ff3d353645c6b
          this.getHandle().getEntityData().set(Avatar.DATA_PLAYER_MODE_CUSTOMISATION, (byte) parts.getRaw());
      }
  
+diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftContainer.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftContainer.java
+index 2f41a92465b9da28e026297cc3528898bb1c8412..332ec22b074784b89949e19a525c4f442a535e81 100644
+--- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftContainer.java
++++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftContainer.java
+@@ -1,28 +1,10 @@
+ package org.bukkit.craftbukkit.inventory;
+ 
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
+ import net.minecraft.world.Container;
+ import net.minecraft.world.entity.player.Player;
+-import net.minecraft.world.inventory.AbstractContainerMenu;
+-import net.minecraft.world.inventory.AnvilMenu;
+-import net.minecraft.world.inventory.BeaconMenu;
+-import net.minecraft.world.inventory.BlastFurnaceMenu;
+-import net.minecraft.world.inventory.BrewingStandMenu;
+-import net.minecraft.world.inventory.CartographyTableMenu;
+-import net.minecraft.world.inventory.ChestMenu;
+-import net.minecraft.world.inventory.CrafterMenu;
+-import net.minecraft.world.inventory.CraftingMenu;
+-import net.minecraft.world.inventory.DispenserMenu;
+-import net.minecraft.world.inventory.EnchantmentMenu;
+-import net.minecraft.world.inventory.FurnaceMenu;
+-import net.minecraft.world.inventory.GrindstoneMenu;
+-import net.minecraft.world.inventory.HopperMenu;
+-import net.minecraft.world.inventory.LecternMenu;
+-import net.minecraft.world.inventory.LoomMenu;
+-import net.minecraft.world.inventory.MerchantMenu;
+-import net.minecraft.world.inventory.ShulkerBoxMenu;
+-import net.minecraft.world.inventory.SimpleContainerData;
+-import net.minecraft.world.inventory.Slot;
+-import net.minecraft.world.inventory.SmokerMenu;
++import net.minecraft.world.inventory.*;
+ import net.minecraft.world.item.ItemStack;
+ import org.bukkit.entity.HumanEntity;
+ import org.bukkit.event.inventory.InventoryType;
+@@ -46,8 +28,11 @@ public class CraftContainer extends AbstractContainerMenu {
+         this.setupSlots(top, bottom, player);
+     }
+ 
++    @Modified(Op.CHANGE_CONSTRUCTOR)
+     public CraftContainer(final Inventory inventory, final Player player, int id) {
+-        this(new CraftAbstractInventoryView() {
++        super(CraftContainer.getNotchInventoryType(inventory), id);
++
++        final CraftAbstractInventoryView view = new CraftAbstractInventoryView() {
+ 
+             private final String originalTitle = inventory instanceof CraftInventoryCustom ? ((CraftInventoryCustom) inventory).getTitle() : inventory.getType().getDefaultTitle(); // Paper
+             private String title = this.originalTitle;
+@@ -100,7 +85,26 @@ public class CraftContainer extends AbstractContainerMenu {
+                 return CraftMenuType.minecraftToBukkit(getNotchInventoryType(inventory));
+             }
+ 
+-        }, player, id);
++            @Modified(Op.ADD_METHOD)
++            @Override
++            public int getContainerId() {
++                return id;
++            }
++
++            @Modified(Op.ADD_METHOD)
++            @Override
++            public int getStateId() {
++                return CraftContainer.this.getStateId();
++            }
++        };
++
++        this.view = view;
++
++        final Container top = ((CraftInventory) inventory).getInventory();
++        final net.minecraft.world.entity.player.Inventory bottom = (net.minecraft.world.entity.player.Inventory) ((CraftInventory) view.getBottomInventory()).getInventory();
++
++        this.cachedType = inventory.getType();
++        this.setupSlots(top, bottom, player);
+     }
+ 
+     @Override
+diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftInventoryView.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftInventoryView.java
+index 5039d87d7f7c7a28ed014fd808941e28573f4cf0..ee3b4c0310d7534ad746f5cfa3f4e34cedaa6d79 100644
+--- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftInventoryView.java
++++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftInventoryView.java
+@@ -1,6 +1,8 @@
+ package org.bukkit.craftbukkit.inventory;
+ 
+ import com.google.common.base.Preconditions;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
+ import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
+ import net.minecraft.server.level.ServerPlayer;
+ import net.minecraft.world.inventory.AbstractContainerMenu;
+@@ -100,6 +102,18 @@ public class CraftInventoryView<T extends AbstractContainerMenu, I extends Inven
+         return menuType != null ? CraftMenuType.minecraftToBukkit(menuType) : null;
+     }
+ 
++    @Modified(Op.ADD_METHOD)
++    @Override
++    public int getContainerId() {
++        return this.container.containerId;
++    }
++
++    @Modified(Op.ADD_METHOD)
++    @Override
++    public int getStateId() {
++        return this.container.getStateId();
++    }
++
+     public boolean isInTop(int rawSlot) {
+         return rawSlot < this.viewing.getSize();
+     }
 diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java
 index 002682049fe890333794072e1e2717004f2ad0cf..a13e672606c16ccb136adac06ef48d4a5aa0ac4e 100644
 --- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java

@@ -32,7 +32,9 @@ abstract class DynamicContents<T>(
         mapReference.set(newMap)
     }
 
-    override fun iterator(): Iterator<T> = requireLoaded().values.iterator()
+    override fun iterator(): Iterator<T> = requireLoaded().toSortedMap()
+        .values
+        .iterator()
 
     private fun requireLoaded(): Map<Key, T> = mapReference.get()
         ?: throw IllegalStateException("You are trying to access contents '$name' too early")

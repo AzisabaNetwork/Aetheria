@@ -135,6 +135,8 @@ internal class Main : JavaPlugin() {
                 CookingItemModels.UDON_ITEM to CookingItemModels.udonItem()
                 CookingItemModels.YAKISOBA_ITEM to CookingItemModels.yakisobaItem()
 
+                EnchantingItemModels.A to EnchantingItemModels.a()
+                EnchantingItemModels.B to EnchantingItemModels.b()
                 EnchantingItemModels.DIALOG_ENCHANTMENT_LOCKED to EnchantingItemModels.locked()
                 EnchantingItemModels.DIALOG_ENCHANTMENT_UNLOCKED to EnchantingItemModels.unlocked()
 
@@ -255,6 +257,8 @@ internal class Main : JavaPlugin() {
                 CookingModels.UDON to CookingModels.udon()
                 CookingModels.YAKISOBA to CookingModels.yakisoba()
 
+                EnchantingModels.A to EnchantingModels.a()
+                EnchantingModels.B to EnchantingModels.b()
                 EnchantingModels.DIALOG_ENCHANTMENT_LOCKED to EnchantingModels.locked()
                 EnchantingModels.DIALOG_ENCHANTMENT_UNLOCKED to EnchantingModels.unlocked()
 
