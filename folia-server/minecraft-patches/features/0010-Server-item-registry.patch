@@ -1480,6 +1480,85 @@ index d3609abd0c9b5585d0e021c4910d2d37b0ff2d51..552c393acfa6b7f062c60358f0bef7bb
 +        return placedFeature.place(worldGenLevel, chunkGenerator, randomSource, blockPos, context.heightContext());
      }
  }
+diff --git a/net/minecraft/world/level/levelgen/feature/SpikeFeature.java b/net/minecraft/world/level/levelgen/feature/SpikeFeature.java
+index 70bb9a6742d236bb2f8f9b6bc43e973838ec5842..93c02259d7ebcda521c3b2138ec95b1a1a4d3a80 100644
+--- a/net/minecraft/world/level/levelgen/feature/SpikeFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/SpikeFeature.java
+@@ -10,6 +10,9 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
+ import java.util.List;
+ import java.util.concurrent.TimeUnit;
+ import java.util.stream.IntStream;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
++import net.azisaba.vanilife.server.world.height.HeightContext;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.SectionPos;
+ import net.minecraft.util.Mth;
+@@ -46,6 +49,7 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
+     }
+ 
+     @Override
++    @Modified(Op.FORWARD_ARGUMENT)
+     public boolean place(FeaturePlaceContext<SpikeConfiguration> context) {
+         SpikeConfiguration spikeConfiguration = context.config();
+         WorldGenLevel worldGenLevel = context.level();
+@@ -58,24 +62,33 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
+ 
+         for (SpikeFeature.EndSpike endSpike : spikes) {
+             if (endSpike.isCenterWithinChunk(blockPos)) {
+-                this.placeSpike(worldGenLevel, randomSource, spikeConfiguration, endSpike);
++                this.placeSpike(worldGenLevel, randomSource, spikeConfiguration, endSpike, context.heightContext());
+             }
+         }
+ 
+         return true;
+     }
+ 
+-    private void placeSpike(ServerLevelAccessor level, RandomSource random, SpikeConfiguration config, SpikeFeature.EndSpike spike) {
++    private void placeSpike(
++        ServerLevelAccessor level,
++        RandomSource random,
++        SpikeConfiguration config,
++        SpikeFeature.EndSpike spike,
++        @Modified(Op.ADD_ARGUMENT) HeightContext heightContext
++    ) {
+         int radius = spike.getRadius();
++        int clearBelowY = heightContext.y(65);
++        int spikeHeight = heightContext.y(spike.getHeight());
++        int spikeTop = heightContext.y(spike.getHeight() + 10);
+ 
+         for (BlockPos blockPos : BlockPos.betweenClosed(
+             new BlockPos(spike.getCenterX() - radius, level.getMinY(), spike.getCenterZ() - radius),
+-            new BlockPos(spike.getCenterX() + radius, spike.getHeight() + 10, spike.getCenterZ() + radius)
++            new BlockPos(spike.getCenterX() + radius, spikeTop, spike.getCenterZ() + radius)
+         )) {
+             if (blockPos.distToLowCornerSqr(spike.getCenterX(), blockPos.getY(), spike.getCenterZ()) <= radius * radius + 1
+-                && blockPos.getY() < spike.getHeight()) {
++                && blockPos.getY() < spikeHeight) {
+                 this.setBlock(level, blockPos, Blocks.OBSIDIAN.defaultBlockState());
+-            } else if (blockPos.getY() > 65) {
++            } else if (blockPos.getY() > clearBelowY) {
+                 this.setBlock(level, blockPos, Blocks.AIR.defaultBlockState());
+             }
+         }
+@@ -101,7 +114,7 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
+                                 .setValue(IronBarsBlock.SOUTH, flag3 && i4 != 2)
+                                 .setValue(IronBarsBlock.WEST, flag4 && i3 != -2)
+                                 .setValue(IronBarsBlock.EAST, flag4 && i3 != 2);
+-                            this.setBlock(level, mutableBlockPos.set(spike.getCenterX() + i3, spike.getHeight() + i5, spike.getCenterZ() + i4), blockState);
++                            this.setBlock(level, mutableBlockPos.set(spike.getCenterX() + i3, heightContext.y(spike.getHeight() + i5), spike.getCenterZ() + i4), blockState);
+                         }
+                     }
+                 }
+@@ -112,7 +125,7 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
+         if (endCrystal != null) {
+             endCrystal.setBeamTarget(config.getCrystalBeamTarget());
+             endCrystal.setInvulnerable(config.isCrystalInvulnerable());
+-            endCrystal.snapTo(spike.getCenterX() + 0.5, spike.getHeight() + 1, spike.getCenterZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
++            endCrystal.snapTo(spike.getCenterX() + 0.5, heightContext.y(spike.getHeight() + 1), spike.getCenterZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
+             endCrystal.generatedByDragonFight = true; // Paper - Fix invulnerable end crystals
+             level.addFreshEntity(endCrystal);
+             BlockPos blockPosx = endCrystal.blockPosition();
 diff --git a/net/minecraft/world/level/levelgen/feature/TreeFeature.java b/net/minecraft/world/level/levelgen/feature/TreeFeature.java
 index 0a8b1925bc8cbd0c41444835dac6a76a63ffe14f..c05e359d617454804a0a1b78009330c8f25df961 100644
 --- a/net/minecraft/world/level/levelgen/feature/TreeFeature.java
