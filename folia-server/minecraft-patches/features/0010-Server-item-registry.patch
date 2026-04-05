@@ -459,7 +459,7 @@ index c5953d5751e655e121e459aaab35e7719948e69e..79c41dbedc90eac928d27454ceb71247
          }
  
 diff --git a/net/minecraft/world/level/chunk/ChunkGenerator.java b/net/minecraft/world/level/chunk/ChunkGenerator.java
-index fd92282bb1cbe7051258f6d239e8dc0ce191baba..5d0d04f21e46d58c20badd2127fcd95c202d25c3 100644
+index fd92282bb1cbe7051258f6d239e8dc0ce191baba..261132ff0aca9ae69cd78aeff709d985d8729402 100644
 --- a/net/minecraft/world/level/chunk/ChunkGenerator.java
 +++ b/net/minecraft/world/level/chunk/ChunkGenerator.java
 @@ -11,7 +11,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
@@ -471,6 +471,35 @@ index fd92282bb1cbe7051258f6d239e8dc0ce191baba..5d0d04f21e46d58c20badd2127fcd95c
  import net.minecraft.CrashReport;
  import net.minecraft.CrashReportCategory;
  import net.minecraft.ReportedException;
+@@ -88,9 +88,7 @@ public abstract class ChunkGenerator {
+         }, Runnable::run);  // Paper - rewrite chunk system
+     }
+ 
+-    public abstract void applyCarvers(
+-        WorldGenRegion region, long seed, RandomState random, BiomeManager biomeManager, StructureManager structureManager, ChunkAccess chunk
+-    );
++    public abstract void applyCarvers(WorldGenRegion region, long seed, RandomState random, BiomeManager biomeManager, StructureManager structureManager, ChunkAccess chunk, @Modified(Op.ADD_ARGUMENT) HeightContext heightContext);
+ 
+     public @Nullable Pair<BlockPos, Holder<Structure>> findNearestMapStructure(
+         ServerLevel level, HolderSet<Structure> structure, BlockPos pos, int radius, boolean skipKnownStructures
+@@ -448,7 +446,7 @@ public abstract class ChunkGenerator {
+         return new BoundingBox(minBlockX, i, minBlockZ, minBlockX + 15, maxY, minBlockZ + 15);
+     }
+ 
+-    public abstract void buildSurface(WorldGenRegion region, StructureManager structureManager, RandomState random, ChunkAccess chunk);
++    public abstract void buildSurface(WorldGenRegion region, StructureManager structureManager, RandomState random, ChunkAccess chunk, @Modified(Op.ADD_ARGUMENT) HeightContext heightContext);
+ 
+     public abstract void spawnOriginalMobs(WorldGenRegion region);
+ 
+@@ -663,7 +661,7 @@ public abstract class ChunkGenerator {
+         }
+     }
+ 
+-    public abstract CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunk);
++    public abstract CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunk, @Modified(Op.ADD_ARGUMENT) HeightContext heightContext);
+ 
+     public abstract int getSeaLevel();
+ 
 diff --git a/net/minecraft/world/level/chunk/ChunkGenerators.java b/net/minecraft/world/level/chunk/ChunkGenerators.java
 index 440163ab5bb56771dc6cf7bd4fa4dbcfa4511d99..cd2832bc1bff07f87deca236434f3e824b8e2d48 100644
 --- a/net/minecraft/world/level/chunk/ChunkGenerators.java
@@ -528,6 +557,220 @@ index a04f20297c984a31216cbeb1c8d049728c9b6a65..202d7f1c6a2c37c75b586d9edfa89fa9
      );
      public static final ChunkStatus EMPTY = register("empty", null, WORLDGEN_HEIGHTMAPS, ChunkType.PROTOCHUNK);
      public static final ChunkStatus STRUCTURE_STARTS = register("structure_starts", EMPTY, WORLDGEN_HEIGHTMAPS, ChunkType.PROTOCHUNK);
+diff --git a/net/minecraft/world/level/chunk/status/ChunkStatusTasks.java b/net/minecraft/world/level/chunk/status/ChunkStatusTasks.java
+index d620862e95abf9f098bb53a76825883f2b1f4bbf..6bab4e52f3190d5d3a528e1344ce961a48e92eb5 100644
+--- a/net/minecraft/world/level/chunk/status/ChunkStatusTasks.java
++++ b/net/minecraft/world/level/chunk/status/ChunkStatusTasks.java
+@@ -3,6 +3,8 @@ package net.minecraft.world.level.chunk.status;
+ import com.mojang.logging.LogUtils;
+ import java.util.EnumSet;
+ import java.util.concurrent.CompletableFuture;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
+ import net.minecraft.SharedConstants;
+ import net.minecraft.server.level.GenerationChunkHolder;
+ import net.minecraft.server.level.ServerLevel;
+@@ -20,6 +22,7 @@ import net.minecraft.world.level.chunk.ProtoChunk;
+ import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
+ import net.minecraft.world.level.levelgen.Heightmap;
+ import net.minecraft.world.level.levelgen.blending.Blender;
++import net.azisaba.vanilife.server.world.height.HeightContext;
+ import net.minecraft.world.level.storage.TagValueInput;
+ import net.minecraft.world.level.storage.ValueInput;
+ import org.slf4j.Logger;
+@@ -84,14 +87,16 @@ public class ChunkStatusTasks {
+             );
+     }
+ 
++    @Modified(Op.COMPAT)
+     static CompletableFuture<ChunkAccess> generateNoise(
+         WorldGenContext worldGenContext, ChunkStep step, StaticCache2D<GenerationChunkHolder> cache, ChunkAccess chunk
+     ) {
+         ServerLevel serverLevel = worldGenContext.level();
+         WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, cache, step, chunk);
++        HeightContext heightContext = new HeightContext.Vanilla(worldGenRegion);
+         return worldGenContext.generator()
+             .fillFromNoise(
+-                Blender.of(worldGenRegion), serverLevel.getChunkSource().randomState(), serverLevel.structureManager().forWorldGenRegion(worldGenRegion), chunk
++                Blender.of(worldGenRegion), serverLevel.getChunkSource().randomState(), serverLevel.structureManager().forWorldGenRegion(worldGenRegion), chunk, heightContext
+             )
+             .thenApply(chunkAccess -> {
+                 if (chunkAccess instanceof ProtoChunk protoChunk) {
+@@ -108,16 +113,18 @@ public class ChunkStatusTasks {
+             });
+     }
+ 
++    @Modified(Op.COMPAT)
+     static CompletableFuture<ChunkAccess> generateSurface(
+         WorldGenContext worldGenContext, ChunkStep step, StaticCache2D<GenerationChunkHolder> cache, ChunkAccess chunk
+     ) {
+         ServerLevel serverLevel = worldGenContext.level();
+         WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, cache, step, chunk);
+         worldGenContext.generator()
+-            .buildSurface(worldGenRegion, serverLevel.structureManager().forWorldGenRegion(worldGenRegion), serverLevel.getChunkSource().randomState(), chunk);
++            .buildSurface(worldGenRegion, serverLevel.structureManager().forWorldGenRegion(worldGenRegion), serverLevel.getChunkSource().randomState(), chunk, new HeightContext.Vanilla(worldGenRegion));
+         return CompletableFuture.completedFuture(chunk);
+     }
+ 
++    @Modified(Op.COMPAT)
+     static CompletableFuture<ChunkAccess> generateCarvers(
+         WorldGenContext worldGenContext, ChunkStep step, StaticCache2D<GenerationChunkHolder> cache, ChunkAccess chunk
+     ) {
+@@ -134,7 +141,8 @@ public class ChunkStatusTasks {
+                 serverLevel.getChunkSource().randomState(),
+                 serverLevel.getBiomeManager(),
+                 serverLevel.structureManager().forWorldGenRegion(worldGenRegion),
+-                chunk
++                chunk,
++                new HeightContext.Vanilla(worldGenRegion)
+             );
+         return CompletableFuture.completedFuture(chunk);
+     }
+diff --git a/net/minecraft/world/level/levelgen/Beardifier.java b/net/minecraft/world/level/levelgen/Beardifier.java
+index b87fad848fa4342dc420a186a762cc826e9c0294..9d38467216cf9765e6ecb217ae00d10d8043f961 100644
+--- a/net/minecraft/world/level/levelgen/Beardifier.java
++++ b/net/minecraft/world/level/levelgen/Beardifier.java
+@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
+ import java.util.ArrayList;
+ import java.util.Arrays;
+ import java.util.List;
++import net.azisaba.vanilife.server.world.height.HeightContext;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.util.Mth;
+ import net.minecraft.util.Util;
+@@ -36,6 +37,10 @@ public class Beardifier implements DensityFunctions.BeardifierOrMarker {
+     private final @Nullable BoundingBox affectedBox;
+ 
+     public static Beardifier forStructuresInChunk(StructureManager structureManager, ChunkPos chunkPos) {
++        return forStructuresInChunk(structureManager, chunkPos, null);
++    }
++
++    public static Beardifier forStructuresInChunk(StructureManager structureManager, ChunkPos chunkPos, @Nullable HeightContext heightContext) {
+         List<StructureStart> list = structureManager.startsForStructure(chunkPos, structure -> structure.terrainAdaptation() != TerrainAdjustment.NONE);
+         if (list.isEmpty()) {
+             return EMPTY;
+@@ -50,7 +55,7 @@ public class Beardifier implements DensityFunctions.BeardifierOrMarker {
+                 TerrainAdjustment terrainAdjustment = structureStart.getStructure().terrainAdaptation();
+ 
+                 for (StructurePiece structurePiece : structureStart.getPieces()) {
+-                    if (structurePiece.isCloseToChunk(chunkPos, 12)) {
++                    if (structurePiece.isCloseToChunk(chunkPos, 12) && isInGenerationArea(heightContext, structurePiece.getBoundingBox(), 24)) {
+                         if (structurePiece instanceof PoolElementStructurePiece poolElementStructurePiece) {
+                             StructureTemplatePool.Projection projection = poolElementStructurePiece.getElement().getProjection();
+                             if (projection == StructureTemplatePool.Projection.RIGID) {
+@@ -65,9 +70,16 @@ public class Beardifier implements DensityFunctions.BeardifierOrMarker {
+                             for (JigsawJunction jigsawJunction : poolElementStructurePiece.getJunctions()) {
+                                 int sourceX = jigsawJunction.getSourceX();
+                                 int sourceZ = jigsawJunction.getSourceZ();
+-                                if (sourceX > minBlockX - 12 && sourceZ > minBlockZ - 12 && sourceX < minBlockX + 15 + 12 && sourceZ < minBlockZ + 15 + 12) {
++                                int sourceGroundY = jigsawJunction.getSourceGroundY();
++                                if (
++                                    sourceX > minBlockX - 12
++                                        && sourceZ > minBlockZ - 12
++                                        && sourceX < minBlockX + 15 + 12
++                                        && sourceZ < minBlockZ + 15 + 12
++                                        && isInGenerationArea(heightContext, new BoundingBox(new BlockPos(sourceX, sourceGroundY, sourceZ)), 24)
++                                ) {
+                                     list2.add(jigsawJunction);
+-                                    BoundingBox boundingBox1 = new BoundingBox(new BlockPos(sourceX, jigsawJunction.getSourceGroundY(), sourceZ));
++                                    BoundingBox boundingBox1 = new BoundingBox(new BlockPos(sourceX, sourceGroundY, sourceZ));
+                                     boundingBox = includeBoundingBox(boundingBox, boundingBox1);
+                                 }
+                             }
+@@ -88,6 +100,10 @@ public class Beardifier implements DensityFunctions.BeardifierOrMarker {
+         }
+     }
+ 
++    private static boolean isInGenerationArea(@Nullable HeightContext heightContext, BoundingBox box, int margin) {
++        return heightContext == null || heightContext.intersects(box, margin);
++    }
++
+     private static BoundingBox includeBoundingBox(@Nullable BoundingBox current, BoundingBox toInclude) {
+         return current == null ? toInclude : BoundingBox.encapsulating(current, toInclude);
+     }
+diff --git a/net/minecraft/world/level/levelgen/DebugLevelSource.java b/net/minecraft/world/level/levelgen/DebugLevelSource.java
+index f06526e94926a66c549ed19f7fd5eecfb584eee3..56568d91e2dfee7246fb96238eeee6fc49dad42a 100644
+--- a/net/minecraft/world/level/levelgen/DebugLevelSource.java
++++ b/net/minecraft/world/level/levelgen/DebugLevelSource.java
+@@ -6,6 +6,9 @@ import java.util.List;
+ import java.util.concurrent.CompletableFuture;
+ import java.util.stream.Collectors;
+ import java.util.stream.StreamSupport;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
++import net.azisaba.vanilife.server.world.height.HeightContext;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Holder;
+ import net.minecraft.core.SectionPos;
+@@ -54,7 +57,7 @@ public class DebugLevelSource extends ChunkGenerator {
+     }
+ 
+     @Override
+-    public void buildSurface(WorldGenRegion region, StructureManager structureManager, RandomState random, ChunkAccess chunk) {
++    public void buildSurface(WorldGenRegion region, StructureManager structureManager, RandomState random, ChunkAccess chunk, @Modified(Op.ADD_ARGUMENT) HeightContext heightContext) {
+     }
+ 
+     @Override
+@@ -76,7 +79,7 @@ public class DebugLevelSource extends ChunkGenerator {
+     }
+ 
+     @Override
+-    public CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunk) {
++    public CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunk, @Modified(Op.ADD_ARGUMENT) HeightContext heightContext) {
+         return CompletableFuture.completedFuture(chunk);
+     }
+ 
+@@ -112,7 +115,7 @@ public class DebugLevelSource extends ChunkGenerator {
+ 
+     @Override
+     public void applyCarvers(
+-        WorldGenRegion region, long seed, RandomState random, BiomeManager biomeManager, StructureManager structureManager, ChunkAccess chunk
++        WorldGenRegion region, long seed, RandomState random, BiomeManager biomeManager, StructureManager structureManager, ChunkAccess chunk, @Modified(Op.ADD_ARGUMENT) HeightContext heightContext
+     ) {
+     }
+ 
+diff --git a/net/minecraft/world/level/levelgen/FlatLevelSource.java b/net/minecraft/world/level/levelgen/FlatLevelSource.java
+index cb96f9808cb9b229a71dd7c6f06eeb4433eff348..dac70f676212ee683bfcaaccbf6e0bd0ff05d33a 100644
+--- a/net/minecraft/world/level/levelgen/FlatLevelSource.java
++++ b/net/minecraft/world/level/levelgen/FlatLevelSource.java
+@@ -5,6 +5,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import java.util.List;
+ import java.util.concurrent.CompletableFuture;
+ import java.util.stream.Stream;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
++import net.azisaba.vanilife.server.world.height.HeightContext;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Holder;
+ import net.minecraft.core.HolderLookup;
+@@ -61,7 +64,7 @@ public class FlatLevelSource extends ChunkGenerator {
+     }
+ 
+     @Override
+-    public void buildSurface(WorldGenRegion region, StructureManager structureManager, RandomState random, ChunkAccess chunk) {
++    public void buildSurface(WorldGenRegion region, StructureManager structureManager, RandomState random, ChunkAccess chunk, @Modified(Op.ADD_ARGUMENT) HeightContext heightContext) {
+     }
+ 
+     @Override
+@@ -70,7 +73,7 @@ public class FlatLevelSource extends ChunkGenerator {
+     }
+ 
+     @Override
+-    public CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunk) {
++    public CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunk, @Modified(Op.ADD_ARGUMENT) HeightContext heightContext) {
+         List<BlockState> layers = this.settings.getLayers();
+         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+         Heightmap heightmapUnprimed = chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG);
+@@ -126,8 +129,7 @@ public class FlatLevelSource extends ChunkGenerator {
+     }
+ 
+     @Override
+-    public void applyCarvers(
+-        WorldGenRegion region, long seed, RandomState random, BiomeManager biomeManager, StructureManager structureManager, ChunkAccess chunk
++    public void applyCarvers(WorldGenRegion region, long seed, RandomState random, BiomeManager biomeManager, StructureManager structureManager, ChunkAccess chunk, @Modified(Op.ADD_ARGUMENT) HeightContext heightContext
+     ) {
+     }
+ 
 diff --git a/net/minecraft/world/level/levelgen/Heightmap.java b/net/minecraft/world/level/levelgen/Heightmap.java
 index d88c703e0eb22af1d815d712f4499305497c1180..8bf486b35f71a9a1642d28a03ee24cc201a664da 100644
 --- a/net/minecraft/world/level/levelgen/Heightmap.java
@@ -616,6 +859,158 @@ index d88c703e0eb22af1d815d712f4499305497c1180..8bf486b35f71a9a1642d28a03ee24cc2
  
          public static final Codec<Heightmap.Types> CODEC = StringRepresentable.fromEnum(Heightmap.Types::values);
          private static final IntFunction<Heightmap.Types> BY_ID = ByIdMap.continuous(types -> types.id, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
+diff --git a/net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator.java b/net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator.java
+index d1068a122e5dbd5af274d0f8178ca9f5fa49f930..f9206a48daa6ddc4174cfa8e46a9748b34cb7c12 100644
+--- a/net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator.java
++++ b/net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator.java
+@@ -14,6 +14,9 @@ import java.util.Set;
+ import java.util.concurrent.CompletableFuture;
+ import java.util.function.Predicate;
+ import java.util.function.Supplier;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
++import net.azisaba.vanilife.server.world.height.HeightContext;
+ import net.minecraft.SharedConstants;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Holder;
+@@ -89,14 +92,23 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
+     }
+ 
+     private void doCreateBiomes(Blender blender, RandomState random, StructureManager structureManager, ChunkAccess chunk) {
+-        NoiseChunk noiseChunk = chunk.getOrCreateNoiseChunk(chunkAccess -> this.createNoiseChunk(chunkAccess, structureManager, blender, random));
++        NoiseChunk noiseChunk = chunk.getOrCreateNoiseChunk(
++            chunkAccess -> this.createNoiseChunk(chunkAccess, structureManager, blender, random, null)
++        );
+         BiomeResolver biomeResolver = BelowZeroRetrogen.getBiomeResolver(blender.getBiomeResolver(this.biomeSource), chunk);
+         chunk.fillBiomesFromNoise(biomeResolver, noiseChunk.cachedClimateSampler(random.router(), this.settings.value().spawnTarget()));
+     }
+ 
+     private NoiseChunk createNoiseChunk(ChunkAccess chunk, StructureManager structureManager, Blender blender, RandomState random) {
++        return this.createNoiseChunk(chunk, structureManager, blender, random, null);
++    }
++
++    @Modified(Op.ADD_METHOD)
++    private NoiseChunk createNoiseChunk(
++        ChunkAccess chunk, StructureManager structureManager, Blender blender, RandomState random, @Nullable HeightContext heightContext
++    ) {
+         return NoiseChunk.forChunk(
+-            chunk, random, Beardifier.forStructuresInChunk(structureManager, chunk.getPos()), this.settings.value(), this.globalFluidPicker.get(), blender
++            chunk, random, Beardifier.forStructuresInChunk(structureManager, chunk.getPos(), heightContext), this.settings.value(), this.globalFluidPicker.get(), blender
+         );
+     }
+ 
+@@ -224,7 +236,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
+     }
+ 
+     @Override
+-    public void buildSurface(WorldGenRegion region, StructureManager structureManager, RandomState random, ChunkAccess chunk) {
++    public void buildSurface(WorldGenRegion region, StructureManager structureManager, RandomState random, ChunkAccess chunk, @Modified(Op.ADD_ARGUMENT) HeightContext heightContext) {
+         if (!SharedConstants.debugVoidTerrain(chunk.getPos()) && !SharedConstants.DEBUG_DISABLE_SURFACE) {
+             WorldGenerationContext worldGenerationContext = new WorldGenerationContext(this, region, region.getMinecraftWorld()); // Paper - Flat bedrock generator settings
+             this.buildSurface(
+@@ -234,12 +246,14 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
+                 structureManager,
+                 region.getBiomeManager(),
+                 region.registryAccess().lookupOrThrow(Registries.BIOME),
+-                Blender.of(region)
++                Blender.of(region),
++                heightContext
+             );
+         }
+     }
+ 
+     @VisibleForTesting
++    @Modified(Op.ADD_METHOD)
+     public void buildSurface(
+         ChunkAccess chunk,
+         WorldGenerationContext context,
+@@ -249,7 +263,23 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
+         Registry<Biome> biomes,
+         Blender blender
+     ) {
+-        NoiseChunk noiseChunk = chunk.getOrCreateNoiseChunk(chunkAccess -> this.createNoiseChunk(chunkAccess, structureManager, blender, random));
++        this.buildSurface(chunk, context, random, structureManager, biomeManager, biomes, blender, null);
++    }
++
++    @VisibleForTesting
++    public void buildSurface(
++        ChunkAccess chunk,
++        WorldGenerationContext context,
++        RandomState random,
++        StructureManager structureManager,
++        BiomeManager biomeManager,
++        Registry<Biome> biomes,
++        Blender blender,
++        @Nullable HeightContext heightContext
++    ) {
++        NoiseChunk noiseChunk = chunk.getOrCreateNoiseChunk(
++            chunkAccess -> this.createNoiseChunk(chunkAccess, structureManager, blender, random, heightContext)
++        );
+         NoiseGeneratorSettings noiseGeneratorSettings = this.settings.value();
+         random.surfaceSystem()
+             .buildSurface(
+@@ -259,14 +289,16 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
+ 
+     @Override
+     public void applyCarvers(
+-        WorldGenRegion region, long seed, RandomState random, BiomeManager biomeManager, StructureManager structureManager, ChunkAccess chunk
++        WorldGenRegion region, long seed, RandomState random, BiomeManager biomeManager, StructureManager structureManager, ChunkAccess chunk, @Modified(Op.ADD_ARGUMENT) HeightContext heightContext
+     ) {
+         if (!SharedConstants.DEBUG_DISABLE_CARVERS) {
+             BiomeManager biomeManager1 = biomeManager.withDifferentSource((x, y, z) -> this.biomeSource.getNoiseBiome(x, y, z, random.sampler()));
+             WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.generateUniqueSeed()));
+             int i = 8;
+             ChunkPos pos = chunk.getPos();
+-            NoiseChunk noiseChunk = chunk.getOrCreateNoiseChunk(chunkAccess -> this.createNoiseChunk(chunkAccess, structureManager, Blender.of(region), random));
++            NoiseChunk noiseChunk = chunk.getOrCreateNoiseChunk(
++                chunkAccess -> this.createNoiseChunk(chunkAccess, structureManager, Blender.of(region), random, heightContext)
++            );
+             Aquifer aquifer = noiseChunk.aquifer();
+             CarvingContext carvingContext = new CarvingContext(
+                 this, region.registryAccess(), chunk.getHeightAccessorForGeneration(), noiseChunk, random, this.settings.value().surfaceRule(), region.getMinecraftWorld() // Paper - Flat bedrock generator settings
+@@ -301,7 +333,9 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
+     }
+ 
+     @Override
+-    public CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunk) {
++    public CompletableFuture<ChunkAccess> fillFromNoise(
++        Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunk, @Modified(Op.ADD_ARGUMENT) HeightContext heightContext
++    ) {
+         NoiseSettings noiseSettings = this.settings.value().noiseSettings().clampToHeightAccessor(chunk.getHeightAccessorForGeneration());
+         int minY = noiseSettings.minY();
+         int i = Mth.floorDiv(minY, noiseSettings.getCellHeight());
+@@ -319,7 +353,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
+ 
+             ChunkAccess var20;
+             try {
+-                var20 = this.doFill(blender, structureManager, randomState, chunk, i, i1);
++                var20 = this.doFill(blender, structureManager, randomState, chunk, i, i1, heightContext);
+             } finally {
+                 for (LevelChunkSection levelChunkSection1 : set) {
+                     levelChunkSection1.release();
+@@ -331,7 +365,21 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
+     }
+ 
+     private ChunkAccess doFill(Blender blender, StructureManager structureManager, RandomState random, ChunkAccess chunk, int minCellY, int cellCountY) {
+-        NoiseChunk noiseChunk = chunk.getOrCreateNoiseChunk(chunkAccess -> this.createNoiseChunk(chunkAccess, structureManager, blender, random));
++        return this.doFill(blender, structureManager, random, chunk, minCellY, cellCountY, null);
++    }
++
++    private ChunkAccess doFill(
++        Blender blender,
++        StructureManager structureManager,
++        RandomState random,
++        ChunkAccess chunk,
++        int minCellY,
++        int cellCountY,
++        @Nullable HeightContext heightContext
++    ) {
++        NoiseChunk noiseChunk = chunk.getOrCreateNoiseChunk(
++            chunkAccess -> this.createNoiseChunk(chunkAccess, structureManager, blender, random, heightContext)
++        );
+         Heightmap heightmapUnprimed = chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG);
+         Heightmap heightmapUnprimed1 = chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
+         ChunkPos pos = chunk.getPos();
 diff --git a/net/minecraft/world/level/levelgen/feature/ConfiguredFeature.java b/net/minecraft/world/level/levelgen/feature/ConfiguredFeature.java
 index f12520f990d28c28e8ce8d4c3c182da266f159b6..4e289e473205b2df162314aad2ef45b1d35a14eb 100644
 --- a/net/minecraft/world/level/levelgen/feature/ConfiguredFeature.java

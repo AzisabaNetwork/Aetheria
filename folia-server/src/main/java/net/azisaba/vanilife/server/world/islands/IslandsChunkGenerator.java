@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import net.azisaba.vanilife.server.world.height.HeightContext;
 import net.azisaba.vanilife.server.world.islands.IslandTerrainSampler.TerrainSample;
 import net.azisaba.vanilife.world.IslandsWorld;
 import net.minecraft.core.BlockPos;
@@ -77,7 +78,8 @@ public final class IslandsChunkGenerator extends ChunkGenerator {
         final Blender blender,
         final RandomState randomState,
         final StructureManager structureManager,
-        final ChunkAccess chunk
+        final ChunkAccess chunk,
+        final HeightContext heightContext
     ) {
         final long levelSeed = structureManager.level.getMinecraftWorld().getSeed();
         final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
@@ -94,7 +96,13 @@ public final class IslandsChunkGenerator extends ChunkGenerator {
     }
 
     @Override
-    public void buildSurface(final WorldGenRegion region, final StructureManager structureManager, final RandomState random, final ChunkAccess chunk) {
+    public void buildSurface(
+        final WorldGenRegion region,
+        final StructureManager structureManager,
+        final RandomState random,
+        final ChunkAccess chunk,
+        final HeightContext heightContext
+    ) {
         this.reefDecorator.buildSurface(region, chunk.getPos());
     }
 
@@ -131,7 +139,8 @@ public final class IslandsChunkGenerator extends ChunkGenerator {
         final RandomState random,
         final BiomeManager biomeManager,
         final StructureManager structureManager,
-        final ChunkAccess chunk
+        final ChunkAccess chunk,
+        final HeightContext heightContext
     ) {
     }
 

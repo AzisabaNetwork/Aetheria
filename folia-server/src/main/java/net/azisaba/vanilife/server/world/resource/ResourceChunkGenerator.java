@@ -15,9 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.RandomState;
-import net.minecraft.world.level.levelgen.WorldGenerationContext;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import org.jspecify.annotations.NullMarked;
@@ -96,22 +94,33 @@ public class ResourceChunkGenerator extends ChunkGenerator {
     }
 
     @Override
-    public void applyCarvers(final WorldGenRegion region, final long seed, final RandomState random, final BiomeManager biomeManager, final StructureManager structureManager, final ChunkAccess chunk) {
+    public void applyCarvers(
+        final WorldGenRegion region,
+        final long seed,
+        final RandomState random,
+        final BiomeManager biomeManager,
+        final StructureManager structureManager,
+        final ChunkAccess chunk,
+        final HeightContext heightContext
+    ) {
         final HolderGetter<NormalNoise.NoiseParameters> noiseParametersGetter = region.registryAccess().lookupOrThrow(Registries.NOISE);
 
         for (final ResourceLayer.Type layerType : this.layout) {
             final ChunkGenerator layerGenerator = layerType.generator();
             final ResourceLayer layerChunk = ResourceLayer.copy(chunk, region.getMinecraftWorld(), this.layout, layerType);
+            final RandomState layerRandomState = Objects.requireNonNullElse(
+                this.randomStateSource.getOrCreate(seed, layerType, noiseParametersGetter),
+                random
+            );
+            final HeightContext layerHeightContext = this.layout.createHeightContext(layerType);
             layerGenerator.applyCarvers(
                 region,
                 seed,
-                Objects.requireNonNullElse(
-                    this.randomStateSource.getOrCreate(seed, layerType, noiseParametersGetter),
-                    random
-                ),
+                layerRandomState,
                 biomeManager.withLayeredSource(this.layout, layerType),
                 structureManager,
-                layerChunk
+                layerChunk,
+                layerHeightContext
             );
             layerChunk.mergeInto(chunk, false);
         }
@@ -127,41 +136,37 @@ public class ResourceChunkGenerator extends ChunkGenerator {
     }
 
     @Override
-    public void buildSurface(final WorldGenRegion region, final StructureManager structureManager, final RandomState random, final ChunkAccess chunk) {
-        final Registry<Biome> biomes = region.registryAccess().lookupOrThrow(Registries.BIOME);
+    public void buildSurface(
+        final WorldGenRegion region,
+        final StructureManager structureManager,
+        final RandomState random,
+        final ChunkAccess chunk,
+        final HeightContext heightContext
+    ) {
         final Registry<NormalNoise.NoiseParameters> noiseParameters = region.registryAccess().lookupOrThrow(Registries.NOISE);
-
-        final Blender blender = Blender.of(region);
 
         for (final ResourceLayer.Type layerType : this.layout) {
             final ChunkGenerator layerGenerator = layerType.generator();
 
             final ResourceLayer layerChunk = ResourceLayer.copy(chunk, region.getMinecraftWorld(), this.layout, layerType);
-            final BiomeManager layerBiomeManager = region.getBiomeManager().withLayeredSource(this.layout, layerType);
             final RandomState layerRandomState = Objects.requireNonNullElse(
                 this.randomStateSource.getOrCreate(region.getSeed(), layerType, noiseParameters),
                 random
             );
-
-            if (layerGenerator instanceof NoiseBasedChunkGenerator noiseBasedGenerator) {
-                noiseBasedGenerator.buildSurface(
-                    layerChunk,
-                    new WorldGenerationContext(noiseBasedGenerator, region, region.getMinecraftWorld()),
-                    layerRandomState,
-                    structureManager,
-                    layerBiomeManager,
-                    biomes,
-                    blender
-                );
-                layerChunk.mergeInto(chunk, true);
-            } else {
-                layerGenerator.buildSurface(region, structureManager, layerRandomState, layerChunk);
-            }
+            final HeightContext layerHeightContext = this.layout.createHeightContext(layerType);
+            layerGenerator.buildSurface(region, structureManager, layerRandomState, layerChunk, layerHeightContext);
+            layerChunk.mergeInto(chunk, true);
         }
     }
 
     @Override
-    public CompletableFuture<ChunkAccess> fillFromNoise(final Blender blender, final RandomState randomState, final StructureManager structureManager, final ChunkAccess chunk) {
+    public CompletableFuture<ChunkAccess> fillFromNoise(
+        final Blender blender,
+        final RandomState randomState,
+        final StructureManager structureManager,
+        final ChunkAccess chunk,
+        final HeightContext heightContext
+    ) {
         return CompletableFuture.supplyAsync(() -> {
             final ServerLevel level = structureManager.level.getMinecraftWorld();
             final long seed = level.getMinecraftWorld().getSeed();
@@ -170,7 +175,7 @@ public class ResourceChunkGenerator extends ChunkGenerator {
             for (final ResourceLayer.Type layerType : this.layout) {
                 final ChunkGenerator layerGenerator = layerType.generator();
                 final ResourceLayer layerChunk = ResourceLayer.empty(chunk.getPos(), level, this.layout, layerType);
-
+                final HeightContext layerHeightContext = this.layout.createHeightContext(layerType);
                 layerGenerator.fillFromNoise(
                     blender,
                     Objects.requireNonNullElse(
@@ -178,7 +183,8 @@ public class ResourceChunkGenerator extends ChunkGenerator {
                         randomState
                     ),
                     structureManager,
-                    layerChunk
+                    layerChunk,
+                    layerHeightContext
                 ).join();
                 layerChunk.mergeInto(chunk, false);
             }

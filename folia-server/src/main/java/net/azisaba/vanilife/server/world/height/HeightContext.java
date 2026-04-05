@@ -2,8 +2,10 @@ package net.azisaba.vanilife.server.world.height;
 
 import net.azisaba.vanilife.server.world.resource.ResourceLayer;
 import net.azisaba.vanilife.server.world.resource.ResourceLayout;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
@@ -17,6 +19,30 @@ public abstract class HeightContext implements HeightmapContext {
     public abstract int seaLevel();
 
     public abstract int y(final int y1);
+
+    public abstract int minY();
+
+    public abstract int maxY();
+
+    public boolean containsY(final int y) {
+        return y >= this.minY() && y <= this.maxY();
+    }
+
+    public boolean containsY(final int y, final int margin) {
+        return y >= this.minY() - margin && y <= this.maxY() + margin;
+    }
+
+    public boolean intersects(final BoundingBox box) {
+        return this.intersects(box, 0);
+    }
+
+    public boolean intersects(final BoundingBox box, final int margin) {
+        return box.maxY() >= this.minY() - margin && box.minY() <= this.maxY() + margin;
+    }
+
+    public BlockPos pos(final int x, final int y, final int z) {
+        return new BlockPos(x, this.y(y), z);
+    }
 
     @Override
     public Heightmap.Types worldSurfaceWg() {
@@ -65,6 +91,16 @@ public abstract class HeightContext implements HeightmapContext {
         public int y(final int y1) {
             return y1;
         }
+
+        @Override
+        public int minY() {
+            return this.worldGenRegion.getMinY();
+        }
+
+        @Override
+        public int maxY() {
+            return this.worldGenRegion.getMaxY();
+        }
     }
 
     public static class Layered extends HeightContext {
@@ -85,6 +121,16 @@ public abstract class HeightContext implements HeightmapContext {
         @Override
         public int y(int y1) {
             return this.layout.toBlockY(this.layerType, y1);
+        }
+
+        @Override
+        public int minY() {
+            return this.layout.getMinYOf(this.layerType);
+        }
+
+        @Override
+        public int maxY() {
+            return this.layout.getMaxYOf(this.layerType);
         }
     }
 }

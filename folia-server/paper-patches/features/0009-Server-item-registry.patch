@@ -214,6 +214,72 @@ index 4b5d39ee38886f504522560f087077a2b81a4b16..17f56c6def27dc43030ff3d353645c6b
          this.getHandle().getEntityData().set(Avatar.DATA_PLAYER_MODE_CUSTOMISATION, (byte) parts.getRaw());
      }
  
+diff --git a/src/main/java/org/bukkit/craftbukkit/generator/CustomChunkGenerator.java b/src/main/java/org/bukkit/craftbukkit/generator/CustomChunkGenerator.java
+index 73c51c66857f53128b737304205295b67e8444e8..4fb0485cd25992871fe59b3f943263623048a7ee 100644
+--- a/src/main/java/org/bukkit/craftbukkit/generator/CustomChunkGenerator.java
++++ b/src/main/java/org/bukkit/craftbukkit/generator/CustomChunkGenerator.java
+@@ -5,6 +5,9 @@ import com.mojang.serialization.MapCodec;
+ import java.util.List;
+ import java.util.Random;
+ import java.util.concurrent.CompletableFuture;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
++import net.azisaba.vanilife.server.world.height.HeightContext;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Holder;
+ import net.minecraft.core.RegistryAccess;
+@@ -128,14 +131,14 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
+     }
+ 
+     @Override
+-    public void buildSurface(WorldGenRegion region, StructureManager structures, RandomState noiseConfig, ChunkAccess chunk) {
++    public void buildSurface(WorldGenRegion region, StructureManager structures, RandomState noiseConfig, ChunkAccess chunk, @Modified(Op.ADD_ARGUMENT) HeightContext heightContext) {
+         WorldgenRandom random = CustomChunkGenerator.getSeededRandom();
+         int x = chunk.getPos().x;
+         int z = chunk.getPos().z;
+ 
+         random.setSeed(Mth.getSeed(x, "should-surface".hashCode(), z) ^ region.getSeed());
+         if (this.generator.shouldGenerateSurface(this.world.getWorld(), new RandomSourceWrapper.RandomWrapper(random), x, z)) {
+-            this.delegate.buildSurface(region, structures, noiseConfig, chunk);
++            this.delegate.buildSurface(region, structures, noiseConfig, chunk, heightContext);
+         }
+ 
+         CraftChunkData chunkData = new CraftChunkData(this.world.getWorld(), chunk);
+@@ -224,14 +227,14 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
+     }
+ 
+     @Override
+-    public void applyCarvers(WorldGenRegion chunkRegion, long seed, RandomState noiseConfig, BiomeManager biomeAccess, StructureManager structureAccessor, ChunkAccess chunk) {
++    public void applyCarvers(WorldGenRegion chunkRegion, long seed, RandomState noiseConfig, BiomeManager biomeAccess, StructureManager structureAccessor, ChunkAccess chunk, @Modified(Op.ADD_ARGUMENT) HeightContext heightContext) {
+         WorldgenRandom random = CustomChunkGenerator.getSeededRandom();
+         int x = chunk.getPos().x;
+         int z = chunk.getPos().z;
+ 
+         random.setSeed(Mth.getSeed(x, "should-caves".hashCode(), z) ^ chunkRegion.getSeed());
+         if (this.generator.shouldGenerateCaves(this.world.getWorld(), new RandomSourceWrapper.RandomWrapper(random), x, z)) {
+-            this.delegate.applyCarvers(chunkRegion, seed, noiseConfig, biomeAccess, structureAccessor, chunk);
++            this.delegate.applyCarvers(chunkRegion, seed, noiseConfig, biomeAccess, structureAccessor, chunk, heightContext);
+         }
+ 
+         // Minecraft removed the LIQUID_CARVERS stage from world generation, without removing the LIQUID Carving enum.
+@@ -244,7 +247,7 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
+     }
+ 
+     @Override
+-    public CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState noiseConfig, StructureManager structureAccessor, ChunkAccess chunk) {
++    public CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState noiseConfig, StructureManager structureAccessor, ChunkAccess chunk, @Modified(Op.ADD_ARGUMENT) HeightContext heightContext) {
+         CompletableFuture<ChunkAccess> future = null;
+         WorldgenRandom random = CustomChunkGenerator.getSeededRandom();
+         int x = chunk.getPos().x;
+@@ -252,7 +255,7 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
+ 
+         random.setSeed(Mth.getSeed(x, "should-noise".hashCode(), z) ^ this.world.getSeed());
+         if (this.generator.shouldGenerateNoise(this.world.getWorld(), new RandomSourceWrapper.RandomWrapper(random), x, z)) {
+-            future = this.delegate.fillFromNoise(blender, noiseConfig, structureAccessor, chunk);
++            future = this.delegate.fillFromNoise(blender, noiseConfig, structureAccessor, chunk, heightContext);
+         }
+ 
+         java.util.function.Function<ChunkAccess, ChunkAccess> function = (ichunkaccess1) -> {
 diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftContainer.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftContainer.java
 index 2f41a92465b9da28e026297cc3528898bb1c8412..332ec22b074784b89949e19a525c4f442a535e81 100644
 --- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftContainer.java
