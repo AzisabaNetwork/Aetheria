@@ -10,6 +10,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.*;
+
 public final class OverworldLayerBiomeSourceBuilder {
     private final Climate.Parameter FULL_RANGE = Climate.Parameter.span(-1.0F, 1.0F);
     private static final Climate.Parameter COLD_TEMPERATURE = Climate.Parameter.span(-1.0F, -0.8F);
@@ -27,8 +28,8 @@ public final class OverworldLayerBiomeSourceBuilder {
 
     private void addVanillaOverworldBiomes(final ImmutableList.Builder<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> builder) {
         final List<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> vanillaBiomes = MultiNoiseBiomeSourceParameterList.knownPresets()
-                .get(MultiNoiseBiomeSourceParameterList.Preset.OVERWORLD)
-                .values();
+            .get(MultiNoiseBiomeSourceParameterList.Preset.OVERWORLD)
+            .values();
         for (final Pair<Climate.ParameterPoint, ResourceKey<Biome>> pair : vanillaBiomes) {
             builder.add(pair);
         }

@@ -17,45 +17,45 @@ import java.util.List;
 public final class ResourceNoiseGeneratorSettings {
     public static NoiseGeneratorSettings overworld(final RegistryOps.RegistryInfoLookup lookup) {
         final HolderGetter<DensityFunction> densityFunctions = lookup.lookup(Registries.DENSITY_FUNCTION)
-                .orElseThrow()
-                .getter();
+            .orElseThrow()
+            .getter();
         final HolderGetter<NormalNoise.NoiseParameters> noiseParameters = lookup.lookup(Registries.NOISE)
-                .orElseThrow()
-                .getter();
+            .orElseThrow()
+            .getter();
         return new NoiseGeneratorSettings(
-                NoiseSettings.OVERWORLD_NOISE_SETTINGS,
-                Blocks.STONE.defaultBlockState(),
-                Blocks.WATER.defaultBlockState(),
-                NoiseRouterData.overworld(densityFunctions, noiseParameters, false, false),
-                SurfaceRuleData.overworldLike(true, false, false),
-                new OverworldBiomeBuilder().spawnTarget(),
-                63,
-                false,
-                true,
-                true,
-                false
+            NoiseSettings.OVERWORLD_NOISE_SETTINGS,
+            Blocks.STONE.defaultBlockState(),
+            Blocks.WATER.defaultBlockState(),
+            NoiseRouterData.overworld(densityFunctions, noiseParameters, false, false),
+            SurfaceRuleData.overworldLike(true, false, false),
+            new OverworldBiomeBuilder().spawnTarget(),
+            63,
+            false,
+            true,
+            true,
+            false
         );
     }
 
     public static NoiseGeneratorSettings nether(final RegistryOps.RegistryInfoLookup lookup) {
         final HolderGetter<DensityFunction> densityFunctions = lookup.lookup(Registries.DENSITY_FUNCTION)
-                .orElseThrow()
-                .getter();
+            .orElseThrow()
+            .getter();
         final HolderGetter<NormalNoise.NoiseParameters> noiseParameters = lookup.lookup(Registries.NOISE)
-                .orElseThrow()
-                .getter();
+            .orElseThrow()
+            .getter();
         return new NoiseGeneratorSettings(
-                NoiseSettings.NETHER_NOISE_SETTINGS,
-                Blocks.NETHERRACK.defaultBlockState(),
-                Blocks.LAVA.defaultBlockState(),
-                NoiseRouterData.nether(densityFunctions, noiseParameters),
-                SurfaceRuleData.nether(false, true),
-                List.of(),
-                32,
-                false,
-                false,
-                false,
-                true
+            NoiseSettings.NETHER_NOISE_SETTINGS,
+            Blocks.NETHERRACK.defaultBlockState(),
+            Blocks.LAVA.defaultBlockState(),
+            NoiseRouterData.nether(densityFunctions, noiseParameters),
+            SurfaceRuleData.nether(false, true),
+            List.of(),
+            32,
+            false,
+            false,
+            false,
+            true
         );
     }
 }

@@ -24,6 +24,7 @@ import net.minecraft.world.level.dimension.DimensionDefaults;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+
 public class ResourceLayer extends ProtoChunk {
     public static ResourceLayer empty(final ChunkPos pos, final ServerLevel level, final ResourceLayout layout, final ResourceLayer.Type type) {
         return new ResourceLayer(pos, level, layout, type);
@@ -102,68 +103,68 @@ public class ResourceLayer extends ProtoChunk {
 
     private Heightmap[] getOrCreateHeightmaps(final ChunkAccess chunk, final HeightmapSet heightmapSet) {
         return new Heightmap[]{
-                chunk.getOrCreateHeightmapUnprimed(heightmapSet.worldSurfaceWg()),
-                chunk.getOrCreateHeightmapUnprimed(heightmapSet.worldSurface()),
-                chunk.getOrCreateHeightmapUnprimed(heightmapSet.oceanFloorWg()),
-                chunk.getOrCreateHeightmapUnprimed(heightmapSet.oceanFloor()),
-                chunk.getOrCreateHeightmapUnprimed(heightmapSet.motionBlocking()),
-                chunk.getOrCreateHeightmapUnprimed(heightmapSet.motionBlockingNoLeaves())
+            chunk.getOrCreateHeightmapUnprimed(heightmapSet.worldSurfaceWg()),
+            chunk.getOrCreateHeightmapUnprimed(heightmapSet.worldSurface()),
+            chunk.getOrCreateHeightmapUnprimed(heightmapSet.oceanFloorWg()),
+            chunk.getOrCreateHeightmapUnprimed(heightmapSet.oceanFloor()),
+            chunk.getOrCreateHeightmapUnprimed(heightmapSet.motionBlocking()),
+            chunk.getOrCreateHeightmapUnprimed(heightmapSet.motionBlockingNoLeaves())
         };
     }
 
     public record Type(int height, HeightmapSet heightmapSet, ChunkGenerator generator) {
         public static final Codec<ResourceLayer.Type> CODEC = RecordCodecBuilder.create(
-                instance -> instance.group(
-                                Kind.CODEC.fieldOf("kind").forGetter(Type::kind),
-                                Codec.INT.fieldOf("height").forGetter(Type::height),
-                                ChunkGenerator.CODEC.fieldOf("generator").forGetter(Type::generator)
-                        )
-                        .apply(instance, (kind, height, generator) -> new Type(height, kind.heightmapSet, generator))
+            instance -> instance.group(
+                    Kind.CODEC.fieldOf("kind").forGetter(Type::kind),
+                    Codec.INT.fieldOf("height").forGetter(Type::height),
+                    ChunkGenerator.CODEC.fieldOf("generator").forGetter(Type::generator)
+                )
+                .apply(instance, (kind, height, generator) -> new Type(height, kind.heightmapSet, generator))
         );
 
         public static ResourceLayer.Type overworld(final RegistryOps.RegistryInfoLookup lookup) {
             final Holder<NoiseGeneratorSettings> noiseGeneratorSettings = Holder.direct(ResourceNoiseGeneratorSettings.overworld(lookup));
             return new ResourceLayer.Type(
-                    DimensionDefaults.OVERWORLD_GENERATION_HEIGHT,
-                    HeightmapSet.RESOURCE_OVERWORLD,
-                    new NoiseBasedChunkGenerator(new OverworldLayerBiomeSourceBuilder().build(lookup), noiseGeneratorSettings)
+                DimensionDefaults.OVERWORLD_GENERATION_HEIGHT,
+                HeightmapSet.RESOURCE_OVERWORLD,
+                new NoiseBasedChunkGenerator(new OverworldLayerBiomeSourceBuilder().build(lookup), noiseGeneratorSettings)
             );
         }
 
         public static ResourceLayer.Type nether(final RegistryOps.RegistryInfoLookup lookup) {
             final Holder<MultiNoiseBiomeSourceParameterList> parameterList = lookup.lookup(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST)
-                    .orElseThrow()
-                    .getter()
-                    .getOrThrow(MultiNoiseBiomeSourceParameterLists.NETHER);
+                .orElseThrow()
+                .getter()
+                .getOrThrow(MultiNoiseBiomeSourceParameterLists.NETHER);
             final Holder<NoiseGeneratorSettings> noiseGeneratorSettings = Holder.direct(ResourceNoiseGeneratorSettings.nether(lookup));
             return new ResourceLayer.Type(
-                    DimensionDefaults.NETHER_GENERATION_HEIGHT,
-                    HeightmapSet.RESOURCE_NETHER,
-                    new NoiseBasedChunkGenerator(MultiNoiseBiomeSource.createFromPreset(parameterList), noiseGeneratorSettings)
+                DimensionDefaults.NETHER_GENERATION_HEIGHT,
+                HeightmapSet.RESOURCE_NETHER,
+                new NoiseBasedChunkGenerator(MultiNoiseBiomeSource.createFromPreset(parameterList), noiseGeneratorSettings)
             );
         }
 
         public static ResourceLayer.Type end(final RegistryOps.RegistryInfoLookup lookup) {
             final HolderGetter<Biome> biomes = lookup.lookup(Registries.BIOME)
-                    .orElseThrow()
-                    .getter();
+                .orElseThrow()
+                .getter();
             final Holder.Reference<NoiseGeneratorSettings> noiseGeneratorSettings = lookup.lookup(Registries.NOISE_SETTINGS)
-                    .orElseThrow()
-                    .getter()
-                    .getOrThrow(NoiseGeneratorSettings.END);
+                .orElseThrow()
+                .getter()
+                .getOrThrow(NoiseGeneratorSettings.END);
             return new ResourceLayer.Type(
-                    DimensionDefaults.END_GENERATION_HEIGHT,
-                    HeightmapSet.RESOURCE_END,
-                    new NoiseBasedChunkGenerator(
-                            new TheEndBiomeSource(
-                                    biomes.getOrThrow(VanilifeBiomes.THE_END),
-                                    biomes.getOrThrow(VanilifeBiomes.END_HIGHLANDS),
-                                    biomes.getOrThrow(VanilifeBiomes.END_MIDLANDS),
-                                    biomes.getOrThrow(VanilifeBiomes.SMALL_END_ISLANDS),
-                                    biomes.getOrThrow(VanilifeBiomes.END_BARRENS)
-                            ),
-                            noiseGeneratorSettings
-                    )
+                DimensionDefaults.END_GENERATION_HEIGHT,
+                HeightmapSet.RESOURCE_END,
+                new NoiseBasedChunkGenerator(
+                    new TheEndBiomeSource(
+                        biomes.getOrThrow(VanilifeBiomes.THE_END),
+                        biomes.getOrThrow(VanilifeBiomes.END_HIGHLANDS),
+                        biomes.getOrThrow(VanilifeBiomes.END_MIDLANDS),
+                        biomes.getOrThrow(VanilifeBiomes.SMALL_END_ISLANDS),
+                        biomes.getOrThrow(VanilifeBiomes.END_BARRENS)
+                    ),
+                    noiseGeneratorSettings
+                )
             );
         }
 

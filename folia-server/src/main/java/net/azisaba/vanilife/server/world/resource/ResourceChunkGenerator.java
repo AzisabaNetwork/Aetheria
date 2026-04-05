@@ -2,10 +2,12 @@ package net.azisaba.vanilife.server.world.resource;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import net.azisaba.vanilife.server.world.height.HeightContext;
 import net.minecraft.core.*;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.*;
@@ -22,10 +24,6 @@ import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-
 public class ResourceChunkGenerator extends ChunkGenerator {
     public static final MapCodec<ResourceChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(
         instance -> instance.group(
@@ -34,7 +32,7 @@ public class ResourceChunkGenerator extends ChunkGenerator {
             .apply(instance, ResourceChunkGenerator::new)
     );
 
-    private final ResourceLayout layout;
+    public final ResourceLayout layout;
 
     private final ResourceRandomStateProvider randomStateSource = new ResourceRandomStateProvider();
 

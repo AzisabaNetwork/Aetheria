@@ -18,8 +18,8 @@ class ResourceRandomStateProvider {
         }
         final Map<ResourceLayer.Type, RandomState> cache = this.cacheMap.computeIfAbsent(seed, s -> new ConcurrentHashMap<>());
         return cache.computeIfAbsent(
-                layerType,
-                t -> RandomState.create(noiseBasedGenerator.settings.value(), noiseParametersGetter, seed)
+            layerType,
+            t -> RandomState.create(noiseBasedGenerator.settings.value(), noiseParametersGetter, seed)
         );
     }
 }

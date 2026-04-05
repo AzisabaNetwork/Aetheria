@@ -4,6 +4,54 @@ Date: Tue, 3 Mar 2026 17:49:56 +0900
 Subject: [PATCH] Server item registry
 
 
+diff --git a/ca/spottedleaf/moonrise/patches/starlight/light/SkyStarLightEngine.java b/ca/spottedleaf/moonrise/patches/starlight/light/SkyStarLightEngine.java
+index cdb679fb6e3d342efc776329124209d1f433cc8f..8d90f9b7a5110848a05023d1821be37144685be1 100644
+--- a/ca/spottedleaf/moonrise/patches/starlight/light/SkyStarLightEngine.java
++++ b/ca/spottedleaf/moonrise/patches/starlight/light/SkyStarLightEngine.java
+@@ -5,6 +5,8 @@ import ca.spottedleaf.moonrise.patches.starlight.blockstate.StarlightAbstractBlo
+ import ca.spottedleaf.moonrise.patches.starlight.chunk.StarlightChunk;
+ import it.unimi.dsi.fastutil.shorts.ShortCollection;
+ import it.unimi.dsi.fastutil.shorts.ShortIterator;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.world.level.BlockGetter;
+ import net.minecraft.world.level.ChunkPos;
+@@ -19,7 +21,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
+ import java.util.Arrays;
+ import java.util.Set;
+ 
+-public final class SkyStarLightEngine extends StarLightEngine {
++@Modified(Op.REMOVE_FINAL)
++public class SkyStarLightEngine extends StarLightEngine {
+ 
+     /*
+       Specification for managing the initialisation and de-initialisation of skylight nibble arrays:
+diff --git a/ca/spottedleaf/moonrise/patches/starlight/light/StarLightInterface.java b/ca/spottedleaf/moonrise/patches/starlight/light/StarLightInterface.java
+index 7faf226b753a03e03b0dec9bbfcc94a6c3f5bc0f..616ff268e174e058c13b2d0e108ed41e13c4e054 100644
+--- a/ca/spottedleaf/moonrise/patches/starlight/light/StarLightInterface.java
++++ b/ca/spottedleaf/moonrise/patches/starlight/light/StarLightInterface.java
+@@ -14,6 +14,8 @@ import ca.spottedleaf.moonrise.patches.starlight.chunk.StarlightChunk;
+ import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
+ import it.unimi.dsi.fastutil.shorts.ShortCollection;
+ import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
++import net.azisaba.vanilife.server.world.resource.ResourceChunkGenerator;
++import net.azisaba.vanilife.server.world.resource.lighting.ResourceLightEngine;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.SectionPos;
+ import net.minecraft.server.level.ChunkLevel;
+@@ -364,8 +366,9 @@ public final class StarLightInterface {
+         SkyStarLightEngine ret = SKY_PROPAGATOR.get();
+         SKY_PROPAGATOR.set(null);
+ 
+-        if (ret == null) {
+-            ret = new SkyStarLightEngine();
++        final boolean shouldUseResourceLightEngine = ResourceLightEngine.shouldUse(this.world);
++        if (ret == null || (shouldUseResourceLightEngine && !(ret instanceof ResourceLightEngine)) || (!shouldUseResourceLightEngine && ret instanceof ResourceLightEngine)) {
++            ret = shouldUseResourceLightEngine ? new ResourceLightEngine() : new SkyStarLightEngine();
+         }
+ 
+         ret.setWorld(this.world);
 diff --git a/io/papermc/paper/threadedregions/ThreadedRegionizer.java b/io/papermc/paper/threadedregions/ThreadedRegionizer.java
 index 604385af903845d966382ad0a4168798e4ed4a0e..b7c4500a40035ead2026e8f2fd4259926137ab7e 100644
 --- a/io/papermc/paper/threadedregions/ThreadedRegionizer.java

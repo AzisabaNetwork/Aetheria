@@ -25,10 +25,10 @@ import java.util.stream.Stream;
 
 public class ResourceBiomeSource extends BiomeSource {
     public static final MapCodec<ResourceBiomeSource> CODEC = RecordCodecBuilder.mapCodec(
-            instance -> instance.group(
-                            ResourceLayout.CODEC.fieldOf("layout").forGetter(source -> source.layout)
-                    )
-                    .apply(instance, ResourceBiomeSource::new)
+        instance -> instance.group(
+                ResourceLayout.CODEC.fieldOf("layout").forGetter(source -> source.layout)
+            )
+            .apply(instance, ResourceBiomeSource::new)
     );
 
     private final ResourceLayout layout;
@@ -63,7 +63,7 @@ public class ResourceBiomeSource extends BiomeSource {
 
     @Override
     public @Nullable Pair<BlockPos, Holder<Biome>> findClosestBiome3d(
-            final BlockPos pos, final int radius, final int horizontalStep, final int verticalStep, final Predicate<Holder<Biome>> biomePredicate, final Climate.Sampler sampler, final LevelReader level
+        final BlockPos pos, final int radius, final int horizontalStep, final int verticalStep, final Predicate<Holder<Biome>> biomePredicate, final Climate.Sampler sampler, final LevelReader level
     ) {
         final Set<Holder<Biome>> targetBiomes = this.possibleBiomes().stream().filter(biomePredicate).collect(Collectors.toUnmodifiableSet());
         if (targetBiomes.isEmpty()) {
