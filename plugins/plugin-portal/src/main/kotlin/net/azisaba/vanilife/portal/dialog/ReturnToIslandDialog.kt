@@ -17,7 +17,7 @@ import org.bukkit.plugin.Plugin
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-internal object ReturnDialog : KoinComponent {
+object ReturnToIslandDialog : KoinComponent {
     private val plugin: Plugin by inject()
 
     fun bootstrap(builder: DialogRegistryEntry.Builder) {

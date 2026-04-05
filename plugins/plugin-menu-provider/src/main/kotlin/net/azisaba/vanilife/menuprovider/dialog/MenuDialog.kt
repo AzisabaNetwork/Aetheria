@@ -16,6 +16,8 @@ import net.azisaba.vanilife.menuprovider.MenuProviderFonts
 import net.azisaba.vanilife.menuprovider.MenuProviderTranslations
 import net.azisaba.vanilife.menuprovider.inventory.StorageInventory
 import net.azisaba.vanilife.menuprovider.inventory.TrashInventory
+import net.azisaba.vanilife.portal.PortalDialogs
+import net.azisaba.vanilife.portal.dialog.ReturnToIslandDialog
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickCallback
 import net.kyori.adventure.text.event.ClickEvent
@@ -35,6 +37,16 @@ internal object MenuDialog : KoinComponent {
         )
         .appendSpace()
         .append(Component.translatable(MenuProviderTranslations.DIALOG_VANILIFE_MENU))
+        .build()
+
+    val RETURN_TO_ISLAND: Component = Component.text()
+        .append(
+            Component.text(MenuProviderFonts.MenuIcons.RETURN_TO_ISLAND)
+                .shadowColor(ShadowColor.none())
+                .font(MenuProviderFonts.MENU_ICONS)
+        )
+        .appendSpace()
+        .append(Component.translatable(MenuProviderTranslations.DIALOG_VANILIFE_MENU_RETURN_TO_ISLAND))
         .build()
 
     val SETTINGS: Component = Component.text()
@@ -91,10 +103,11 @@ internal object MenuDialog : KoinComponent {
             .type(
                 DialogType.multiAction(
                     listOf(
-                        settingsButton(),
-                        enchantments(),
+                        returnToIsland(),
                         trashButton(),
                         storageButton(),
+                        enchantments(),
+                        settingsButton(),
                         discordButton(),
                     )
                 ).exitAction(
@@ -124,21 +137,6 @@ internal object MenuDialog : KoinComponent {
         )
         .build()
 
-    private fun settingsButton(): ActionButton = ActionButton.builder(SETTINGS).action(
-        DialogAction.customClick(
-            { _, audience ->
-                (audience as? Player)?.let { player ->
-                    plugin.launch {
-                        player.showDialog(SettingsDialog.create(player))
-                    }
-                }
-            },
-            ClickCallback.Options.builder()
-                .uses(ClickCallback.UNLIMITED_USES)
-                .build()
-        )
-    ).build()
-
     private fun enchantments(): ActionButton = ActionButton.builder(EnchantmentsDialog.TITLE)
         .action(
             DialogAction.customClick(
@@ -155,6 +153,36 @@ internal object MenuDialog : KoinComponent {
             )
         )
         .build()
+
+    private fun returnToIsland(): ActionButton = ActionButton.builder(RETURN_TO_ISLAND).action(
+        DialogAction.customClick(
+            { _, audience ->
+                audience.showDialog(
+                    RegistryAccess.registryAccess()
+                        .getRegistry(RegistryKey.DIALOG)
+                        .getOrThrow(PortalDialogs.RETURN)
+                )
+            },
+            ClickCallback.Options.builder()
+                .uses(ClickCallback.UNLIMITED_USES)
+                .build()
+        )
+    ).build()
+
+    private fun settingsButton(): ActionButton = ActionButton.builder(SETTINGS).action(
+        DialogAction.customClick(
+            { _, audience ->
+                (audience as? Player)?.let { player ->
+                    plugin.launch {
+                        player.showDialog(SettingsDialog.create(player))
+                    }
+                }
+            },
+            ClickCallback.Options.builder()
+                .uses(ClickCallback.UNLIMITED_USES)
+                .build()
+        )
+    ).build()
 
     private fun trashButton(): ActionButton = ActionButton.builder(TRASH)
         .action(
