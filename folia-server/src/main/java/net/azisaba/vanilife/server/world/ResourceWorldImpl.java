@@ -6,9 +6,6 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.generator.BiomeProvider;
 import org.bukkit.generator.ChunkGenerator;
 import org.jetbrains.annotations.Nullable;
-import org.jspecify.annotations.NullMarked;
-
-@NullMarked
 public class ResourceWorldImpl extends CraftWorld implements ResourceWorld {
     public ResourceWorldImpl(
         final ServerLevel world,

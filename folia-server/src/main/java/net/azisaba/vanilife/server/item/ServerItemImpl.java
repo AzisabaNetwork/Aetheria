@@ -12,10 +12,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import org.bukkit.craftbukkit.CraftRegistry;
 import org.bukkit.inventory.ItemStack;
-import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-
-@NullMarked
 public class ServerItemImpl extends HolderableBase<ServerItemRegistryEntry> implements ServerItem {
     public static ServerItemImpl minecraftToBukkit(final Holder<ServerItemRegistryEntry> minecraft) {
         return CraftRegistry.minecraftHolderToBukkit(minecraft, Registries.SERVER_ITEM);

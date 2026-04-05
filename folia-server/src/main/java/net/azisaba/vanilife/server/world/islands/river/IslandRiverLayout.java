@@ -5,9 +5,6 @@ import net.azisaba.vanilife.world.IslandPosition;
 import net.azisaba.vanilife.world.IslandsWorld;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
-import org.jspecify.annotations.NullMarked;
-
-@NullMarked
 public final class IslandRiverLayout {
     private static final long RIVER_NOISE_SALT = 0x71D1B54A6CE29EF3L;
 
@@ -38,7 +35,6 @@ public final class IslandRiverLayout {
         return this.riverNetwork;
     }
 
-    @NullMarked
     public record RiverSample(double strength, double bankInfluence, double coreInfluence) {
         public static final RiverSample NONE = new RiverSample(0.0, 0.0, 0.0);
 

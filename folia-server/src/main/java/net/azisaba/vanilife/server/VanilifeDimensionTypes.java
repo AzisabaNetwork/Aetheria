@@ -18,9 +18,6 @@ import net.minecraft.world.attribute.*;
 import net.minecraft.world.level.dimension.DimensionDefaults;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.timeline.Timeline;
-import org.jspecify.annotations.NullMarked;
-
-@NullMarked
 public final class VanilifeDimensionTypes {
     public static final ResourceKey<DimensionType> RESOURCE = ResourceKey.create(Registries.DIMENSION_TYPE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "resource"));
     public static final ResourceKey<DimensionType> ISLANDS = ResourceKey.create(Registries.DIMENSION_TYPE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "islands"));

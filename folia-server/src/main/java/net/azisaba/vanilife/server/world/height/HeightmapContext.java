@@ -1,12 +1,10 @@
 package net.azisaba.vanilife.server.world.height;
 
 import net.minecraft.world.level.levelgen.Heightmap;
-import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
-@NullMarked
 public interface HeightmapContext {
     Heightmap.Types worldSurfaceWg();
 

@@ -16,9 +16,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import org.jspecify.annotations.NullMarked;
-
-@NullMarked
 public final class VanilifeFeatures {
     public static final ResourceKey<Feature<CaveIceClusterFeature.Configuration>> CAVE_ICE_CLUSTER = create(Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "cave_ice_cluster"));
     public static final ResourceKey<Feature<NoneFeatureConfiguration>> CAVE_ICE_PILLAR = create(Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "cave_ice_pillar"));

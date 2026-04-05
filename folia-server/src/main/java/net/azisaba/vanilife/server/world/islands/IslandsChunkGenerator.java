@@ -28,9 +28,6 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
-import org.jspecify.annotations.NullMarked;
-
-@NullMarked
 public final class IslandsChunkGenerator extends ChunkGenerator {
     public static final MapCodec<IslandsChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(
         instance -> instance.group(

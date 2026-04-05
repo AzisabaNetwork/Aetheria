@@ -32,9 +32,6 @@ import net.minecraft.world.level.levelgen.feature.stateproviders.RuleBasedBlockS
 import net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStateProvider;
 import net.minecraft.world.level.levelgen.feature.treedecorators.PlaceOnGroundDecorator;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.StraightTrunkPlacer;
-import org.jspecify.annotations.NullMarked;
-
-@NullMarked
 public final class VanilifeConfiguredFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> CAVE_ICE_CLUSTER = ResourceKey.create(Registries.CONFIGURED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "cave_ice_cluster"));
     public static final ResourceKey<ConfiguredFeature<?, ?>> CAVE_ICE_PILLAR = ResourceKey.create(Registries.CONFIGURED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "cave_ice_pillar"));

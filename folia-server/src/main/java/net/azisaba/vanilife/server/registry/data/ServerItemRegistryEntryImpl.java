@@ -18,12 +18,10 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.core.component.DataComponentMap;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
-import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import static io.papermc.paper.registry.data.util.Checks.asConfigured;
 
-@NullMarked
 public record ServerItemRegistryEntryImpl(
         String translationKey,
         boolean described,
@@ -64,7 +62,6 @@ public record ServerItemRegistryEntryImpl(
         itemStack.setData(DataComponentTypes.LORE, itemLore);
     }
 
-    @NullMarked
     public static class BuilderImpl implements ServerItemRegistryEntry.Builder, PaperRegistryBuilder<ServerItemRegistryEntry, ServerItem> {
         private @Nullable String translationKey;
         private boolean described = false;

@@ -6,9 +6,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import org.jspecify.annotations.NullMarked;
-
-@NullMarked
 public abstract class HeightContext implements HeightmapContext {
     private final HeightmapSet heightmap;
 

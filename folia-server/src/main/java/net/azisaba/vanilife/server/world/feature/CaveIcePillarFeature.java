@@ -10,9 +10,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import org.jspecify.annotations.NullMarked;
-
-@NullMarked
 public final class CaveIcePillarFeature extends Feature<NoneFeatureConfiguration> {
     private static final int MIN_HEIGHT = 4;
     private static final int MAX_HEIGHT = 12;

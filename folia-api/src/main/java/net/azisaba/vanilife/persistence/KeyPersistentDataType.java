@@ -1,14 +1,12 @@
 package net.azisaba.vanilife.persistence;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import net.azisaba.vanilife.annotations.VanilifoliaApi;
 import net.kyori.adventure.key.Key;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 
 @VanilifoliaApi
 public final class KeyPersistentDataType implements PersistentDataType<byte[], Key> {
@@ -17,17 +15,17 @@ public final class KeyPersistentDataType implements PersistentDataType<byte[], K
     }
 
     @Override
-    public @NotNull Class<byte[]> getPrimitiveType() {
+    public Class<byte[]> getPrimitiveType() {
         return byte[].class;
     }
 
     @Override
-    public @NotNull Class<Key> getComplexType() {
+    public Class<Key> getComplexType() {
         return Key.class;
     }
 
     @Override
-    public byte @NotNull [] toPrimitive(final @NotNull Key complex, final @NotNull PersistentDataAdapterContext context) {
+    public byte[] toPrimitive(final Key complex, final PersistentDataAdapterContext context) {
         final byte[] namespaceBytes = complex.namespace().getBytes(StandardCharsets.UTF_8);
         final byte[] valueBytes = complex.value().getBytes(StandardCharsets.UTF_8);
 
@@ -43,7 +41,7 @@ public final class KeyPersistentDataType implements PersistentDataType<byte[], K
     }
 
     @Override
-    public @NotNull Key fromPrimitive(final byte @NotNull [] primitive, final @NotNull PersistentDataAdapterContext context) {
+    public Key fromPrimitive(final byte[] primitive, final PersistentDataAdapterContext context) {
         if (primitive.length < 2) {
             throw new IllegalArgumentException("Invalid serialized key length: " + primitive.length);
         }

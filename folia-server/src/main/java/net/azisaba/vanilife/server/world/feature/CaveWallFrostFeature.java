@@ -13,11 +13,9 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
-import org.jspecify.annotations.NullMarked;
 
 import java.util.ArrayDeque;
 
-@NullMarked
 public final class CaveWallFrostFeature extends Feature<CaveWallFrostFeature.Configuration> {
     private static final int SEARCH_RADIUS = 7;
     private static final int SEARCH_HEIGHT = 5;

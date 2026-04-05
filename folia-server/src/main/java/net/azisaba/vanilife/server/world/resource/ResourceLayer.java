@@ -24,9 +24,6 @@ import net.minecraft.world.level.dimension.DimensionDefaults;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import org.jspecify.annotations.NullMarked;
-
-@NullMarked
 public class ResourceLayer extends ProtoChunk {
     public static ResourceLayer empty(final ChunkPos pos, final ServerLevel level, final ResourceLayout layout, final ResourceLayer.Type type) {
         return new ResourceLayer(pos, level, layout, type);
@@ -114,7 +111,6 @@ public class ResourceLayer extends ProtoChunk {
         };
     }
 
-    @NullMarked
     public record Type(int height, HeightmapSet heightmapSet, ChunkGenerator generator) {
         public static final Codec<ResourceLayer.Type> CODEC = RecordCodecBuilder.create(
                 instance -> instance.group(

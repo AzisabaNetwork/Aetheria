@@ -24,9 +24,6 @@ import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
-import org.jspecify.annotations.NullMarked;
-
-@NullMarked
 public final class VanilifeBiomes {
     public static final ResourceKey<Biome> ISLANDS = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "islands"));
     public static final ResourceKey<Biome> END_BARRENS = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "end_barrens"));

@@ -3,7 +3,6 @@ package net.azisaba.vanilife.server.world.resource;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.azisaba.vanilife.server.world.height.HeightContext;
-import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Iterator;
@@ -11,7 +10,6 @@ import java.util.List;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-@NullMarked
 public record ResourceLayout(
         int minY,
         List<ResourceLayer.Type> layersTypes

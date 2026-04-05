@@ -4,13 +4,11 @@ import net.minecraft.core.HolderGetter;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
-import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@NullMarked
 class ResourceRandomStateProvider {
     private final Map<Long, Map<ResourceLayer.Type, RandomState>> cacheMap = new ConcurrentHashMap<>();
 

@@ -3,9 +3,6 @@ package net.azisaba.vanilife.server.world.islands;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jspecify.annotations.NullMarked;
-
-@NullMarked
 public final class IslandSurfaceBlender {
     public static final int SURFACE_LAYER_THICKNESS = 3;
 

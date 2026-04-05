@@ -6,9 +6,6 @@ import java.util.List;
 import java.util.Random;
 import net.azisaba.vanilife.world.IslandPosition;
 import net.minecraft.util.Mth;
-import org.jspecify.annotations.NullMarked;
-
-@NullMarked
 final class RiverNetworkPlanner {
     private static final double PORTAL_RIVER_SAFE_RADIUS = 42.0;
     private static final double PORTAL_RIVER_DETOUR_DISTANCE = 28.0;

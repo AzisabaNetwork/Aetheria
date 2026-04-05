@@ -23,11 +23,7 @@ import net.minecraft.world.level.levelgen.placement.HeightmapPlacement;
 import net.minecraft.world.level.levelgen.placement.InSquarePlacement;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.placement.RarityFilter;
-import org.jspecify.annotations.NullMarked;
-
 import java.util.List;
-
-@NullMarked
 public final class VanilifePlacedFeatures {
     public static final ResourceKey<PlacedFeature> ISLAND_CONIFER_TREE = ResourceKey.create(Registries.PLACED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_conifer_tree"));
     public static final ResourceKey<PlacedFeature> ISLAND_JUNGLE_BUSH = ResourceKey.create(Registries.PLACED_FEATURE, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "island_jungle_bush"));

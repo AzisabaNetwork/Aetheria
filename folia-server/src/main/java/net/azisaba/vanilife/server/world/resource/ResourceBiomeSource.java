@@ -16,7 +16,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
-import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Set;
@@ -24,7 +23,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@NullMarked
 public class ResourceBiomeSource extends BiomeSource {
     public static final MapCodec<ResourceBiomeSource> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(

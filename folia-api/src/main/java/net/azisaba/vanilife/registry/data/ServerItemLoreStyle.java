@@ -12,7 +12,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 public record ServerItemLoreStyle(List<ConditionedPart> conditionedParts) {
     private static final ServerItemLoreStyle DEFAULT = loreStyle()
@@ -29,33 +28,33 @@ public record ServerItemLoreStyle(List<ConditionedPart> conditionedParts) {
         .build();
 
     @Contract(value = "-> new", pure = true)
-    public static @NotNull Builder loreStyle() {
+    public static Builder loreStyle() {
         return new Builder();
     }
 
     @Contract(pure = true)
-    public static @NotNull ServerItemLoreStyle defaultStyle() {
+    public static ServerItemLoreStyle defaultStyle() {
         return DEFAULT;
     }
 
     @Contract(pure = true)
-    public static @NotNull ServerItemLoreStyle emptyStyle() {
+    public static ServerItemLoreStyle emptyStyle() {
         return EMPTY;
     }
 
-    public @NotNull List<@NotNull Part> parts(final ServerItemRegistryEntry item) {
+    public List<Part> parts(final ServerItemRegistryEntry item) {
         return this.conditionedParts.stream()
             .filter((conditioned) -> conditioned.predicate().test(item))
             .map(ConditionedPart::part)
             .toList();
     }
 
-    public @NotNull ItemLore itemLore(final @NotNull ServerItemRegistryEntry item) {
+    public ItemLore itemLore(final ServerItemRegistryEntry item) {
         final List<Component> lines = this.buildLines(item).stream().map((line) -> line.applyFallbackStyle(RESET_LORE_STYLE)).toList();
         return ItemLore.lore(lines);
     }
 
-    private @NotNull List<Component> buildLines(final @NotNull ServerItemRegistryEntry item) {
+    private List<Component> buildLines(final ServerItemRegistryEntry item) {
         final List<Part> parts = this.parts(item);
         final ImmutableList.Builder<Component> builder = ImmutableList.builder();
         for (int i = 0; i < parts.size(); i++) {
@@ -70,19 +69,19 @@ public record ServerItemLoreStyle(List<ConditionedPart> conditionedParts) {
 
     @FunctionalInterface
     public interface Part {
-        static @NotNull Part description() {
+        static Part description() {
             return (item, builder) -> builder.add(Component.translatable(item.translationKey() + ".description"));
         }
 
-        static @NotNull Part itemCategory() {
+        static Part itemCategory() {
             return (item, builder) -> builder.add(Component.translatable("item.vanilife.category"))
                 .add(Component.translatable(item.category(), item.category().color()));
         }
 
-        static @NotNull Part peakSeason() {
+        static Part peakSeason() {
             return new Part() {
                 @Override
-                public void append(@NotNull ServerItemRegistryEntry item, ImmutableList.@NotNull Builder<@NotNull Component> builder) {
+                public void append(ServerItemRegistryEntry item, ImmutableList.Builder<Component> builder) {
                     final List<Season.Sub> peakSeason = item.peakSeason().stream().sorted().toList();
                     final List<Range> ranges = this.buildRanges(peakSeason);
 
@@ -128,10 +127,10 @@ public record ServerItemLoreStyle(List<ConditionedPart> conditionedParts) {
             };
         }
 
-        void append(final @NotNull ServerItemRegistryEntry item, final ImmutableList.@NotNull Builder<@NotNull Component> builder);
+        void append(final ServerItemRegistryEntry item, final ImmutableList.Builder<Component> builder);
     }
 
-    public record ConditionedPart(@NotNull Predicate<@NotNull ServerItemRegistryEntry> predicate, @NotNull Part part) {
+    public record ConditionedPart(Predicate<ServerItemRegistryEntry> predicate, Part part) {
     }
 
     public static final class Builder {
@@ -141,18 +140,18 @@ public record ServerItemLoreStyle(List<ConditionedPart> conditionedParts) {
         }
 
         @Contract(value = "_ -> this", mutates = "this")
-        public Builder then(final @NotNull Part part) {
+        public Builder then(final Part part) {
             return this.then((item) -> true, part);
         }
 
         @Contract(value = "_, _ -> this", mutates = "this")
-        public @NotNull Builder then(final @NotNull Predicate<@NotNull ServerItemRegistryEntry> predicate, final @NotNull Part part) {
+        public Builder then(final Predicate<ServerItemRegistryEntry> predicate, final Part part) {
             conditionedParts.add(new ConditionedPart(predicate, part));
             return this;
         }
 
         @Contract(value = "-> new", pure = true)
-        public @NotNull ServerItemLoreStyle build() {
+        public ServerItemLoreStyle build() {
             return new ServerItemLoreStyle(this.conditionedParts);
         }
     }

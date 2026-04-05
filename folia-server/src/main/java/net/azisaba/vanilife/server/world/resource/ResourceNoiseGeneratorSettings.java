@@ -11,11 +11,9 @@ import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.NoiseRouterData;
 import net.minecraft.world.level.levelgen.NoiseSettings;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
-import org.jspecify.annotations.NullMarked;
 
 import java.util.List;
 
-@NullMarked
 public final class ResourceNoiseGeneratorSettings {
     public static NoiseGeneratorSettings overworld(final RegistryOps.RegistryInfoLookup lookup) {
         final HolderGetter<DensityFunction> densityFunctions = lookup.lookup(Registries.DENSITY_FUNCTION)

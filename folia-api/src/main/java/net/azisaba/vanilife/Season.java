@@ -7,8 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.translation.Translatable;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public enum Season implements Translatable {
     SPRING(TextColor.color(242, 163, 179), Month.MARCH, Month.APRIL, Month.MAY),
@@ -16,7 +15,7 @@ public enum Season implements Translatable {
     FALL(TextColor.color(230, 126, 34), Month.SEPTEMBER, Month.OCTOBER, Month.NOVEMBER),
     WINTER(TextColor.color(143, 163, 191), Month.DECEMBER, Month.JANUARY, Month.FEBRUARY);
 
-    public static @NotNull Season now() {
+    public static Season now() {
         final Month month = LocalDate.now().getMonth();
         return Arrays.stream(Season.values())
                 .filter(season -> season.months().contains(month))
@@ -32,41 +31,41 @@ public enum Season implements Translatable {
         this.months = Arrays.asList(months);
     }
 
-    public @NotNull TextColor color() {
+    public TextColor color() {
         return this.color;
     }
 
-    public @NotNull List<@NotNull Month> months() {
+    public List<Month> months() {
         return this.months;
     }
 
-    public @NotNull Season next() {
+    public Season next() {
         return values()[(this.ordinal() + 1) % values().length];
     }
 
-    public @NotNull Season previous() {
+    public Season previous() {
         return values()[(this.ordinal() - 1 + values().length) % values().length];
     }
 
-    public @NotNull Sub withStage(final Stage stage) {
+    public Sub withStage(final Stage stage) {
         return new Sub(this, stage);
     }
 
-    public Sub @NotNull [] subSeasons() {
+    public Sub[] subSeasons() {
         return new Sub[]{withStage(Stage.EARLY), withStage(Stage.MID), withStage(Stage.LATE)};
     }
 
     @Override
-    public @NotNull String translationKey() {
+    public String translationKey() {
         return "season." + this.name().toLowerCase(Locale.ROOT);
     }
 
-    public record Sub(@NotNull Season season, @NotNull Stage stage) implements Comparable<Sub>, Translatable {
-        public static @NotNull Sub now() {
+    public record Sub(Season season, Stage stage) implements Comparable<Sub>, Translatable {
+        public static Sub now() {
             return new Sub(Season.now(), Stage.now());
         }
 
-        public @NotNull Sub next() {
+        public Sub next() {
             final Stage nextStage = this.stage.next();
             if (nextStage != null) {
                 return this.season.withStage(nextStage);
@@ -75,7 +74,7 @@ public enum Season implements Translatable {
             }
         }
 
-        public @NotNull Sub previous() {
+        public Sub previous() {
             final Stage previousStage = this.stage.previous();
             if (previousStage != null) {
                 return this.season.withStage(previousStage);
@@ -88,12 +87,12 @@ public enum Season implements Translatable {
         }
 
         @Override
-        public @NotNull String translationKey() {
+        public String translationKey() {
             return this.season.translationKey() + "." + this.stage.name().toLowerCase(Locale.ROOT);
         }
 
         @Override
-        public int compareTo(final Season.@NotNull Sub other) {
+        public int compareTo(final Season.Sub other) {
             int seasonCompare = Integer.compare(this.season.ordinal(), other.season().ordinal());
             if (seasonCompare != 0) {
                 return seasonCompare;
@@ -106,7 +105,7 @@ public enum Season implements Translatable {
     public enum Stage {
         EARLY, MID, LATE;
 
-        public static @NotNull Stage now() {
+        public static Stage now() {
             final Season season = Season.now();
             final Month month = LocalDate.now().getMonth();
             if (season.months().getFirst() == month) {

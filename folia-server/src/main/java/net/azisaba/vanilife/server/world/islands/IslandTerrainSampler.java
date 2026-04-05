@@ -11,9 +11,6 @@ import net.azisaba.vanilife.world.IslandPosition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
-import org.jspecify.annotations.NullMarked;
-
-@NullMarked
 final class IslandTerrainSampler {
     static final double RIVER_BANK_THRESHOLD = 0.015;
 

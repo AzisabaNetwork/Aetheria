@@ -7,9 +7,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import io.papermc.paper.math.BlockPosition;
-import org.jspecify.annotations.NullMarked;
-
-@NullMarked
 public final class IslandNoise {
     private static final double SPAWN_BEACH_HEIGHT_RADIUS = 14.0;
     private static final double SPAWN_BEACH_STABILITY_RADIUS = 22.0;

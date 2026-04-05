@@ -3,9 +3,6 @@ package net.azisaba.vanilife.server.world.height;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.level.levelgen.Heightmap;
-import org.jspecify.annotations.NullMarked;
-
-@NullMarked
 public record HeightmapSet(
         Heightmap.Types worldSurfaceWg,
         Heightmap.Types worldSurface,

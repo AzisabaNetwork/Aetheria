@@ -21,13 +21,11 @@ import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
-import org.jspecify.annotations.NullMarked;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
-@NullMarked
 public class ResourceChunkGenerator extends ChunkGenerator {
     public static final MapCodec<ResourceChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(
         instance -> instance.group(

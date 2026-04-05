@@ -4,9 +4,6 @@ import com.google.common.base.Preconditions;
 import io.papermc.paper.math.BlockPosition;
 import io.papermc.paper.math.Position;
 import java.util.Random;
-import org.jspecify.annotations.NullMarked;
-
-@NullMarked
 public sealed interface IslandPosition permits IslandPositionImpl {
     long SERIALIZED_WIDTH = 4096L;
 

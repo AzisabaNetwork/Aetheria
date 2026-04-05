@@ -8,9 +8,6 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jspecify.annotations.NullMarked;
-
-@NullMarked
 final class IslandReefDecorator {
     private static final long REEF_RANDOM_SALT = 0x50A1D4B71E2CL;
     private static final int SHALLOW_REEF_MIN_DEPTH = 1;

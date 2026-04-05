@@ -3,7 +3,6 @@ package net.azisaba.vanilife.registry.data;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.translation.Translatable;
-import org.jetbrains.annotations.NotNull;
 
 public enum ServerItemCategory implements Translatable {
     MATERIAL("item.vanilife.category.material", TextColor.color(255, 213, 79)),
@@ -23,17 +22,17 @@ public enum ServerItemCategory implements Translatable {
     private final String translationKey;
     private final TextColor color;
 
-    ServerItemCategory(final @NotNull String translationKey, final @NotNull TextColor color) {
+    ServerItemCategory(final String translationKey, final TextColor color) {
         this.translationKey = translationKey;
         this.color = color;
     }
 
     @Override
-    public @NotNull String translationKey() {
+    public String translationKey() {
         return this.translationKey;
     }
 
-    public @NotNull TextColor color() {
+    public TextColor color() {
         return this.color;
     }
 }

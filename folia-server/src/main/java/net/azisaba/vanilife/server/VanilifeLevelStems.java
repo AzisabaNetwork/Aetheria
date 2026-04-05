@@ -22,9 +22,6 @@ import net.minecraft.world.level.biome.FixedBiomeSource;
 import net.minecraft.world.level.dimension.DimensionDefaults;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
-import org.jspecify.annotations.NullMarked;
-
-@NullMarked
 public final class VanilifeLevelStems {
     public static final ResourceKey<LevelStem> RESOURCE = ResourceKey.create(Registries.LEVEL_STEM, Identifier.fromNamespaceAndPath(Vanilife.NAMESPACE, "2026/spring"));
     public static final ResourceKey<LevelStem> ISLANDS = ResourceKey.create(Registries.LEVEL_STEM, PaperAdventure.asVanilla(IslandsWorld.WORLD_KEY));

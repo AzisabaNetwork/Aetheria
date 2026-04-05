@@ -13,10 +13,8 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
-import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-@NullMarked
 public final class CaveSnowCoverFeature extends Feature<CaveSnowCoverFeature.Configuration> {
     private static final int NO_FLOOR = Integer.MIN_VALUE;
 

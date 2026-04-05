@@ -12,12 +12,10 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
-import org.jspecify.annotations.NullMarked;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@NullMarked
 public final class CaveIceClusterFeature extends Feature<CaveIceClusterFeature.Configuration> {
     private static final int FLOOR_SEARCH_RANGE = 10;
     private static final int MIN_RADIUS = 2;

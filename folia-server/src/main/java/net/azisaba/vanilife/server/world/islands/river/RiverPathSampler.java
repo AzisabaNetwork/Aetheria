@@ -3,9 +3,6 @@ package net.azisaba.vanilife.server.world.islands.river;
 import net.azisaba.vanilife.server.world.islands.IslandsGeneratorSettings;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
-import org.jspecify.annotations.NullMarked;
-
-@NullMarked
 final class RiverPathSampler {
     private static final double RIVER_BANK_WIDTH_BLOCKS = 6.0;
 
