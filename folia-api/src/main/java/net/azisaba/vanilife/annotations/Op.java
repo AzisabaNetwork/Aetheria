@@ -14,6 +14,8 @@ public enum Op {
     MAKE_PRIVATE,
     CHANGE_FIELD_INITIALIZATION,
     CHANGE_CONSTRUCTOR,
+    FORWARD_ARGUMENT,
+    SUPPLY_ARGUMENT,
     COMPAT,
 
     @Deprecated(forRemoval = true)

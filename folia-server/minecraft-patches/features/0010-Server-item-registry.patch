@@ -459,7 +459,7 @@ index c5953d5751e655e121e459aaab35e7719948e69e..79c41dbedc90eac928d27454ceb71247
          }
  
 diff --git a/net/minecraft/world/level/chunk/ChunkGenerator.java b/net/minecraft/world/level/chunk/ChunkGenerator.java
-index fd92282bb1cbe7051258f6d239e8dc0ce191baba..261132ff0aca9ae69cd78aeff709d985d8729402 100644
+index fd92282bb1cbe7051258f6d239e8dc0ce191baba..098ca2fb4df4a4c91140e7f3c3953848feaf7868 100644
 --- a/net/minecraft/world/level/chunk/ChunkGenerator.java
 +++ b/net/minecraft/world/level/chunk/ChunkGenerator.java
 @@ -11,7 +11,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
@@ -482,6 +482,15 @@ index fd92282bb1cbe7051258f6d239e8dc0ce191baba..261132ff0aca9ae69cd78aeff709d985
  
      public @Nullable Pair<BlockPos, Holder<Structure>> findNearestMapStructure(
          ServerLevel level, HolderSet<Structure> structure, BlockPos pos, int radius, boolean skipKnownStructures
+@@ -307,7 +305,7 @@ public abstract class ChunkGenerator {
+         ChunkPos pos = chunk.getPos();
+         if (!SharedConstants.debugVoidTerrain(pos)) {
+             SectionPos sectionPos = SectionPos.of(pos, level.getMinSectionY());
+-            BlockPos blockPos = sectionPos.origin();
++            BlockPos blockPos = new BlockPos(pos.getMinBlockX(), heightContext.minY(), pos.getMinBlockZ());
+             Registry<Structure> registry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
+             Map<Integer, List<Structure>> map = registry.stream().collect(Collectors.groupingBy(structure1 -> structure1.step().ordinal()));
+             List<FeatureSorter.StepFeatureData> list = this.featuresPerStep.get();
 @@ -448,7 +446,7 @@ public abstract class ChunkGenerator {
          return new BoundingBox(minBlockX, i, minBlockZ, minBlockX + 15, maxY, minBlockZ + 15);
      }
@@ -558,7 +567,7 @@ index a04f20297c984a31216cbeb1c8d049728c9b6a65..202d7f1c6a2c37c75b586d9edfa89fa9
      public static final ChunkStatus EMPTY = register("empty", null, WORLDGEN_HEIGHTMAPS, ChunkType.PROTOCHUNK);
      public static final ChunkStatus STRUCTURE_STARTS = register("structure_starts", EMPTY, WORLDGEN_HEIGHTMAPS, ChunkType.PROTOCHUNK);
 diff --git a/net/minecraft/world/level/chunk/status/ChunkStatusTasks.java b/net/minecraft/world/level/chunk/status/ChunkStatusTasks.java
-index d620862e95abf9f098bb53a76825883f2b1f4bbf..6bab4e52f3190d5d3a528e1344ce961a48e92eb5 100644
+index d620862e95abf9f098bb53a76825883f2b1f4bbf..d55bcc825619eb83cdcc1e9afb63c626e7f51bc9 100644
 --- a/net/minecraft/world/level/chunk/status/ChunkStatusTasks.java
 +++ b/net/minecraft/world/level/chunk/status/ChunkStatusTasks.java
 @@ -3,6 +3,8 @@ package net.minecraft.world.level.chunk.status;
@@ -582,7 +591,7 @@ index d620862e95abf9f098bb53a76825883f2b1f4bbf..6bab4e52f3190d5d3a528e1344ce961a
              );
      }
  
-+    @Modified(Op.COMPAT)
++    @Modified(Op.SUPPLY_ARGUMENT)
      static CompletableFuture<ChunkAccess> generateNoise(
          WorldGenContext worldGenContext, ChunkStep step, StaticCache2D<GenerationChunkHolder> cache, ChunkAccess chunk
      ) {
@@ -600,7 +609,7 @@ index d620862e95abf9f098bb53a76825883f2b1f4bbf..6bab4e52f3190d5d3a528e1344ce961a
              });
      }
  
-+    @Modified(Op.COMPAT)
++    @Modified(Op.SUPPLY_ARGUMENT)
      static CompletableFuture<ChunkAccess> generateSurface(
          WorldGenContext worldGenContext, ChunkStep step, StaticCache2D<GenerationChunkHolder> cache, ChunkAccess chunk
      ) {
@@ -612,7 +621,7 @@ index d620862e95abf9f098bb53a76825883f2b1f4bbf..6bab4e52f3190d5d3a528e1344ce961a
          return CompletableFuture.completedFuture(chunk);
      }
  
-+    @Modified(Op.COMPAT)
++    @Modified(Op.SUPPLY_ARGUMENT)
      static CompletableFuture<ChunkAccess> generateCarvers(
          WorldGenContext worldGenContext, ChunkStep step, StaticCache2D<GenerationChunkHolder> cache, ChunkAccess chunk
      ) {
@@ -1024,6 +1033,33 @@ index f12520f990d28c28e8ce8d4c3c182da266f159b6..4e289e473205b2df162314aad2ef45b1
  import net.minecraft.core.BlockPos;
  import net.minecraft.core.Holder;
  import net.minecraft.core.HolderSet;
+diff --git a/net/minecraft/world/level/levelgen/feature/FallenTreeFeature.java b/net/minecraft/world/level/levelgen/feature/FallenTreeFeature.java
+index 0ffd86e6b6781d5b529ebb56342bcb70fd0441ba..15352d47d96b0d7d11f75190e01b58d7b3cd414c 100644
+--- a/net/minecraft/world/level/levelgen/feature/FallenTreeFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/FallenTreeFeature.java
+@@ -6,6 +6,8 @@ import java.util.List;
+ import java.util.Set;
+ import java.util.function.BiConsumer;
+ import java.util.function.Function;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Direction;
+ import net.minecraft.util.RandomSource;
+@@ -114,9 +116,12 @@ public class FallenTreeFeature extends Feature<FallenTreeConfiguration> {
+         return pos.immutable();
+     }
+ 
++    @Modified(Op.SUPPLY_ARGUMENT)
+     private void decorateLogs(WorldGenLevel level, RandomSource random, Set<BlockPos> logPositions, List<TreeDecorator> decorators) {
+         if (!decorators.isEmpty()) {
+-            TreeDecorator.Context context = new TreeDecorator.Context(level, this.getDecorationSetter(level), random, logPositions, Set.of(), Set.of());
++            TreeDecorator.Context context = new TreeDecorator.Context(
++                level, this.getDecorationSetter(level), random, logPositions, Set.of(), Set.of(), new net.azisaba.vanilife.server.world.height.HeightContext.Vanilla(level)
++            );
+             decorators.forEach(decorator -> decorator.place(context));
+         }
+     }
 diff --git a/net/minecraft/world/level/levelgen/feature/Feature.java b/net/minecraft/world/level/levelgen/feature/Feature.java
 index cf41eaeec0eea4e320dfc1d820772ef63217bebb..c2b5c5cb381954e3cabe5d48679da5494d9964f3 100644
 --- a/net/minecraft/world/level/levelgen/feature/Feature.java
@@ -1063,8 +1099,413 @@ index ecb573ca0521d86bfda9ea793c391c01ae71f5e6..05588383b6dff2ce95ba60fac27ca6b3
  import net.minecraft.SharedConstants;
  import net.minecraft.core.BlockPos;
  import net.minecraft.core.Direction;
+diff --git a/net/minecraft/world/level/levelgen/feature/RandomBooleanSelectorFeature.java b/net/minecraft/world/level/levelgen/feature/RandomBooleanSelectorFeature.java
+index 5dd4e15f743e8bf6dcf6cd923b3ff27bb94c4491..405db76a4f639b93a2ed94e3b6f465c41d5d1c3f 100644
+--- a/net/minecraft/world/level/levelgen/feature/RandomBooleanSelectorFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/RandomBooleanSelectorFeature.java
+@@ -1,6 +1,8 @@
+ package net.minecraft.world.level.levelgen.feature;
+ 
+ import com.mojang.serialization.Codec;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.util.RandomSource;
+ import net.minecraft.world.level.WorldGenLevel;
+@@ -13,6 +15,7 @@ public class RandomBooleanSelectorFeature extends Feature<RandomBooleanFeatureCo
+     }
+ 
+     @Override
++    @Modified(Op.FORWARD_ARGUMENT)
+     public boolean place(FeaturePlaceContext<RandomBooleanFeatureConfiguration> context) {
+         RandomSource randomSource = context.random();
+         RandomBooleanFeatureConfiguration randomBooleanFeatureConfiguration = context.config();
+@@ -22,6 +25,6 @@ public class RandomBooleanSelectorFeature extends Feature<RandomBooleanFeatureCo
+         boolean randomBoolean = randomSource.nextBoolean();
+         return (randomBoolean ? randomBooleanFeatureConfiguration.featureTrue : randomBooleanFeatureConfiguration.featureFalse)
+             .value()
+-            .place(worldGenLevel, chunkGenerator, randomSource, blockPos);
++            .place(worldGenLevel, chunkGenerator, randomSource, blockPos, context.heightContext());
+     }
+ }
+diff --git a/net/minecraft/world/level/levelgen/feature/RandomPatchFeature.java b/net/minecraft/world/level/levelgen/feature/RandomPatchFeature.java
+index 338c7e84751850cdfbba70668cc3e074fdb8b64d..7641d692ef949deeb41c78bf046ca73f1b1d0e29 100644
+--- a/net/minecraft/world/level/levelgen/feature/RandomPatchFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/RandomPatchFeature.java
+@@ -1,6 +1,8 @@
+ package net.minecraft.world.level.levelgen.feature;
+ 
+ import com.mojang.serialization.Codec;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.util.RandomSource;
+ import net.minecraft.world.level.WorldGenLevel;
+@@ -12,6 +14,7 @@ public class RandomPatchFeature extends Feature<RandomPatchConfiguration> {
+     }
+ 
+     @Override
++    @Modified(Op.FORWARD_ARGUMENT)
+     public boolean place(FeaturePlaceContext<RandomPatchConfiguration> context) {
+         RandomPatchConfiguration randomPatchConfiguration = context.config();
+         RandomSource randomSource = context.random();
+@@ -29,7 +32,7 @@ public class RandomPatchFeature extends Feature<RandomPatchConfiguration> {
+                 randomSource.nextInt(i2) - randomSource.nextInt(i2),
+                 randomSource.nextInt(i1) - randomSource.nextInt(i1)
+             );
+-            if (randomPatchConfiguration.feature().value().place(worldGenLevel, context.chunkGenerator(), randomSource, mutableBlockPos)) {
++            if (randomPatchConfiguration.feature().value().place(worldGenLevel, context.chunkGenerator(), randomSource, mutableBlockPos, context.heightContext())) {
+                 i++;
+             }
+         }
+diff --git a/net/minecraft/world/level/levelgen/feature/RandomSelectorFeature.java b/net/minecraft/world/level/levelgen/feature/RandomSelectorFeature.java
+index d8372d7b045a0412e9db2888df6e1ff2f62d6227..9d026772354eacc98d397531eb34b6d28c252775 100644
+--- a/net/minecraft/world/level/levelgen/feature/RandomSelectorFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/RandomSelectorFeature.java
+@@ -1,6 +1,8 @@
+ package net.minecraft.world.level.levelgen.feature;
+ 
+ import com.mojang.serialization.Codec;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.util.RandomSource;
+ import net.minecraft.world.level.WorldGenLevel;
+@@ -13,6 +15,7 @@ public class RandomSelectorFeature extends Feature<RandomFeatureConfiguration> {
+     }
+ 
+     @Override
++    @Modified(Op.FORWARD_ARGUMENT)
+     public boolean place(FeaturePlaceContext<RandomFeatureConfiguration> context) {
+         RandomFeatureConfiguration randomFeatureConfiguration = context.config();
+         RandomSource randomSource = context.random();
+@@ -22,10 +25,10 @@ public class RandomSelectorFeature extends Feature<RandomFeatureConfiguration> {
+ 
+         for (WeightedPlacedFeature weightedPlacedFeature : randomFeatureConfiguration.features) {
+             if (randomSource.nextFloat() < weightedPlacedFeature.chance) {
+-                return weightedPlacedFeature.place(worldGenLevel, chunkGenerator, randomSource, blockPos);
++                return weightedPlacedFeature.place(worldGenLevel, chunkGenerator, randomSource, blockPos, context.heightContext());
+             }
+         }
+ 
+-        return randomFeatureConfiguration.defaultFeature.value().place(worldGenLevel, chunkGenerator, randomSource, blockPos);
++        return randomFeatureConfiguration.defaultFeature.value().place(worldGenLevel, chunkGenerator, randomSource, blockPos, context.heightContext());
+     }
+ }
+diff --git a/net/minecraft/world/level/levelgen/feature/RootSystemFeature.java b/net/minecraft/world/level/levelgen/feature/RootSystemFeature.java
+index 792a1577c4c0d0935c31b53eee7caca0f7fccd2f..a1c54c7fd3f1d3c77cf9eb1d9816eb4cf67fbb90 100644
+--- a/net/minecraft/world/level/levelgen/feature/RootSystemFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/RootSystemFeature.java
+@@ -2,6 +2,9 @@ package net.minecraft.world.level.levelgen.feature;
+ 
+ import com.mojang.serialization.Codec;
+ import java.util.function.Predicate;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
++import net.azisaba.vanilife.server.world.height.HeightContext;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Direction;
+ import net.minecraft.tags.FluidTags;
+@@ -18,6 +21,7 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
+     }
+ 
+     @Override
++    @Modified(Op.FORWARD_ARGUMENT)
+     public boolean place(FeaturePlaceContext<RootSystemConfiguration> context) {
+         WorldGenLevel worldGenLevel = context.level();
+         BlockPos blockPos = context.origin();
+@@ -28,7 +32,7 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
+             BlockPos blockPos1 = context.origin();
+             RootSystemConfiguration rootSystemConfiguration = context.config();
+             BlockPos.MutableBlockPos mutableBlockPos = blockPos1.mutable();
+-            if (placeDirtAndTree(worldGenLevel, context.chunkGenerator(), rootSystemConfiguration, randomSource, mutableBlockPos, blockPos1)) {
++            if (placeDirtAndTree(worldGenLevel, context.chunkGenerator(), rootSystemConfiguration, randomSource, mutableBlockPos, blockPos1, context.heightContext())) {
+                 placeRoots(worldGenLevel, rootSystemConfiguration, randomSource, blockPos1, mutableBlockPos);
+             }
+ 
+@@ -65,7 +69,8 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
+         RootSystemConfiguration config,
+         RandomSource random,
+         BlockPos.MutableBlockPos mutablePos,
+-        BlockPos basePos
++        BlockPos basePos,
++        @Modified(Op.ADD_ARGUMENT) HeightContext heightContext
+     ) {
+         for (int i = 0; i < config.rootColumnMaxHeight; i++) {
+             mutablePos.move(Direction.UP);
+@@ -75,7 +80,7 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
+                     return false;
+                 }
+ 
+-                if (config.treeFeature.value().place(level, chunkGenerator, random, mutablePos)) {
++                if (config.treeFeature.value().place(level, chunkGenerator, random, mutablePos, heightContext)) {
+                     placeDirt(basePos, basePos.getY() + i, level, config, random);
+                     return true;
+                 }
+diff --git a/net/minecraft/world/level/levelgen/feature/SimpleRandomSelectorFeature.java b/net/minecraft/world/level/levelgen/feature/SimpleRandomSelectorFeature.java
+index d3609abd0c9b5585d0e021c4910d2d37b0ff2d51..552c393acfa6b7f062c60358f0bef7bb8ff48ca6 100644
+--- a/net/minecraft/world/level/levelgen/feature/SimpleRandomSelectorFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/SimpleRandomSelectorFeature.java
+@@ -1,6 +1,8 @@
+ package net.minecraft.world.level.levelgen.feature;
+ 
+ import com.mojang.serialization.Codec;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.util.RandomSource;
+ import net.minecraft.world.level.WorldGenLevel;
+@@ -14,6 +16,7 @@ public class SimpleRandomSelectorFeature extends Feature<SimpleRandomFeatureConf
+     }
+ 
+     @Override
++    @Modified(Op.FORWARD_ARGUMENT)
+     public boolean place(FeaturePlaceContext<SimpleRandomFeatureConfiguration> context) {
+         RandomSource randomSource = context.random();
+         SimpleRandomFeatureConfiguration simpleRandomFeatureConfiguration = context.config();
+@@ -22,6 +25,6 @@ public class SimpleRandomSelectorFeature extends Feature<SimpleRandomFeatureConf
+         ChunkGenerator chunkGenerator = context.chunkGenerator();
+         int randomInt = randomSource.nextInt(simpleRandomFeatureConfiguration.features.size());
+         PlacedFeature placedFeature = simpleRandomFeatureConfiguration.features.get(randomInt).value();
+-        return placedFeature.place(worldGenLevel, chunkGenerator, randomSource, blockPos);
++        return placedFeature.place(worldGenLevel, chunkGenerator, randomSource, blockPos, context.heightContext());
+     }
+ }
+diff --git a/net/minecraft/world/level/levelgen/feature/TreeFeature.java b/net/minecraft/world/level/levelgen/feature/TreeFeature.java
+index 0a8b1925bc8cbd0c41444835dac6a76a63ffe14f..c05e359d617454804a0a1b78009330c8f25df961 100644
+--- a/net/minecraft/world/level/levelgen/feature/TreeFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/TreeFeature.java
+@@ -9,6 +9,8 @@ import java.util.List;
+ import java.util.OptionalInt;
+ import java.util.Set;
+ import java.util.function.BiConsumer;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Direction;
+ import net.minecraft.tags.BlockTags;
+@@ -117,6 +119,7 @@ public class TreeFeature extends Feature<TreeConfiguration> {
+     }
+ 
+     @Override
++    @Modified(Op.FORWARD_ARGUMENT)
+     public final boolean place(FeaturePlaceContext<TreeConfiguration> context) {
+         final WorldGenLevel worldGenLevel = context.level();
+         RandomSource randomSource = context.random();
+@@ -153,7 +156,9 @@ public class TreeFeature extends Feature<TreeConfiguration> {
+         boolean flag = this.doPlace(worldGenLevel, randomSource, blockPos, biConsumer, biConsumer1, foliageSetter, treeConfiguration);
+         if (flag && (!set1.isEmpty() || !set2.isEmpty())) {
+             if (!treeConfiguration.decorators.isEmpty()) {
+-                TreeDecorator.Context context1 = new TreeDecorator.Context(worldGenLevel, biConsumer2, randomSource, set1, set2, set);
++                TreeDecorator.Context context1 = new TreeDecorator.Context(
++                    worldGenLevel, biConsumer2, randomSource, set1, set2, set, context.heightContext()
++                );
+                 treeConfiguration.decorators.forEach(decorator -> decorator.place(context1));
+             }
+ 
+diff --git a/net/minecraft/world/level/levelgen/feature/VegetationPatchFeature.java b/net/minecraft/world/level/levelgen/feature/VegetationPatchFeature.java
+index 4cde8119674360d548463c0df4eb4eae5bf399fa..64b6acf591894cb56344c6d2cf74d68fc884bdbf 100644
+--- a/net/minecraft/world/level/levelgen/feature/VegetationPatchFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/VegetationPatchFeature.java
+@@ -4,6 +4,9 @@ import com.mojang.serialization.Codec;
+ import java.util.HashSet;
+ import java.util.Set;
+ import java.util.function.Predicate;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
++import net.azisaba.vanilife.server.world.height.HeightContext;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Direction;
+ import net.minecraft.util.RandomSource;
+@@ -79,6 +82,7 @@ public class VegetationPatchFeature extends Feature<VegetationPatchConfiguration
+         return set;
+     }
+ 
++    @Modified(Op.FORWARD_ARGUMENT)
+     protected void distributeVegetation(
+         FeaturePlaceContext<VegetationPatchConfiguration> context,
+         WorldGenLevel level,
+@@ -90,15 +94,22 @@ public class VegetationPatchFeature extends Feature<VegetationPatchConfiguration
+     ) {
+         for (BlockPos blockPos : possiblePositions) {
+             if (config.vegetationChance > 0.0F && random.nextFloat() < config.vegetationChance) {
+-                this.placeVegetation(level, config, context.chunkGenerator(), random, blockPos);
++                this.placeVegetation(level, config, context.chunkGenerator(), random, blockPos, context.heightContext());
+             }
+         }
+     }
+ 
+     protected boolean placeVegetation(
+-        WorldGenLevel level, VegetationPatchConfiguration config, ChunkGenerator chunkGenerator, RandomSource random, BlockPos pos
++        WorldGenLevel level,
++        VegetationPatchConfiguration config,
++        ChunkGenerator chunkGenerator,
++        RandomSource random,
++        BlockPos pos,
++        @Modified(Op.ADD_ARGUMENT) HeightContext heightContext
+     ) {
+-        return config.vegetationFeature.value().place(level, chunkGenerator, random, pos.relative(config.surface.getDirection().getOpposite()));
++        return config.vegetationFeature
++            .value()
++            .place(level, chunkGenerator, random, pos.relative(config.surface.getDirection().getOpposite()), heightContext);
+     }
+ 
+     protected boolean placeGround(
+diff --git a/net/minecraft/world/level/levelgen/feature/WaterloggedVegetationPatchFeature.java b/net/minecraft/world/level/levelgen/feature/WaterloggedVegetationPatchFeature.java
+index 194315898f2df84f5a1a1f23be5d45aac44dfdd4..ee086e078f04ea6c38f2a123d335e5658410111f 100644
+--- a/net/minecraft/world/level/levelgen/feature/WaterloggedVegetationPatchFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/WaterloggedVegetationPatchFeature.java
+@@ -4,6 +4,9 @@ import com.mojang.serialization.Codec;
+ import java.util.HashSet;
+ import java.util.Set;
+ import java.util.function.Predicate;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
++import net.azisaba.vanilife.server.world.height.HeightContext;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Direction;
+ import net.minecraft.util.RandomSource;
+@@ -56,9 +59,14 @@ public class WaterloggedVegetationPatchFeature extends VegetationPatchFeature {
+ 
+     @Override
+     protected boolean placeVegetation(
+-        WorldGenLevel level, VegetationPatchConfiguration config, ChunkGenerator chunkGenerator, RandomSource random, BlockPos pos
++        WorldGenLevel level,
++        VegetationPatchConfiguration config,
++        ChunkGenerator chunkGenerator,
++        RandomSource random,
++        BlockPos pos,
++        @Modified(Op.ADD_ARGUMENT) HeightContext heightContext
+     ) {
+-        if (super.placeVegetation(level, config, chunkGenerator, random, pos.below())) {
++        if (super.placeVegetation(level, config, chunkGenerator, random, pos.below(), heightContext)) {
+             BlockState blockState = level.getBlockState(pos);
+             if (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && !blockState.getValue(BlockStateProperties.WATERLOGGED)) {
+                 level.setBlock(pos, blockState.setValue(BlockStateProperties.WATERLOGGED, true), Block.UPDATE_CLIENTS);
+diff --git a/net/minecraft/world/level/levelgen/feature/WeightedPlacedFeature.java b/net/minecraft/world/level/levelgen/feature/WeightedPlacedFeature.java
+index bb4d6a73fe7ef955393a20638e2e881f118e3006..9947e0d0ee225974275f8893c690a61fb4567b06 100644
+--- a/net/minecraft/world/level/levelgen/feature/WeightedPlacedFeature.java
++++ b/net/minecraft/world/level/levelgen/feature/WeightedPlacedFeature.java
+@@ -2,6 +2,9 @@ package net.minecraft.world.level.levelgen.feature;
+ 
+ import com.mojang.serialization.Codec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
++import net.azisaba.vanilife.server.world.height.HeightContext;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Holder;
+ import net.minecraft.util.RandomSource;
+@@ -25,7 +28,19 @@ public class WeightedPlacedFeature {
+         this.chance = chance;
+     }
+ 
++    @Deprecated
++    @Modified(Op.COMPAT)
+     public boolean place(WorldGenLevel level, ChunkGenerator chunkGenerator, RandomSource random, BlockPos pos) {
+-        return this.feature.value().place(level, chunkGenerator, random, pos);
++        return this.place(level, chunkGenerator, random, pos, new HeightContext.Vanilla(level));
++    }
++
++    public boolean place(
++        WorldGenLevel level,
++        ChunkGenerator chunkGenerator,
++        RandomSource random,
++        BlockPos pos,
++        @Modified(Op.ADD_ARGUMENT) HeightContext heightContext
++    ) {
++        return this.feature.value().place(level, chunkGenerator, random, pos, heightContext);
+     }
+ }
+diff --git a/net/minecraft/world/level/levelgen/feature/treedecorators/PaleMossDecorator.java b/net/minecraft/world/level/levelgen/feature/treedecorators/PaleMossDecorator.java
+index 410b7d0ad828fa984494dc77423852afc3ecf8e7..a0ce75b4aa115b191cfdbabd64c57b4d4ff02242 100644
+--- a/net/minecraft/world/level/levelgen/feature/treedecorators/PaleMossDecorator.java
++++ b/net/minecraft/world/level/levelgen/feature/treedecorators/PaleMossDecorator.java
+@@ -6,6 +6,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import java.util.Collections;
+ import java.util.Comparator;
+ import java.util.List;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Vec3i;
+ import net.minecraft.core.registries.Registries;
+@@ -41,6 +43,7 @@ public class PaleMossDecorator extends TreeDecorator {
+     }
+ 
+     @Override
++    @Modified(Op.FORWARD_ARGUMENT)
+     public void place(TreeDecorator.Context context) {
+         RandomSource randomSource = context.random();
+         WorldGenLevel worldGenLevel = (WorldGenLevel)context.level();
+@@ -53,7 +56,13 @@ public class PaleMossDecorator extends TreeDecorator {
+                     .flatMap(registry -> registry.get(VegetationFeatures.PALE_MOSS_PATCH))
+                     .ifPresent(
+                         reference -> reference.value()
+-                            .place(worldGenLevel, worldGenLevel.getLevel().getChunkSource().getGenerator(), randomSource, blockPos.above())
++                            .place(
++                                worldGenLevel,
++                                worldGenLevel.getLevel().getChunkSource().getGenerator(),
++                                randomSource,
++                                blockPos.above(),
++                                context.heightContext()
++                            )
+                     );
+             }
+ 
+diff --git a/net/minecraft/world/level/levelgen/feature/treedecorators/TreeDecorator.java b/net/minecraft/world/level/levelgen/feature/treedecorators/TreeDecorator.java
+index a0614996505f5380174fea586f63061ffd824d34..bb47831decdd9a2aefdd476996f7433e70e409e6 100644
+--- a/net/minecraft/world/level/levelgen/feature/treedecorators/TreeDecorator.java
++++ b/net/minecraft/world/level/levelgen/feature/treedecorators/TreeDecorator.java
+@@ -6,6 +6,9 @@ import java.util.Comparator;
+ import java.util.Set;
+ import java.util.function.BiConsumer;
+ import java.util.function.Predicate;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
++import net.azisaba.vanilife.server.world.height.HeightContext;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.core.Vec3i;
+ import net.minecraft.core.registries.BuiltInRegistries;
+@@ -32,6 +35,7 @@ public abstract class TreeDecorator {
+         private final ObjectArrayList<BlockPos> logs;
+         private final ObjectArrayList<BlockPos> leaves;
+         private final ObjectArrayList<BlockPos> roots;
++        private final @Modified(Op.ADD_FIELD) HeightContext heightContext;
+ 
+         public Context(
+             LevelSimulatedReader level,
+@@ -39,7 +43,8 @@ public abstract class TreeDecorator {
+             RandomSource random,
+             Set<BlockPos> logs,
+             Set<BlockPos> leaves,
+-            Set<BlockPos> roots
++            Set<BlockPos> roots,
++            @Modified(Op.ADD_ARGUMENT) HeightContext heightContext
+         ) {
+             this.level = level;
+             this.decorationSetter = decorationSetter;
+@@ -47,6 +52,7 @@ public abstract class TreeDecorator {
+             this.roots = new ObjectArrayList<>(roots);
+             this.logs = new ObjectArrayList<>(logs);
+             this.leaves = new ObjectArrayList<>(leaves);
++            this.heightContext = heightContext;
+             this.logs.sort(Comparator.comparingInt(Vec3i::getY));
+             this.leaves.sort(Comparator.comparingInt(Vec3i::getY));
+             this.roots.sort(Comparator.comparingInt(Vec3i::getY));
+@@ -87,5 +93,10 @@ public abstract class TreeDecorator {
+         public ObjectArrayList<BlockPos> roots() {
+             return this.roots;
+         }
++
++        @Modified(Op.ADD_METHOD)
++        public HeightContext heightContext() {
++            return this.heightContext;
++        }
+     }
+ }
 diff --git a/net/minecraft/world/level/levelgen/placement/BiomeFilter.java b/net/minecraft/world/level/levelgen/placement/BiomeFilter.java
-index 4e07c03af2f117634477db3de54fa5a046d04bac..b06a8a634740b39e39079a1324d9b65ecadff3e5 100644
+index 4e07c03af2f117634477db3de54fa5a046d04bac..23da038bb81f270c2e5beb6a81d3dfaba474ca87 100644
 --- a/net/minecraft/world/level/levelgen/placement/BiomeFilter.java
 +++ b/net/minecraft/world/level/levelgen/placement/BiomeFilter.java
 @@ -3,7 +3,7 @@ package net.minecraft.world.level.levelgen.placement;
@@ -1076,8 +1517,17 @@ index 4e07c03af2f117634477db3de54fa5a046d04bac..b06a8a634740b39e39079a1324d9b65e
  import net.minecraft.core.BlockPos;
  import net.minecraft.core.Holder;
  import net.minecraft.util.RandomSource;
+@@ -24,7 +24,7 @@ public class BiomeFilter extends PlacementFilter {
+     protected boolean shouldPlace(PlacementContext context, RandomSource random, BlockPos pos, @Modified(Op.ADD_ARGUMENT) HeightContext heightContext) {
+         PlacedFeature placedFeature = context.topFeature()
+             .orElseThrow(() -> new IllegalStateException("Tried to biome check an unregistered feature, or a feature that should not restrict the biome"));
+-        Holder<Biome> biome = context.getLevel().getBiome(pos.atY(heightContext.y(pos.getY())));
++        Holder<Biome> biome = context.getLevel().getBiome(pos);
+         return context.generator().getBiomeGenerationSettings(biome).hasFeature(placedFeature);
+     }
+ 
 diff --git a/net/minecraft/world/level/levelgen/placement/BlockPredicateFilter.java b/net/minecraft/world/level/levelgen/placement/BlockPredicateFilter.java
-index 7aed7a8c3a67ab03b93469e0e7b875c1df1543b4..8ed12dc2b9991088f48513128c9825f25e46704a 100644
+index 7aed7a8c3a67ab03b93469e0e7b875c1df1543b4..6c80d8fe6de0a2bc39a8ed4c6d2af0139cf04b03 100644
 --- a/net/minecraft/world/level/levelgen/placement/BlockPredicateFilter.java
 +++ b/net/minecraft/world/level/levelgen/placement/BlockPredicateFilter.java
 @@ -4,7 +4,7 @@ import com.mojang.serialization.MapCodec;
@@ -1089,6 +1539,15 @@ index 7aed7a8c3a67ab03b93469e0e7b875c1df1543b4..8ed12dc2b9991088f48513128c9825f2
  import net.minecraft.core.BlockPos;
  import net.minecraft.util.RandomSource;
  import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
+@@ -25,7 +25,7 @@ public class BlockPredicateFilter extends PlacementFilter {
+ 
+     @Override
+     protected boolean shouldPlace(PlacementContext context, RandomSource random, BlockPos pos, @Modified(Op.ADD_ARGUMENT) HeightContext heightContext) {
+-        return this.predicate.test(context.getLevel(), pos.atY(heightContext.y(pos.getY())));
++        return this.predicate.test(context.getLevel(), pos);
+     }
+ 
+     @Override
 diff --git a/net/minecraft/world/level/levelgen/placement/CountOnEveryLayerPlacement.java b/net/minecraft/world/level/levelgen/placement/CountOnEveryLayerPlacement.java
 index 4c5c8659a77606acb412bd9fc26aae9b8ec9e175..611b17270c3ffe90de7f05e80bd7875f4859a054 100644
 --- a/net/minecraft/world/level/levelgen/placement/CountOnEveryLayerPlacement.java
@@ -1168,7 +1627,7 @@ index 1d8e98c381a0d805db68d29beb5bb7570e8ad317..eaaeeb25798f3d469033ed1b46df5e28
  import net.minecraft.util.RandomSource;
  
 diff --git a/net/minecraft/world/level/levelgen/placement/PlacedFeature.java b/net/minecraft/world/level/levelgen/placement/PlacedFeature.java
-index 5ec2bea9751d4f4a1e1c968555dc7901603d1f8f..11f26a2e241766746b587f63c5285b16e5612bf6 100644
+index 5ec2bea9751d4f4a1e1c968555dc7901603d1f8f..602d9affe6094f0ccce76f79e4606905dd7ebd90 100644
 --- a/net/minecraft/world/level/levelgen/placement/PlacedFeature.java
 +++ b/net/minecraft/world/level/levelgen/placement/PlacedFeature.java
 @@ -8,7 +8,7 @@ import java.util.stream.Stream;
@@ -1180,6 +1639,57 @@ index 5ec2bea9751d4f4a1e1c968555dc7901603d1f8f..11f26a2e241766746b587f63c5285b16
  import net.minecraft.SharedConstants;
  import net.minecraft.core.BlockPos;
  import net.minecraft.core.Holder;
+@@ -45,11 +45,11 @@ public record PlacedFeature(Holder<ConfiguredFeature<?, ?>> feature, List<Placem
+     }
+ 
+     public boolean place(WorldGenLevel level, ChunkGenerator generator, RandomSource random, BlockPos pos, @Modified(Op.ADD_ARGUMENT) HeightContext heightContext) {
+-        return this.placeWithContext(new PlacementContext(level, generator, Optional.empty()), random, pos, heightContext);
++        return this.placeWithContext(new PlacementContext(level, generator, Optional.empty(), heightContext), random, pos, heightContext);
+     }
+ 
+     public boolean placeWithBiomeCheck(WorldGenLevel level, ChunkGenerator generator, RandomSource random, BlockPos pos, @Modified(Op.ADD_ARGUMENT) HeightContext heightContext) {
+-        return this.placeWithContext(new PlacementContext(level, generator, Optional.of(this)), random, pos, heightContext);
++        return this.placeWithContext(new PlacementContext(level, generator, Optional.of(this), heightContext), random, pos, heightContext);
+     }
+ 
+     private boolean placeWithContext(PlacementContext context, RandomSource source, BlockPos pos, @Modified(Op.ADD_ARGUMENT) HeightContext heightContext) {
+diff --git a/net/minecraft/world/level/levelgen/placement/PlacementContext.java b/net/minecraft/world/level/levelgen/placement/PlacementContext.java
+index 29c583cdc09487035b51a4fbc39fcdbe7a890a6d..6e1033f8a90c9fbeeedf8132565132df38b8d5cf 100644
+--- a/net/minecraft/world/level/levelgen/placement/PlacementContext.java
++++ b/net/minecraft/world/level/levelgen/placement/PlacementContext.java
+@@ -1,8 +1,12 @@
+ package net.minecraft.world.level.levelgen.placement;
+ 
+ import java.util.Optional;
++import net.azisaba.vanilife.annotations.Modified;
++import net.azisaba.vanilife.annotations.Op;
++import net.azisaba.vanilife.server.world.height.HeightContext;
+ import net.minecraft.core.BlockPos;
+ import net.minecraft.world.level.ChunkPos;
++import net.minecraft.world.level.LevelHeightAccessor;
+ import net.minecraft.world.level.WorldGenLevel;
+ import net.minecraft.world.level.block.state.BlockState;
+ import net.minecraft.world.level.chunk.CarvingMask;
+@@ -23,6 +27,19 @@ public class PlacementContext extends WorldGenerationContext {
+         this.topFeature = topFeature;
+     }
+ 
++    @Modified(Op.ADD_METHOD)
++    public PlacementContext(
++        WorldGenLevel level,
++        ChunkGenerator generator,
++        Optional<PlacedFeature> topFeature,
++        @Modified(Op.ADD_ARGUMENT) HeightContext heightContext
++    ) {
++        super(generator, LevelHeightAccessor.create(heightContext.minY(), heightContext.maxY() - heightContext.minY() + 1), level.getLevel());
++        this.level = level;
++        this.generator = generator;
++        this.topFeature = topFeature;
++    }
++
+     public int getHeight(Heightmap.Types heightmapType, int x, int z) {
+         return this.level.getHeight(heightmapType, x, z);
+     }
 diff --git a/net/minecraft/world/level/levelgen/placement/PlacementFilter.java b/net/minecraft/world/level/levelgen/placement/PlacementFilter.java
 index 44a2d1086f0212d6c066a754e8c6bbc00f4ce3c8..c8bb615bf1383a1d5c6e28365203a8d8eb8dfd2b 100644
 --- a/net/minecraft/world/level/levelgen/placement/PlacementFilter.java
