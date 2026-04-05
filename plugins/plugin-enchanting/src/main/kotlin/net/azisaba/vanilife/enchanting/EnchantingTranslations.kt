@@ -13,7 +13,7 @@ object EnchantingTranslations {
     const val ENCHANTING_REQUIRED_LEVEL: String = "enchanting.required_level"
 
     fun us(): PackLanguage = mapOf(
-        DIALOG_VANILIFE_ENCHANTMENTS to Translation.literal("Enchantment Encyclopedia"),
+        DIALOG_VANILIFE_ENCHANTMENTS to Translation.literal("Enchantments"),
         DIALOG_VANILIFE_ENCHANTMENTS_REQUIRED_LEVEL to Translation.literal("Appears on island with level ") + Translation.placeholder() + Translation.literal(" or higher"),
         DIALOG_VANILIFE_ENCHANTMENTS_SECTION to Translation.placeholder() + Translation.literal("-") + Translation.placeholder(),
         DIALOG_VANILIFE_ENCHANTMENTS_SUMMARY to Translation.placeholder() + Translation.literal(" unlocked"),

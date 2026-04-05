@@ -14,6 +14,7 @@ import net.azisaba.vanilife.island.Island
 import net.azisaba.vanilife.island.IslandFonts
 import net.azisaba.vanilife.island.enchantment.EnchantmentAccessor
 import net.azisaba.vanilife.island.wrack.WrackType
+import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -94,7 +95,8 @@ object EnchantmentsDialog {
         ItemStack.of(Material.STICK).apply {
             setData(
                 DataComponentTypes.ITEM_NAME,
-                Component.text("i wanna commit suicide, sincerely tksimeji", NamedTextColor.DARK_GRAY, TextDecoration.OBFUSCATED)
+                Component.text("I wanna commit suicide", NamedTextColor.DARK_GRAY, TextDecoration.OBFUSCATED) // 自殺したい...
+                    .font(Key.key("alt"))
             )
             setData(DataComponentTypes.ITEM_MODEL, EnchantingItemModels.DIALOG_ENCHANTMENT_LOCKED)
             lore(listOf(requiredLevel(wrackType), unlockRate(wrackType.enchantment)))

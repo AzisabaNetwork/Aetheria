@@ -23,6 +23,8 @@ import kotlinx.coroutines.delay
 import net.azisaba.vanilife.enchanting.EnchantingRecipe
 import net.azisaba.vanilife.island.getIslandAt
 import net.azisaba.vanilife.world.IslandsWorld
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
@@ -214,7 +216,9 @@ private fun EnchantingRecipe.createBookDisplayItem(level: Int): PacketItemStack 
     return createDisplayItem(ItemTypes.ENCHANTED_BOOK).apply {
         setComponent(
             ComponentTypes.CUSTOM_NAME,
-            enchantment.displayName(level),
+            enchantment.displayName(level)
+                .color(NamedTextColor.GOLD)
+                .decoration(TextDecoration.ITALIC, false),
         )
     }
 }
@@ -222,6 +226,7 @@ private fun EnchantingRecipe.createBookDisplayItem(level: Int): PacketItemStack 
 private fun EnchantingRecipe.resolveIngredientPacketType(): PacketItemType {
     return SpigotConversionUtil.fromBukkitItemStack(createIngredientItem()).type
 }
+
 private fun createDisplay(
     targetDisplay: SlotDisplay<*>,
     resultDisplay: SlotDisplay<*>,

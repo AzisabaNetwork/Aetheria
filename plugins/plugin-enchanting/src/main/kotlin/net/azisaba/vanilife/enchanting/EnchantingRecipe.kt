@@ -17,6 +17,7 @@ import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.ItemType
+import kotlin.collections.buildList
 
 @Serializable
 data class EnchantingRecipe(
@@ -68,14 +69,71 @@ data class EnchantingRecipe(
         affordable: Boolean,
     ): ItemStack {
         return createResultItem(itemStack, level).apply {
-            setData(DataComponentTypes.ITEM_NAME, createResultName(requiredLevel, affordable))
+            val requiredLevelColor = if (affordable) NamedTextColor.GREEN else NamedTextColor.RED
+            setData(
+                DataComponentTypes.ITEM_NAME,
+                Component.text()
+                    .color(NamedTextColor.GRAY)
+                    .decoration(TextDecoration.ITALIC, false)
+                    .append(
+                        Component.text(EnchantingFonts.EnchantingIcons.EXPERIENCE, NamedTextColor.WHITE)
+                            .font(EnchantingFonts.ENCHANTING_ICONS),
+                    )
+                    .appendSpace()
+                    .append(
+                        Component.translatable(
+                            EnchantingTranslations.ENCHANTING_REQUIRED_LEVEL,
+                            Component.text(requiredLevel, requiredLevelColor),
+                        ),
+                    )
+                    .build(),
+            )
             setData(
                 DataComponentTypes.TOOLTIP_DISPLAY,
                 TooltipDisplay.tooltipDisplay()
                     .addHiddenComponents(DataComponentTypes.ENCHANTMENTS, DataComponentTypes.STORED_ENCHANTMENTS)
                     .build(),
             )
-            lore(createResultLore(currentLevel, level))
+            lore(
+                buildList {
+                    add(
+                        Component.text()
+                            .color(if (currentLevel > 0) NamedTextColor.AQUA else NamedTextColor.GREEN)
+                            .decoration(TextDecoration.ITALIC, false)
+                            .append(Component.text(if (currentLevel > 0) "^" else "+"))
+                            .append(Component.text(" "))
+                            .append(Component.translatable(enchantment))
+                            .append(
+                                if (currentLevel > 0) {
+                                    Component.text(" ")
+                                        .append(Component.text("("))
+                                        .append(levelComponent(currentLevel))
+                                        .append(Component.text(" -> "))
+                                        .append(levelComponent(level))
+                                        .append(Component.text(")"))
+                                } else {
+                                    Component.empty()
+                                },
+                            )
+                            .build(),
+                    )
+                    itemStack.enchantments.entries
+                        .asSequence()
+                        .filter { (currentEnchantment, _) -> currentEnchantment != enchantment }
+                        .sortedBy { (currentEnchantment, _) -> currentEnchantment.key().asString() }
+                        .forEach { (currentEnchantment, currentEnchantmentLevel) ->
+                            add(
+                                Component.text()
+                                    .color(NamedTextColor.GRAY)
+                                    .decoration(TextDecoration.ITALIC, false)
+                                    .append(Component.translatable(currentEnchantment))
+                                    .append(Component.text(" "))
+                                    .append(levelComponent(currentEnchantmentLevel))
+                                    .build(),
+                            )
+                        }
+                },
+            )
         }
     }
 
@@ -89,50 +147,6 @@ data class EnchantingRecipe(
             is ServerItem -> ItemStack.of(resolved, 1)
             else -> error("Cannot resolve ingredient item id: $ingredient")
         }
-    }
-
-    private fun createResultName(requiredLevel: Int, affordable: Boolean): Component {
-        val requiredLevelColor = if (affordable) NamedTextColor.GREEN else NamedTextColor.RED
-        return Component.text()
-            .color(NamedTextColor.GRAY)
-            .decoration(TextDecoration.ITALIC, false)
-            .append(
-                Component.text(EnchantingFonts.EnchantingIcons.EXPERIENCE, NamedTextColor.WHITE)
-                    .font(EnchantingFonts.ENCHANTING_ICONS),
-            )
-            .appendSpace()
-            .append(
-                Component.translatable(
-                    EnchantingTranslations.ENCHANTING_REQUIRED_LEVEL,
-                    Component.text(requiredLevel, requiredLevelColor),
-                ),
-            )
-            .build()
-    }
-
-    private fun createResultLore(currentLevel: Int, level: Int): List<Component> {
-        val lineColor = if (currentLevel > 0) NamedTextColor.AQUA else NamedTextColor.GREEN
-        val lore = mutableListOf<Component>()
-        lore += Component.text()
-            .color(lineColor)
-            .decoration(TextDecoration.ITALIC, false)
-            .append(Component.text(if (currentLevel > 0) "^" else "+"))
-            .append(Component.text(" "))
-            .append(Component.translatable(enchantment))
-            .append(
-                if (currentLevel > 0) {
-                    Component.text(" ")
-                        .append(Component.text("("))
-                        .append(levelComponent(currentLevel))
-                        .append(Component.text(" -> "))
-                        .append(levelComponent(level))
-                        .append(Component.text(")"))
-                } else {
-                    Component.empty()
-                },
-            )
-            .build()
-        return lore
     }
 
     private fun levelComponent(level: Int): Component {
