@@ -215,7 +215,7 @@ index 4b5d39ee38886f504522560f087077a2b81a4b16..17f56c6def27dc43030ff3d353645c6b
      }
  
 diff --git a/src/main/java/org/bukkit/craftbukkit/generator/CustomChunkGenerator.java b/src/main/java/org/bukkit/craftbukkit/generator/CustomChunkGenerator.java
-index 73c51c66857f53128b737304205295b67e8444e8..4fb0485cd25992871fe59b3f943263623048a7ee 100644
+index 73c51c66857f53128b737304205295b67e8444e8..ff66afbc09a7343f592d1c1cd8b33a10b62610a7 100644
 --- a/src/main/java/org/bukkit/craftbukkit/generator/CustomChunkGenerator.java
 +++ b/src/main/java/org/bukkit/craftbukkit/generator/CustomChunkGenerator.java
 @@ -5,6 +5,9 @@ import com.mojang.serialization.MapCodec;
@@ -228,7 +228,29 @@ index 73c51c66857f53128b737304205295b67e8444e8..4fb0485cd25992871fe59b3f94326362
  import net.minecraft.core.BlockPos;
  import net.minecraft.core.Holder;
  import net.minecraft.core.RegistryAccess;
-@@ -128,14 +131,14 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
+@@ -116,26 +119,34 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
+     }
+ 
+     @Override
+-    public void createStructures(RegistryAccess registryManager, ChunkGeneratorStructureState placementCalculator, StructureManager structureAccessor, ChunkAccess chunk, StructureTemplateManager structureTemplateManager, ResourceKey<Level> dimension) {
++    public void createStructures(
++        RegistryAccess registryManager,
++        ChunkGeneratorStructureState placementCalculator,
++        StructureManager structureAccessor,
++        ChunkAccess chunk,
++        StructureTemplateManager structureTemplateManager,
++        ResourceKey<Level> dimension,
++        @Modified(Op.ADD_ARGUMENT) HeightContext heightContext
++    ) {
+         WorldgenRandom random = CustomChunkGenerator.getSeededRandom();
+         int x = chunk.getPos().x;
+         int z = chunk.getPos().z;
+ 
+         random.setSeed(Mth.getSeed(x, "should-structures".hashCode(), z) ^ this.world.getSeed());
+         if (this.generator.shouldGenerateStructures(this.world.getWorld(), new RandomSourceWrapper.RandomWrapper(random), x, z)) {
+-            super.createStructures(registryManager, placementCalculator, structureAccessor, chunk, structureTemplateManager, dimension);
++            super.createStructures(registryManager, placementCalculator, structureAccessor, chunk, structureTemplateManager, dimension, heightContext);
+         }
      }
  
      @Override
@@ -245,7 +267,7 @@ index 73c51c66857f53128b737304205295b67e8444e8..4fb0485cd25992871fe59b3f94326362
          }
  
          CraftChunkData chunkData = new CraftChunkData(this.world.getWorld(), chunk);
-@@ -224,14 +227,14 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
+@@ -224,14 +235,14 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
      }
  
      @Override
@@ -262,7 +284,7 @@ index 73c51c66857f53128b737304205295b67e8444e8..4fb0485cd25992871fe59b3f94326362
          }
  
          // Minecraft removed the LIQUID_CARVERS stage from world generation, without removing the LIQUID Carving enum.
-@@ -244,7 +247,7 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
+@@ -244,7 +255,7 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
      }
  
      @Override
@@ -271,7 +293,7 @@ index 73c51c66857f53128b737304205295b67e8444e8..4fb0485cd25992871fe59b3f94326362
          CompletableFuture<ChunkAccess> future = null;
          WorldgenRandom random = CustomChunkGenerator.getSeededRandom();
          int x = chunk.getPos().x;
-@@ -252,7 +255,7 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
+@@ -252,7 +263,7 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
  
          random.setSeed(Mth.getSeed(x, "should-noise".hashCode(), z) ^ this.world.getSeed());
          if (this.generator.shouldGenerateNoise(this.world.getWorld(), new RandomSourceWrapper.RandomWrapper(random), x, z)) {
@@ -499,6 +521,55 @@ index 9496478c869e9c8b0021633cdb858d5cf3611631..45fb0cab7542fb43e82428fc9357e68a
   */
  @SuppressWarnings("unchecked")
  public final class DeprecatedCustomTagContainer implements CustomItemTagContainer {
+diff --git a/src/main/java/org/bukkit/craftbukkit/util/HeightAwareGeneratorAccess.java b/src/main/java/org/bukkit/craftbukkit/util/HeightAwareGeneratorAccess.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..4bca02f0d9cbbbb093f291407f56681e05a5b2af
+--- /dev/null
++++ b/src/main/java/org/bukkit/craftbukkit/util/HeightAwareGeneratorAccess.java
+@@ -0,0 +1,43 @@
++package org.bukkit.craftbukkit.util;
++
++import net.azisaba.vanilife.server.world.height.HeightContext;
++import net.minecraft.core.BlockPos;
++import net.minecraft.world.level.levelgen.Heightmap;
++
++public class HeightAwareGeneratorAccess extends TransformerGeneratorAccess {
++    private final HeightContext heightContext;
++
++    public HeightAwareGeneratorAccess(HeightContext heightContext) {
++        this.heightContext = heightContext;
++    }
++
++    @Override
++    public BlockPos getHeightmapPos(Heightmap.Types heightmap, BlockPos pos) {
++        return super.getHeightmapPos(this.heightContext.map(heightmap), pos);
++    }
++
++    @Override
++    public int getHeight(Heightmap.Types heightmap, int x, int z) {
++        return super.getHeight(this.heightContext.map(heightmap), x, z);
++    }
++
++    @Override
++    public int getSeaLevel() {
++        return this.heightContext.y(this.heightContext.seaLevel());
++    }
++
++    @Override
++    public int getMinY() {
++        return this.heightContext.minY();
++    }
++
++    @Override
++    public int getHeight() {
++        return this.heightContext.maxY() - this.heightContext.minY() + 1;
++    }
++
++    @Override
++    public int getMaxY() {
++        return this.heightContext.maxY();
++    }
++}
 diff --git a/src/main/resources/configurations/help.yml b/src/main/resources/configurations/help.yml
 index e0958ee252cb38aeb21c2db24a9cbdb134171507..44301bf9d3bcd5199fed84630293a126cfa02db9 100644
 --- a/src/main/resources/configurations/help.yml

@@ -20,6 +20,8 @@ public abstract class HeightContext implements HeightmapContext {
 
     public abstract int y(final int y1);
 
+    public abstract int localY(final int y);
+
     public abstract int minY();
 
     public abstract int maxY();
@@ -42,6 +44,18 @@ public abstract class HeightContext implements HeightmapContext {
 
     public BlockPos pos(final int x, final int y, final int z) {
         return new BlockPos(x, this.y(y), z);
+    }
+
+    public Heightmap.Types map(final Heightmap.Types type) {
+        return switch (type) {
+            case WORLD_SURFACE_WG -> this.worldSurfaceWg();
+            case WORLD_SURFACE -> this.worldSurface();
+            case OCEAN_FLOOR_WG -> this.oceanFloorWg();
+            case OCEAN_FLOOR -> this.oceanFloor();
+            case MOTION_BLOCKING -> this.motionBlocking();
+            case MOTION_BLOCKING_NO_LEAVES -> this.motionBlockingNoLeaves();
+            default -> type;
+        };
     }
 
     @Override
@@ -93,6 +107,11 @@ public abstract class HeightContext implements HeightmapContext {
         }
 
         @Override
+        public int localY(final int y) {
+            return y;
+        }
+
+        @Override
         public int minY() {
             return this.worldGenRegion.getMinY();
         }
@@ -124,6 +143,11 @@ public abstract class HeightContext implements HeightmapContext {
         }
 
         @Override
+        public int localY(final int y) {
+            return this.layout.toLayerY(this.layerType, y);
+        }
+
+        @Override
         public int minY() {
             return this.layout.getMinYOf(this.layerType);
         }
@@ -131,6 +155,44 @@ public abstract class HeightContext implements HeightmapContext {
         @Override
         public int maxY() {
             return this.layout.getMaxYOf(this.layerType);
+        }
+    }
+
+    public static class Identity extends HeightContext {
+        private final int minY;
+        private final int maxY;
+        private final int seaLevel;
+
+        public Identity(final int minY, final int maxY, final int seaLevel) {
+            super(HeightmapSet.VANILLA);
+            this.minY = minY;
+            this.maxY = maxY;
+            this.seaLevel = seaLevel;
+        }
+
+        @Override
+        public int seaLevel() {
+            return this.seaLevel;
+        }
+
+        @Override
+        public int y(final int y1) {
+            return y1;
+        }
+
+        @Override
+        public int localY(final int y) {
+            return y;
+        }
+
+        @Override
+        public int minY() {
+            return this.minY;
+        }
+
+        @Override
+        public int maxY() {
+            return this.maxY;
         }
     }
 }

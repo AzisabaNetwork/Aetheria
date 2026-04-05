@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.azisaba.vanilife.server.world.height.HeightContext;
 import net.minecraft.core.*;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.*;
@@ -14,9 +15,11 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import org.jspecify.annotations.NullMarked;
 
@@ -133,6 +136,70 @@ public class ResourceChunkGenerator extends ChunkGenerator {
             final HeightContext heightmapSet = this.layout.createHeightContext(layerType);
             layerGenerator.applyBiomeDecoration(level, chunk, structureManager, true, heightmapSet);
         }
+    }
+
+    @Override
+    public void createStructures(
+        final RegistryAccess registryAccess,
+        final ChunkGeneratorStructureState structureState,
+        final StructureManager structureManager,
+        final ChunkAccess chunk,
+        final StructureTemplateManager structureTemplateManager,
+        final net.minecraft.resources.ResourceKey<Level> level,
+        final HeightContext heightContext
+    ) {
+        for (final ResourceLayer.Type layerType : this.layout) {
+            layerType.generator().createStructures(
+                registryAccess,
+                structureState,
+                structureManager,
+                chunk,
+                structureTemplateManager,
+                level,
+                this.layout.createHeightContext(layerType)
+            );
+        }
+    }
+
+    @Override
+    public boolean canCreateStructure(
+        final net.minecraft.world.level.levelgen.structure.Structure structure,
+        final RegistryAccess registryAccess,
+        final StructureTemplateManager structureTemplateManager,
+        final RandomState randomState,
+        final ChunkPos chunkPos,
+        final LevelHeightAccessor heightAccessor,
+        final long seed,
+        final HeightContext heightContext
+    ) {
+        for (final ResourceLayer.Type layerType : this.layout) {
+            if (layerType.generator()
+                .canCreateStructure(
+                    structure,
+                    registryAccess,
+                    structureTemplateManager,
+                    randomState,
+                    chunkPos,
+                    heightAccessor,
+                    seed,
+                    this.layout.createHeightContext(layerType)
+                )) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public HeightContext getStructurePlacementHeightContext(final WorldGenLevel level, final net.minecraft.world.level.levelgen.structure.StructureStart structureStart) {
+        final BlockPos center = structureStart.getBoundingBox().getCenter();
+        final ResourceLayer.Type layerType = this.layout.getLayerTypeAt(center.getY());
+        if (layerType != null) {
+            return this.layout.createHeightContext(layerType);
+        }
+
+        return new HeightContext.Vanilla(level);
     }
 
     @Override

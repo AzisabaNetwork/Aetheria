@@ -151,7 +151,8 @@ public final class IslandsChunkGenerator extends ChunkGenerator {
         final StructureManager structureManager,
         final ChunkAccess chunk,
         final StructureTemplateManager structureTemplateManager,
-        final ResourceKey<Level> level
+        final ResourceKey<Level> level,
+        final HeightContext heightContext
     ) {
     }
 
