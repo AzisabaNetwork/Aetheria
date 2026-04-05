@@ -1,4 +1,4 @@
-package net.azisaba.vanilife.enchanting.recipe
+package net.azisaba.vanilife.enchanting.recipebook
 
 import org.bukkit.entity.Player
 import java.util.UUID

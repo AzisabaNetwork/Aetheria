@@ -1,8 +1,7 @@
 package net.azisaba.vanilife.enchanting.listener
 
 import net.azisaba.vanilife.enchanting.inventory.EnchantingInventory
-import net.azisaba.vanilife.enchanting.recipe.EnchantingRecipeBook
-import net.azisaba.vanilife.enchanting.recipe.RecipeBookToastSuppressor
+import net.azisaba.vanilife.enchanting.recipebook.RecipeBookToastSuppressor
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -14,13 +13,7 @@ import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.event.player.PlayerRecipeDiscoverEvent
 import org.bukkit.plugin.Plugin
 
-internal object EnchantingInventoryListener : Listener {
-    private lateinit var plugin: Plugin
-
-    fun initialize(plugin: Plugin) {
-        this.plugin = plugin
-    }
-
+internal class EnchantingInventoryListener(private val plugin: Plugin) : Listener {
     @EventHandler
     fun onInventoryClick(event: InventoryClickEvent) {
         val inventoryHolder = event.view.topInventory.holder as? EnchantingInventory ?: return
@@ -29,7 +22,7 @@ internal object EnchantingInventoryListener : Listener {
         val clickedItem = event.currentItem
         var shouldSync = false
 
-        if (event.rawSlot == 0) {
+        if (event.rawSlot == EnchantingInventory.RESULT_SLOT) {
             event.isCancelled = true
             val result = inventoryHolder.confirmCraft(player) ?: return
             player.setItemOnCursor(result)
@@ -40,19 +33,19 @@ internal object EnchantingInventoryListener : Listener {
 
         if (event.action == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
             if (clickedInventory == event.view.bottomInventory) {
-                val item = clickedItem ?: return
-                val targetSlot = inventoryHolder.firstEmptyInputSlotFor(item) ?: run {
+                val itemStack = clickedItem ?: return
+                val targetSlot = inventoryHolder.firstEmptyInputSlotFor(itemStack) ?: run {
                     event.isCancelled = true
                     return
                 }
                 event.isCancelled = true
-                if (item.amount <= 1) {
-                    inventoryHolder.placeShiftItem(targetSlot, item)
+                if (itemStack.amount <= 1) {
+                    inventoryHolder.placeItemStack(targetSlot, itemStack)
                     clickedInventory.setItem(event.slot, null)
                 } else {
-                    inventoryHolder.placeShiftItem(targetSlot, item)
-                    item.amount -= 1
-                    clickedInventory.setItem(event.slot, item)
+                    inventoryHolder.placeItemStack(targetSlot, itemStack)
+                    itemStack.amount -= 1
+                    clickedInventory.setItem(event.slot, itemStack)
                 }
                 shouldSync = true
             }
@@ -62,7 +55,10 @@ internal object EnchantingInventoryListener : Listener {
             shouldSync = true
         }
 
-        if (!event.isCancelled && clickedInventory == event.view.topInventory && inventoryHolder.isInputSlot(event.rawSlot)) {
+        if (!event.isCancelled &&
+            clickedInventory == event.view.topInventory &&
+            (event.rawSlot == EnchantingInventory.TARGET_SLOT || event.rawSlot in EnchantingInventory.ALL_CRAFT_SLOTS)
+        ) {
             shouldSync = true
         }
 
@@ -75,12 +71,15 @@ internal object EnchantingInventoryListener : Listener {
     fun onInventoryDrag(event: InventoryDragEvent) {
         val inventoryHolder = event.view.topInventory.holder as? EnchantingInventory ?: return
         val player = event.whoClicked as? Player ?: return
-        if (event.rawSlots.any { slot -> slot == 0 }) {
+        if (event.rawSlots.any { slot -> slot == EnchantingInventory.RESULT_SLOT }) {
             event.isCancelled = true
             inventoryHolder.sync(plugin, player)
             return
         }
-        if (event.rawSlots.any { slot -> inventoryHolder.isInputSlot(slot) }) {
+        if (event.rawSlots.any { slot ->
+                slot == EnchantingInventory.TARGET_SLOT || slot in EnchantingInventory.ALL_CRAFT_SLOTS
+            }
+        ) {
             inventoryHolder.sync(plugin, player)
         }
     }
@@ -89,7 +88,7 @@ internal object EnchantingInventoryListener : Listener {
     fun onInventoryOpen(event: InventoryOpenEvent) {
         val inventoryHolder = event.inventory.holder as? EnchantingInventory ?: return
         val player = event.player as? Player ?: return
-        EnchantingRecipeBook.hide(player)
+        inventoryHolder.recipeBook.sendEmptyRecipeBook(player)
         inventoryHolder.sync(plugin, player)
     }
 
@@ -98,7 +97,7 @@ internal object EnchantingInventoryListener : Listener {
         val inventoryHolder = event.inventory.holder as? EnchantingInventory ?: return
         val player = event.player as? Player ?: return
         inventoryHolder.rollbackCrafting(player)
-        EnchantingRecipeBook.restore(player, plugin)
+        inventoryHolder.recipeBook.sendRestoredRecipeBook(player, plugin)
     }
 
     @EventHandler

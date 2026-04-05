@@ -1,4 +1,4 @@
-package net.azisaba.vanilife.enchanting.recipe
+package net.azisaba.vanilife.enchanting.recipebook
 
 import com.github.retrooper.packetevents.protocol.recipe.RecipeBookSettings
 import com.github.retrooper.packetevents.protocol.recipe.RecipeBookType
@@ -26,8 +26,8 @@ internal object RecipeBookStates {
 
     fun createExpandedSettings(settings: RecipeBookSettings): RecipeBookSettings {
         val expanded = RecipeBookSettings(settings.states.toMap())
-        for (type in RecipeBookType.values()) {
-            expanded.getState(type).setOpen(true)
+        for (type in RecipeBookType.entries) {
+            expanded.getState(type).isOpen = true
         }
         return expanded
     }

@@ -6,7 +6,6 @@ import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import me.tofaa.entitylib.APIConfig
 import me.tofaa.entitylib.EntityLib
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform
-import net.azisaba.vanilife.enchanting.recipe.EnchantingRecipe
 import net.azisaba.vanilife.reloadableConfig
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin

@@ -10,8 +10,8 @@ import io.papermc.paper.datacomponent.item.TooltipDisplay
 import kotlinx.coroutines.delay
 import net.azisaba.vanilife.enchanting.EnchantingFonts
 import net.azisaba.vanilife.enchanting.EnchantingItemModels
-import net.azisaba.vanilife.enchanting.recipe.EnchantingRecipe
-import net.azisaba.vanilife.enchanting.recipe.EnchantingRecipeBook
+import net.azisaba.vanilife.enchanting.EnchantingRecipe
+import net.azisaba.vanilife.enchanting.recipebook.EnchantingRecipeBook
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
@@ -27,177 +27,168 @@ import org.bukkit.plugin.Plugin
 import kotlin.time.Duration.Companion.milliseconds
 
 internal class EnchantingInventory : InventoryHolder {
+    var recipeBook: EnchantingRecipeBook = EnchantingRecipeBook.empty()
+        private set
+
     private val inventory: Inventory = Bukkit.createInventory(this, InventoryType.WORKBENCH, TITLE)
+
     private var selectedRecipe: EnchantingRecipe = EnchantingRecipe.first()
-    private var visibleRecipes: List<EnchantingRecipe> = emptyList()
+
     private var craftable: Boolean = false
 
     override fun getInventory(): Inventory = inventory
 
-    fun open(player: Player) {
-        player.openInventory(inventory)
-    }
-
-    fun selectRecipe(recipe: EnchantingRecipe) {
-        selectedRecipe = recipe
-    }
-
-    fun snapshotCenterItem(): ItemStack? = inventory.getItem(CENTER_SLOT)?.clone()
-
-    fun prepareRecipe(player: Player): Boolean {
-        updateResult(player)
-        return craftable
-    }
-
-    fun tryPopulateRecipeInputs(player: Player): Boolean {
-        val ingredientTemplate = selectedRecipe.createIngredientItem()
-        val lapisTemplate = LAPIS_TEMPLATE.clone()
-        val missingIngredientSlots = INGREDIENT_SLOTS.filter { isSlotEmpty(it) }
-        val missingLapisSlots = LAPIS_SLOTS.filter { isSlotEmpty(it) }
-
-        if (!hasPlayerItems(player, ingredientTemplate, missingIngredientSlots.size) ||
-            !hasPlayerItems(player, lapisTemplate, missingLapisSlots.size)
-        ) {
-            return false
-        }
-
-        return fillMissingSlots(player, missingIngredientSlots, ingredientTemplate) &&
-            fillMissingSlots(player, missingLapisSlots, lapisTemplate)
-    }
-
-    fun confirmCraft(player: Player): ItemStack? {
-        val centerItem = inventory.getItem(CENTER_SLOT) ?: return null
-        val recipe = resolveRecipe(centerItem) ?: return null
-        if (!craftable || !hasRequiredIngredients(recipe)) return null
-
-        val resultLevel = recipe.targetLevelFor(centerItem) ?: return null
-        val requiredLevel = recipe.requiredLevel(centerItem) ?: return null
-        val result = recipe.createResultItem(centerItem, resultLevel)
-        playCraftEffect(player)
-        consumeExperience(player, requiredLevel)
-        clearResult()
-        clearRecipeInputs()
-        inventory.setItem(CENTER_SLOT, null)
-        craftable = false
-        return result
-    }
-
-    fun rollbackCrafting(player: Player) {
-        restoreRecipeInputs(player)
-        clearResult()
-        craftable = false
-    }
-
-    fun isCraftInputSlot(slot: Int): Boolean = slot in ALL_CRAFT_SLOTS
-
-    fun isInputSlot(slot: Int): Boolean = slot == CENTER_SLOT || isCraftInputSlot(slot)
-
-    fun isPlaceholderSlot(slot: Int): Boolean = slot in LAPIS_SLOTS
-
-    fun placeholderSlots(): List<Int> = LAPIS_SLOTS
-
-    fun hasPlaceholderItem(slot: Int): Boolean = isPlaceholderSlot(slot) && isSlotEmpty(slot)
-
-    fun createPlaceholderItem(slot: Int): ItemStack = when (slot) {
-        in LAPIS_SLOTS -> ItemStack(Material.STICK).apply {
-            setData(
-                DataComponentTypes.TOOLTIP_DISPLAY,
-                TooltipDisplay.tooltipDisplay().hideTooltip(true).build()
-            )
-            setData(DataComponentTypes.ITEM_MODEL, EnchantingItemModels.B)
-        }
-        else -> error("Unsupported placeholder slot: $slot")
-    }
-
-    fun firstEmptyInputSlotFor(item: ItemStack): Int? {
-        return ALL_CRAFT_SLOTS.firstOrNull { slot ->
-            isSlotEmpty(slot) && isCompatibleWithSlot(slot, item)
-        }
-    }
-
-    fun placeShiftItem(slot: Int, item: ItemStack): Boolean = placeItem(slot, item)
-
-    fun sync(plugin: Plugin, player: Player) {
-        plugin.launch(plugin.entityDispatcher(player)) {
-            delay(1L.milliseconds)
-            val centerItem = snapshotCenterItem()
-            val recipes = EnchantingRecipeBook.visibleCandidates(player, centerItem)
-            visibleRecipes = recipes.map { it.recipe }
-            updateResult(player)
-            player.updateInventory()
-            syncPlaceholders(player)
-            EnchantingRecipeBook.display(player, recipes)
-        }
-    }
-
-    private fun syncPlaceholders(player: Player) {
-        val user = PacketEvents.getAPI().playerManager.getUser(player)
-        val view = player.openInventory
-        val windowId = view.containerId
-        val stateId = view.stateId
-
-        for (slot in placeholderSlots()) {
-            if (!hasPlaceholderItem(slot)) {
-                continue
-            }
-            val item = SpigotConversionUtil.fromBukkitItemStack(createPlaceholderItem(slot))
-            user.sendPacket(WrapperPlayServerSetSlot(windowId, stateId, slot, item))
-        }
-    }
-
-    private fun hasRequiredIngredients(recipe: EnchantingRecipe): Boolean {
-        val centerItem = inventory.getItem(CENTER_SLOT) ?: return false
-        if (centerItem.type == Material.AIR) return false
-        if (recipe.targetLevelFor(centerItem) == null) return false
-        return ALL_CRAFT_SLOTS.all { slot ->
-            val item = inventory.getItem(slot) ?: return@all false
-            item.isSimilar(requiredItemForSlot(recipe, slot))
-        }
-    }
-
-    private fun createResultItem(player: Player): ItemStack? {
-        val centerItem = inventory.getItem(CENTER_SLOT) ?: return null
-        if (centerItem.type == Material.AIR) return null
-        val recipe = resolveRecipe(centerItem) ?: return null
-        selectedRecipe = recipe
-        val level = recipe.targetLevelFor(centerItem) ?: return null
-        val requiredLevel = recipe.requiredLevel(centerItem) ?: return null
-        val affordable = player.level >= requiredLevel
-        return recipe.createResultDisplayItem(centerItem, level, requiredLevel, affordable)
-    }
-
-    private fun clearRecipeInputs() {
-        ALL_CRAFT_SLOTS.forEach { inventory.setItem(it, null) }
-    }
-
-    private fun restoreRecipeInputs(player: Player) {
-        (listOf(CENTER_SLOT) + ALL_CRAFT_SLOTS).forEach { slot ->
-            val item = inventory.getItem(slot) ?: return@forEach
-            player.inventory.addItem(item.clone()).values.forEach { leftover ->
+    fun selectRecipe(player: Player, plugin: Plugin, candidate: EnchantingRecipeBook.Candidate, windowId: Int?) {
+        val targetItemStack = inventory.getItem(TARGET_SLOT)?.clone() ?: return
+        ALL_CRAFT_SLOTS.forEach { slot ->
+            val itemStack = inventory.getItem(slot) ?: return@forEach
+            player.inventory.addItem(itemStack.clone()).values.forEach { leftover ->
                 player.world.dropItemNaturally(player.location, leftover)
             }
             inventory.setItem(slot, null)
         }
+        selectedRecipe = candidate.recipe
+        val populated = tryPopulateRecipeInputs(player)
+        updateResult(player)
+        player.updateInventory()
+
+        if (!populated) {
+            val resolvedWindowId = windowId ?: player.openInventory.containerId
+            recipeBook.sendPreview(player, resolvedWindowId, candidate, targetItemStack)
+        }
+
+        sync(plugin, player)
     }
 
-    private fun clearResult() {
+    fun confirmCraft(player: Player): ItemStack? {
+        val itemStack = inventory.getItem(TARGET_SLOT) ?: return null
+        val recipe = resolveRecipe(itemStack) ?: return null
+        if (!craftable) return null
+        if (itemStack.type == Material.AIR) return null
+        if (recipe.targetLevelFor(itemStack) == null) return null
+        if (!ALL_CRAFT_SLOTS.all { slot ->
+                val ingredientStack = inventory.getItem(slot) ?: return@all false
+                ingredientStack.isSimilar(requiredItemForSlot(recipe, slot))
+            }
+        ) return null
+
+        val resultLevel = recipe.targetLevelFor(itemStack) ?: return null
+        val requiredLevel = recipe.requiredLevel(itemStack) ?: return null
+        val result = recipe.createResultItem(itemStack, resultLevel)
+        val location = player.location.clone().add(0.5, 1.0, 0.5)
+        player.world.playSound(location, Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1.0f, 1.0f)
+        player.world.spawnParticle(Particle.ENCHANT, location, 24, 0.5, 0.5, 0.5, 0.0)
+        player.giveExpLevels(-requiredLevel)
         inventory.setItem(RESULT_SLOT, null)
+        ALL_CRAFT_SLOTS.forEach { inventory.setItem(it, null) }
+        inventory.setItem(TARGET_SLOT, null)
+        craftable = false
+        return result
+    }
+
+    fun firstEmptyInputSlotFor(itemStack: ItemStack): Int? {
+        return ALL_CRAFT_SLOTS.firstOrNull { slot ->
+            isSlotEmpty(slot) && when (slot) {
+                in INGREDIENT_SLOTS -> itemStack.isSimilar(selectedRecipe.createIngredientItem())
+                in LAPIS_SLOTS -> itemStack.isSimilar(ItemStack(Material.LAPIS_LAZULI))
+                else -> false
+            }
+        }
+    }
+
+    fun placeItemStack(slot: Int, itemStack: ItemStack): Boolean {
+        if (!isSlotEmpty(slot)) return false
+        val compatible = when (slot) {
+            in INGREDIENT_SLOTS -> itemStack.isSimilar(selectedRecipe.createIngredientItem())
+            in LAPIS_SLOTS -> itemStack.isSimilar(ItemStack(Material.LAPIS_LAZULI))
+            else -> false
+        }
+        if (!compatible) return false
+        inventory.setItem(slot, itemStack.clone().apply { amount = 1 })
+        return true
+    }
+
+    fun sync(plugin: Plugin, player: Player) {
+        plugin.launch(plugin.entityDispatcher(player)) {
+            delay(1L.milliseconds)
+            val targetItemStack = inventory.getItem(TARGET_SLOT)?.clone()
+            val recipes = EnchantingRecipeBook.fromContext(player, targetItemStack)
+            recipeBook = recipes
+            updateResult(player)
+            player.updateInventory()
+            val user = PacketEvents.getAPI().playerManager.getUser(player)
+            val view = player.openInventory
+            val windowId = view.containerId
+            val stateId = view.stateId
+
+            for (slot in LAPIS_SLOTS) {
+                if (!isSlotEmpty(slot)) {
+                    continue
+                }
+                val itemStack = SpigotConversionUtil.fromBukkitItemStack(
+                    ItemStack(Material.STICK).apply {
+                        setData(
+                            DataComponentTypes.TOOLTIP_DISPLAY,
+                            TooltipDisplay.tooltipDisplay().hideTooltip(true).build(),
+                        )
+                        setData(DataComponentTypes.ITEM_MODEL, EnchantingItemModels.B)
+                    },
+                )
+                user.sendPacket(WrapperPlayServerSetSlot(windowId, stateId, slot, itemStack))
+            }
+            recipes.sendRecipeBook(player)
+        }
+    }
+
+    fun rollbackCrafting(player: Player) {
+        (listOf(TARGET_SLOT) + ALL_CRAFT_SLOTS).forEach { slot ->
+            val itemStack = inventory.getItem(slot) ?: return@forEach
+            player.inventory.addItem(itemStack.clone()).values.forEach { leftover ->
+                player.world.dropItemNaturally(player.location, leftover)
+            }
+            inventory.setItem(slot, null)
+        }
+        inventory.setItem(RESULT_SLOT, null)
+        craftable = false
+    }
+
+    private fun tryPopulateRecipeInputs(player: Player): Boolean {
+        val ingredientTemplate = selectedRecipe.createIngredientItem()
+        val lapisTemplate = ItemStack(Material.LAPIS_LAZULI)
+        val missingIngredientSlots = INGREDIENT_SLOTS.filter { isSlotEmpty(it) }
+        val missingLapisSlots = LAPIS_SLOTS.filter { isSlotEmpty(it) }
+        val ingredientAmount = player.inventory.contents.filterNotNull().sumOf { itemStack ->
+            if (itemStack.isSimilar(ingredientTemplate)) itemStack.amount else 0
+        }
+        val lapisAmount = player.inventory.contents.filterNotNull().sumOf { itemStack ->
+            if (itemStack.isSimilar(lapisTemplate)) itemStack.amount else 0
+        }
+
+        if (ingredientAmount < missingIngredientSlots.size || lapisAmount < missingLapisSlots.size) {
+            return false
+        }
+
+        for (slot in missingIngredientSlots) {
+            if (!player.inventory.removeItem(ingredientTemplate.clone().apply { amount = 1 }).isEmpty()) {
+                return false
+            }
+            inventory.setItem(slot, ingredientTemplate.clone())
+        }
+        for (slot in missingLapisSlots) {
+            if (!player.inventory.removeItem(lapisTemplate.clone().apply { amount = 1 }).isEmpty()) {
+                return false
+            }
+            inventory.setItem(slot, lapisTemplate.clone())
+        }
+        return true
     }
 
     private fun requiredItemForSlot(recipe: EnchantingRecipe, slot: Int): ItemStack {
         return when (slot) {
             in INGREDIENT_SLOTS -> recipe.createIngredientItem()
-            in LAPIS_SLOTS -> LAPIS_TEMPLATE.clone()
+            in LAPIS_SLOTS -> ItemStack(Material.LAPIS_LAZULI)
             else -> error("Unsupported slot: $slot")
         }
-    }
-
-    private fun isCompatibleWithSlot(slot: Int, item: ItemStack): Boolean = item.isSimilar(requiredItemForSlot(selectedRecipe, slot))
-
-    private fun placeItem(slot: Int, item: ItemStack): Boolean {
-        if (!isCompatibleWithSlot(slot, item) || !isSlotEmpty(slot)) return false
-        inventory.setItem(slot, item.clone().apply { amount = 1 })
-        return true
     }
 
     private fun isSlotEmpty(slot: Int): Boolean {
@@ -205,89 +196,75 @@ internal class EnchantingInventory : InventoryHolder {
         return current.type == Material.AIR
     }
 
-    private fun fillMissingSlots(player: Player, slots: List<Int>, template: ItemStack): Boolean {
-        for (slot in slots) {
-            if (!removePlayerItem(player, template)) return false
-            inventory.setItem(slot, template.clone())
-        }
-        return true
-    }
-
-    private fun hasPlayerItems(player: Player, template: ItemStack, amount: Int): Boolean {
-        if (amount <= 0) return true
-        val matchingAmount = player.inventory.contents.filterNotNull().sumOf { item ->
-            if (item.isSimilar(template)) item.amount else 0
-        }
-        return matchingAmount >= amount
-    }
-
-    private fun removePlayerItem(player: Player, template: ItemStack): Boolean {
-        return player.inventory.removeItem(template.clone().apply { amount = 1 }).isEmpty()
-    }
-
     private fun updateResult(player: Player) {
-        val centerItem = inventory.getItem(CENTER_SLOT) ?: run {
+        val itemStack = inventory.getItem(TARGET_SLOT) ?: run {
             craftable = false
-            clearResult()
+            inventory.setItem(RESULT_SLOT, null)
             return
         }
-        val recipe = resolveRecipe(centerItem) ?: run {
+        val recipe = resolveRecipe(itemStack) ?: run {
             craftable = false
-            clearResult()
+            inventory.setItem(RESULT_SLOT, null)
             return
         }
         selectedRecipe = recipe
 
-        if (!hasRequiredIngredients(recipe)) {
+        if (itemStack.type == Material.AIR || recipe.targetLevelFor(itemStack) == null) {
             craftable = false
-            clearResult()
+            inventory.setItem(RESULT_SLOT, null)
             return
         }
 
-        val result = createResultItem(player) ?: run {
+        if (!ALL_CRAFT_SLOTS.all { slot ->
+                val ingredientStack = inventory.getItem(slot) ?: return@all false
+                ingredientStack.isSimilar(requiredItemForSlot(recipe, slot))
+            }
+        ) {
             craftable = false
-            clearResult()
+            inventory.setItem(RESULT_SLOT, null)
             return
         }
-        inventory.setItem(RESULT_SLOT, result)
-        craftable = isCraftable(player)
+
+        val level = recipe.targetLevelFor(itemStack) ?: run {
+            craftable = false
+            inventory.setItem(RESULT_SLOT, null)
+            return
+        }
+        val requiredLevel = recipe.requiredLevel(itemStack) ?: run {
+            craftable = false
+            inventory.setItem(RESULT_SLOT, null)
+            return
+        }
+        val currentLevel = itemStack.getEnchantmentLevel(recipe.enchantment)
+        inventory.setItem(
+            RESULT_SLOT,
+            recipe.createResultDisplayItem(
+                itemStack,
+                currentLevel,
+                level,
+                requiredLevel,
+                player.level >= requiredLevel,
+            )
+        )
+        craftable = player.level >= requiredLevel
     }
 
-    private fun isCraftable(player: Player): Boolean {
-        val centerItem = inventory.getItem(CENTER_SLOT) ?: return false
-        val recipe = resolveRecipe(centerItem) ?: return false
-        val requiredLevel = recipe.requiredLevel(centerItem) ?: return false
-        return player.level >= requiredLevel
-    }
-
-    private fun resolveRecipe(centerItem: ItemStack): EnchantingRecipe? {
-        val ingredientItem = INGREDIENT_SLOTS
+    private fun resolveRecipe(itemStack: ItemStack): EnchantingRecipe? {
+        val ingredientStack = INGREDIENT_SLOTS
             .mapNotNull { slot -> inventory.getItem(slot) }
             .firstOrNull { it.type != Material.AIR }
             ?: return null
 
-        return visibleRecipes.firstOrNull { recipe ->
-            recipe.matches(centerItem, ingredientItem)
-        }
+        return recipeBook.findVisibleRecipe(itemStack, ingredientStack)
     }
 
-    private fun consumeExperience(player: Player, requiredLevel: Int) {
-        player.giveExpLevels(-requiredLevel)
-    }
+    companion object {
+        const val RESULT_SLOT: Int = 0
+        const val TARGET_SLOT: Int = 5
 
-    private fun playCraftEffect(player: Player) {
-        val location = player.location.clone().add(0.5, 1.0, 0.5)
-        player.world.playSound(location, Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1.0f, 1.0f)
-        player.world.spawnParticle(Particle.ENCHANT, location, 24, 0.5, 0.5, 0.5, 0.0)
-    }
-
-    private companion object {
-        const val RESULT_SLOT = 0
-        const val CENTER_SLOT = 5
-        val INGREDIENT_SLOTS = listOf(1, 3, 7, 9)
-        val LAPIS_SLOTS = listOf(2, 4, 6, 8)
-        val ALL_CRAFT_SLOTS = INGREDIENT_SLOTS + LAPIS_SLOTS
-        private val LAPIS_TEMPLATE = ItemStack(Material.LAPIS_LAZULI)
+        val INGREDIENT_SLOTS: List<Int> = listOf(1, 3, 7, 9)
+        val LAPIS_SLOTS: List<Int> = listOf(2, 4, 6, 8)
+        val ALL_CRAFT_SLOTS: List<Int> = INGREDIENT_SLOTS + LAPIS_SLOTS
 
         val TITLE: Component = Component.text()
             .append(

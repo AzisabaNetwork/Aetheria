@@ -8,11 +8,11 @@ import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientCr
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientSetDisplayedRecipe
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerRecipeBookAdd
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerRecipeBookSettings
-import io.github.retrooper.packetevents.util.SpigotConversionUtil
+import com.github.shynixn.mccoroutine.folia.entityDispatcher
+import com.github.shynixn.mccoroutine.folia.launch
 import net.azisaba.vanilife.enchanting.inventory.EnchantingInventory
-import net.azisaba.vanilife.enchanting.recipe.EnchantingRecipeBook
-import net.azisaba.vanilife.enchanting.recipe.EnchantingRecipe
-import net.azisaba.vanilife.enchanting.recipe.RecipeBookStates
+import net.azisaba.vanilife.enchanting.EnchantingRecipe
+import net.azisaba.vanilife.enchanting.recipebook.RecipeBookStates
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 
@@ -63,18 +63,12 @@ internal class RecipeBookPacketListener(private val plugin: Plugin) : PacketList
             else -> return
         }
 
-        val recipe = EnchantingRecipe.toList().getOrNull(recipeId) ?: return
         event.isCancelled = true
-        val holder = player.openInventory.topInventory.holder as? EnchantingInventory ?: return
-        val centerItem = holder.snapshotCenterItem()
-        val level = recipe.targetLevelFor(centerItem) ?: return
-        EnchantingRecipeBook.handleSelection(
-            player,
-            plugin,
-            recipe,
-            windowId,
-            recipe.toPreviewDisplay(centerItem?.let(SpigotConversionUtil::fromBukkitItemStack), level),
-        )
+        plugin.launch(plugin.entityDispatcher(player)) {
+            val holder = player.openInventory.topInventory.holder as? EnchantingInventory ?: return@launch
+            val candidate = holder.recipeBook.candidate(recipeId) ?: return@launch
+            holder.selectRecipe(player, plugin, candidate, windowId)
+        }
     }
 
     private fun PacketSendEvent.safePlayer(): Player? {
