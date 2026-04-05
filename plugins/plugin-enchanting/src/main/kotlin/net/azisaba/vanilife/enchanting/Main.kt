@@ -28,6 +28,7 @@ internal class Main : JavaPlugin() {
 
         PacketEvents.getAPI().init()
         EntityLib.init(SpigotEntityLibPlatform(this), APIConfig(PacketEvents.getAPI()))
+        EnchantingRecipes.bootstrap(server)
 
         koinApp = startKoin {
             modules(
