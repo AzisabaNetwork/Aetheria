@@ -1,8 +1,7 @@
 package net.azisaba.vanilife.island
 
-import io.papermc.paper.registry.TypedKey
 import io.papermc.paper.registry.RegistryKey
-import net.azisaba.serialization.IntProvider
+import io.papermc.paper.registry.TypedKey
 import net.azisaba.vanilife.ConfigurationHolder
 import net.azisaba.vanilife.island.enchantment.EnchantmentAccessor
 import net.azisaba.vanilife.island.event.IslandEnchantmentAddEvent
@@ -13,6 +12,7 @@ import net.azisaba.vanilife.island.storage.StorageAccessor
 import net.azisaba.vanilife.island.visitors.VisitorsAccessor
 import net.azisaba.vanilife.island.waves.WaveAccessor
 import net.azisaba.vanilife.island.wrack.WrackAccessor
+import net.azisaba.vanilife.island.wrack.WrackConfiguration
 import net.azisaba.vanilife.world.IslandPosition
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.audience.ForwardingAudience
@@ -24,8 +24,7 @@ import org.jetbrains.exposed.v1.jdbc.Database
 
 class Island internal constructor(
     position: IslandPosition,
-    private val wrackSpawnLimit: ConfigurationHolder<Int>,
-    private val wrackSpawnIntervalTicks: ConfigurationHolder<IntProvider>,
+    private val wrackConfig: ConfigurationHolder<WrackConfiguration>,
     private val database: Database,
     private val plugin: Plugin,
     private val primaryDataAccessor: PrimaryDataAccessor = PrimaryDataAccessor.fromDatabase(position, database),
@@ -35,7 +34,12 @@ class Island internal constructor(
     private val storageAccessor: StorageAccessor = StorageAccessor.fromDatabase(position, database),
     private val visitorsAccessor: VisitorsAccessor = VisitorsAccessor.fromDatabase(position, database),
     private val waveAccessor: WaveAccessor = WaveAccessor.create(position),
-    private val wrackAccessor: WrackAccessor = WrackAccessor.create(position, wrackSpawnLimit, wrackSpawnIntervalTicks, plugin),
+    private val wrackAccessor: WrackAccessor = WrackAccessor.create(
+        position,
+        spawnLimit = wrackConfig.map(WrackConfiguration::spawnLimit),
+        spawnIntervalTicks = wrackConfig.map(WrackConfiguration::spawnIntervalTicks),
+        plugin,
+    ),
 ) :
     ForwardingAudience, IslandFeatureHolder,
     PrimaryDataAccessor by primaryDataAccessor,
@@ -46,7 +50,7 @@ class Island internal constructor(
     VisitorsAccessor by visitorsAccessor,
     WaveAccessor by waveAccessor,
     WrackAccessor by wrackAccessor {
-    override fun audiences(): Iterable<Audience> = IslandPlayerMap.collect(this).mapNotNull(Bukkit::getPlayer)
+    override fun audiences(): Iterable<Audience> = IslandsPlayerAccessor.byIsland(this).mapNotNull(Bukkit::getPlayer)
 
     override suspend fun addEnchantment(enchantment: TypedKey<Enchantment>): Boolean {
         if (!IslandEnchantmentAddEvent(this, enchantment).callEvent()) return false

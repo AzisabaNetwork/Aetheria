@@ -2,8 +2,8 @@ package net.azisaba.vanilife.portal.listener
 
 import com.github.shynixn.mccoroutine.folia.launch
 import com.github.shynixn.mccoroutine.folia.regionDispatcher
-import net.azisaba.vanilife.island.IslandPlayerMap
 import net.azisaba.vanilife.island.ownedIsland
+import net.azisaba.vanilife.island.unassignFromIsland
 import net.azisaba.vanilife.portal.exits.ExitForcer
 import net.azisaba.vanilife.portal.exits.getExitAnchor
 import net.azisaba.vanilife.world.IslandsWorld
@@ -24,12 +24,12 @@ internal class PortalEnterListener(private val forcer: ExitForcer, private val p
         }
 
         plugin.launch(plugin.regionDispatcher(forcer.world, 0, 0)) {
-            val island = player.ownedIsland()
+            val island = player.ownedIsland
             val exitAnchor = forcer.world.getExitAnchor(player)
             if (exitAnchor?.teleportOrClear(forcer.world, player) != true) {
                 val safeLocation = forcer.findSafeLocation(island.position, plugin)
                 player.teleportAsync(safeLocation)
-                IslandPlayerMap.remove(player)
+                player.unassignFromIsland()
             }
         }
     }

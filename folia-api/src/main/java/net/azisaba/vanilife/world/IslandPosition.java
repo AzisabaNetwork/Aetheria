@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import io.papermc.paper.math.BlockPosition;
 import io.papermc.paper.math.Position;
 import java.util.Random;
+
 public sealed interface IslandPosition permits IslandPositionImpl {
     long SERIALIZED_WIDTH = 4096L;
 
@@ -66,7 +67,7 @@ public sealed interface IslandPosition permits IslandPositionImpl {
     default BlockPosition defaultSpawnPosition(final long seed) {
         final long islandSeed = this.computeSeed(seed);
         final Random random = new Random(islandSeed ^ 0x63A7B4F5D91EC24AL);
-        final int side = random.nextInt(4);
+        final int coastSide = random.nextInt(4);
         final int maxOffsetX = (IslandsWorld.ISLAND_SIZE_X_BLOCKS / 2) - 18;
         final int maxOffsetZ = (IslandsWorld.ISLAND_SIZE_Z_BLOCKS / 2) - 18;
         final int alongX = random.nextInt(-maxOffsetX, maxOffsetX + 1);
@@ -76,7 +77,7 @@ public sealed interface IslandPosition permits IslandPositionImpl {
 
         final int offsetX;
         final int offsetZ;
-        switch (side) {
+        switch (coastSide) {
             case 0 -> {
                 offsetX = alongX;
                 offsetZ = -shoreZ;
@@ -94,24 +95,13 @@ public sealed interface IslandPosition permits IslandPositionImpl {
                 offsetZ = alongZ;
             }
         }
-        return Position.block(this.centerBlockX() + offsetX, IslandsWorld.SEA_LEVEL, this.centerBlockZ() + offsetZ);
-    }
 
-    default float defaultSpawnYaw(final long seed) {
-        final long islandSeed = this.computeSeed(seed);
-        final java.util.Random random = new java.util.Random(islandSeed ^ 0x63A7B4F5D91EC24AL);
-        final int side = random.nextInt(4);
-        return switch (side) {
-            case 0 -> 0.0F;
-            case 1 -> -90.0F;
-            case 2 -> 180.0F;
-            default -> 90.0F;
-        };
+        return Position.block(this.centerBlockX() + offsetX, IslandsWorld.SEA_LEVEL + 2, this.centerBlockZ() + offsetZ);
     }
 
     default BlockPosition defaultPortalPosition(final long seed) {
         final long islandSeed = this.computeSeed(seed);
-        final java.util.Random random = new java.util.Random(islandSeed ^ 0x2F7A46D1B0C8E51AL);
+        final Random random = new Random(islandSeed ^ 0x2F7A46D1B0C8E51AL);
         final boolean axisX = random.nextBoolean();
         final int chunkOffsetX = random.nextBoolean() ? -1 : 0;
         final int chunkOffsetZ = random.nextBoolean() ? -1 : 0;
@@ -124,7 +114,7 @@ public sealed interface IslandPosition permits IslandPositionImpl {
 
     default boolean defaultPortalAxisX(final long seed) {
         final long islandSeed = this.computeSeed(seed);
-        final java.util.Random random = new java.util.Random(islandSeed ^ 0x2F7A46D1B0C8E51AL);
+        final Random random = new Random(islandSeed ^ 0x2F7A46D1B0C8E51AL);
         return random.nextBoolean();
     }
 

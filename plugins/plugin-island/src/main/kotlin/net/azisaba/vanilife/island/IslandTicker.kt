@@ -5,7 +5,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import net.azisaba.vanilife.ConfigurationHolder
-import net.azisaba.vanilife.island.cache.IslandCacheMap
 import net.azisaba.vanilife.island.leveling.requirements.LevelUpRequirementProvider
 import net.azisaba.vanilife.island.leveling.tryLevelUp
 import org.bukkit.Bukkit
@@ -13,15 +12,15 @@ import org.bukkit.plugin.Plugin
 import kotlin.time.Duration.Companion.milliseconds
 
 internal class IslandTicker(
-    private val plugin: Plugin,
-    private val cacheMap: IslandCacheMap,
+    private val islands: IslandsAccessor,
     private val levelUpRequirements: ConfigurationHolder<LevelUpRequirementProvider>,
     private val levelUpCheckIntervalTicks: ConfigurationHolder<Long>,
+    private val plugin: Plugin,
 ) : AutoCloseable {
     private val job: Job = plugin.launch {
         var time = 0L
         while (isActive) {
-            for (island in cacheMap) {
+            for (island in islands.islands) {
                 island.tick(time)
             }
             time++
@@ -39,13 +38,13 @@ internal class IslandTicker(
             tickLevel.tick(this, time)
         }
 
-        if (time % levelUpCheckIntervalTicks.value() == 0L && IslandPlayerMap.lookup(owner) === this) {
+        if (time % levelUpCheckIntervalTicks.value() == 0L && IslandsPlayerAccessor.byPlayer(owner) === this) {
             tryLevelUp(levelUpRequirements.value(), plugin)
         }
     }
 
     private fun Island.tickLevel(): TickLevel = when {
-        IslandPlayerMap.collect(this).isNotEmpty() -> TickLevel.ACTIVE
+        IslandsPlayerAccessor.byIsland(this).isNotEmpty() -> TickLevel.ACTIVE
         Bukkit.getPlayer(owner) != null -> TickLevel.OWNER_ONLINE
         else -> TickLevel.IDLE
     }
@@ -53,7 +52,7 @@ internal class IslandTicker(
     private enum class TickLevel(val tickInterval: Long) {
         ACTIVE(1L) {
             override suspend fun tick(island: Island, time: Long) {
-                if (IslandPlayerMap.lookup(island.owner) === island) {
+                if (IslandsPlayerAccessor.byPlayer(island.owner) === island) {
                     island.wrackTick(time, island.level, enchantments = island)
                 }
                 island.waveTick(time)

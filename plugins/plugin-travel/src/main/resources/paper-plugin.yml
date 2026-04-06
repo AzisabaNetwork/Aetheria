@@ -9,5 +9,7 @@ dependencies:
     AzisabaNetwork.Vanilife.Runtime:
       load: BEFORE
   server:
+    AzisabaNetwork.Vanilife.Island:
+      load: BEFORE
     AzisabaNetwork.Vanilife.Runtime:
       load: BEFORE

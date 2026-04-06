@@ -15,7 +15,7 @@ internal fun Main.setupIslandBetterHudPlaceholders() {
         HudPlaceholder.of(
             HudPlaceholder.PlaceholderFunction.of { hudPlayer ->
                 val player = hudPlayer.handle() as? Player ?: return@of null
-                val island = IslandPlayerMap.lookup(player.uniqueId)
+                val island = IslandsPlayerAccessor.byPlayer(player.uniqueId)
                 return@of island?.displayName?.let(miniMessage::serialize) ?: ""
             }
         )
@@ -26,7 +26,7 @@ internal fun Main.setupIslandBetterHudPlaceholders() {
         HudPlaceholder.of(
             HudPlaceholder.PlaceholderFunction.of { hudPlayer ->
                 val player = hudPlayer.handle() as? Player ?: return@of null
-                val island = IslandPlayerMap.lookup(player.uniqueId)
+                val island = IslandsPlayerAccessor.byPlayer(player.uniqueId)
                 return@of island?.level ?: 0
             }
         )
@@ -37,7 +37,7 @@ internal fun Main.setupIslandBetterHudPlaceholders() {
         HudPlaceholder.of(
             HudPlaceholder.PlaceholderFunction.of { hudPlayer ->
                 val player = hudPlayer.handle() as? Player ?: return@of false
-                return@of IslandPlayerMap.lookup(player.uniqueId) != null
+                return@of IslandsPlayerAccessor.byPlayer(player.uniqueId) != null
             }
         )
     )

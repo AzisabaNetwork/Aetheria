@@ -27,8 +27,8 @@ internal object SettingsDialog {
         .append(Component.translatable(MenuProviderTranslations.DIALOG_VANILIFE_SETTINGS))
         .build()
 
-    suspend fun create(player: Player): Dialog {
-        val island = player.ownedIsland()
+    fun create(player: Player): Dialog {
+        val island = player.ownedIsland
 
         return Dialog.create { builder ->
             builder.empty()

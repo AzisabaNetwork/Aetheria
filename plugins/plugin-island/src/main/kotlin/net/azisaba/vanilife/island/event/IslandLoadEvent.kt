@@ -1,11 +1,10 @@
 package net.azisaba.vanilife.island.event
 
-import net.azisaba.vanilife.world.IslandPosition
+import net.azisaba.vanilife.island.Island
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
-import java.util.*
 
-data class IslandInitEvent(val position: IslandPosition, val owner: UUID) : Event(true) {
+data class IslandLoadEvent(val island: Island, val cause: Cause) : Event(true) {
     override fun getHandlers(): HandlerList = HANDLER_LIST
 
     companion object {
@@ -13,5 +12,11 @@ data class IslandInitEvent(val position: IslandPosition, val owner: UUID) : Even
 
         @JvmStatic
         fun getHandlerList(): HandlerList = HANDLER_LIST
+    }
+
+    enum class Cause {
+        PLAYER_JOIN,
+        LOADER,
+        UNKNOWN,
     }
 }

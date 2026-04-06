@@ -1,8 +1,8 @@
 package net.azisaba.vanilife.server.world.islands;
 
+import io.papermc.paper.math.BlockPosition;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import io.papermc.paper.math.BlockPosition;
 import net.azisaba.vanilife.server.world.islands.noise.IslandNoise;
 import net.azisaba.vanilife.server.world.islands.river.IslandRiverLayout;
 import net.azisaba.vanilife.server.world.islands.river.IslandRiverLayout.RiverSample;
@@ -11,6 +11,7 @@ import net.azisaba.vanilife.world.IslandPosition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
+
 final class IslandTerrainSampler {
     static final double RIVER_BANK_THRESHOLD = 0.015;
 

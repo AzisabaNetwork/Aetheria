@@ -1,22 +1,31 @@
 package net.azisaba.vanilife.island
 
 import kotlinx.coroutines.future.await
-import net.azisaba.vanilife.island.cache.IslandCacheMap
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
 import org.koin.core.context.GlobalContext
 
 val Player.currentIsland: Island?
-    get() = IslandPlayerMap.lookup(uniqueId)
+    get() = IslandsPlayerAccessor.byPlayer(uniqueId)
+
+val Player.ownedIsland: Island
+    get() = (this as OfflinePlayer).ownedIsland!!
+
+val OfflinePlayer.ownedIsland: Island?
+    get() {
+        val islands = GlobalContext.get().get<IslandsAccessor>()
+        return islands.byOwner(uniqueId)
+    }
 
 suspend fun Player.teleport(island: Island) {
     teleportAsync(island.spawnPoint).await()
-    IslandPlayerMap.put(this, island)
+    assignToIsland(island)
 }
 
-suspend fun Player.ownedIsland(): Island = (this as OfflinePlayer).ownedIsland()!!
+suspend fun Player.assignToIsland(island: Island) {
+    IslandsPlayerAccessor.assign(this, island)
+}
 
-suspend fun OfflinePlayer.ownedIsland(): Island? {
-    val cacheMap = GlobalContext.get().get<IslandCacheMap>()
-    return cacheMap.lookup(uniqueId)
+suspend fun Player.unassignFromIsland() {
+    IslandsPlayerAccessor.unassign(this)
 }

@@ -11,19 +11,19 @@ import java.util.*
 object IslandsTable : LongIdTable("islands", "position") {
     val owner: Column<UUID> = javaUUID("owner").uniqueIndex()
 
-    val level: Column<Int> = integer("level").default(Island.MIN_LEVEL).check { it.between(Island.MIN_LEVEL, Island.MAX_LEVEL) }
+    val level: Column<Int> = integer("level").clientDefault { Island.MIN_LEVEL }.check { it.between(Island.MIN_LEVEL, Island.MAX_LEVEL) }
 
-    val score: Column<Double> = double("score").default(0.0)
+    val score: Column<Double> = double("score").clientDefault { 0.0 }
 
-    val displayName: Column<Component> = component("display_name").default(Component.text("Untitled"))
+    val displayName: Column<Component> = component("display_name").clientDefault { Component.text("Untitled") }
 
-    val spawnOffsetX: Column<Double> = double("spawn_offset_x").default(0.0)
+    val spawnOffsetX: Column<Double> = double("spawn_offset_x").clientDefault { 0.0 }
 
-    val spawnOffsetY: Column<Double> = double("spawn_offset_y").default(0.0)
+    val spawnOffsetY: Column<Double> = double("spawn_offset_y").clientDefault { 0.0 }
 
-    val spawnOffsetZ: Column<Double> = double("spawn_offset_z").default(0.0)
+    val spawnOffsetZ: Column<Double> = double("spawn_offset_z").clientDefault { 0.0 }
 
-    val spawnYaw: Column<Float> = float("spawn_yaw").default(90f)
+    val spawnYaw: Column<Float> = float("spawn_yaw").clientDefault { 90f }
 
-    val spawnPitch: Column<Float> = float("spawn_pitch").default(0f)
+    val spawnPitch: Column<Float> = float("spawn_pitch").clientDefault { 0f }
 }

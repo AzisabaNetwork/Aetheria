@@ -59,7 +59,7 @@ object ReturnToIslandDialog : KoinComponent {
     }
 
     private suspend fun returnToIsland(player: Player) {
-        val island = player.ownedIsland()
+        val island = player.ownedIsland
         player.teleport(island)
     }
 }

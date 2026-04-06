@@ -1,11 +1,13 @@
 package net.azisaba.vanilife.server.world.islands.river;
 
 import io.papermc.paper.math.BlockPosition;
+import io.papermc.paper.math.FinePosition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import net.azisaba.vanilife.world.IslandPosition;
 import net.minecraft.util.Mth;
+
 final class RiverNetworkPlanner {
     private static final double PORTAL_RIVER_SAFE_RADIUS = 42.0;
     private static final double PORTAL_RIVER_DETOUR_DISTANCE = 28.0;
@@ -13,7 +15,8 @@ final class RiverNetworkPlanner {
     private static final double SPAWN_RIVER_DETOUR_DISTANCE = 18.0;
     private static final double MIN_MOUTH_INWARD_DOT = 0.72;
 
-    private record Obstacle(double x, double z, double safeRadius, double detourDistance) {}
+    private record Obstacle(double x, double z, double safeRadius, double detourDistance) {
+    }
 
     private final double halfWidth;
     private final double halfHeight;

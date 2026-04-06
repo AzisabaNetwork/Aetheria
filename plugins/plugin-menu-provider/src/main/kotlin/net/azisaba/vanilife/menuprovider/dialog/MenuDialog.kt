@@ -1,6 +1,5 @@
 package net.azisaba.vanilife.menuprovider.dialog
 
-import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import io.papermc.paper.registry.RegistryAccess
 import io.papermc.paper.registry.RegistryKey
@@ -17,7 +16,6 @@ import net.azisaba.vanilife.menuprovider.MenuProviderTranslations
 import net.azisaba.vanilife.menuprovider.inventory.StorageInventory
 import net.azisaba.vanilife.menuprovider.inventory.TrashInventory
 import net.azisaba.vanilife.portal.PortalDialogs
-import net.azisaba.vanilife.portal.dialog.ReturnToIslandDialog
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickCallback
 import net.kyori.adventure.text.event.ClickEvent
@@ -142,10 +140,8 @@ internal object MenuDialog : KoinComponent {
             DialogAction.customClick(
                 { _, audience ->
                     val player = audience as? Player ?: return@customClick
-                    plugin.launch {
-                        val island = player.ownedIsland()
-                        audience.showDialog(EnchantmentsDialog.create(island))
-                    }
+                    val island = player.ownedIsland
+                    audience.showDialog(EnchantmentsDialog.create(island))
                 },
                 ClickCallback.Options.builder()
                     .uses(ClickCallback.UNLIMITED_USES)
@@ -173,9 +169,7 @@ internal object MenuDialog : KoinComponent {
         DialogAction.customClick(
             { _, audience ->
                 (audience as? Player)?.let { player ->
-                    plugin.launch {
-                        player.showDialog(SettingsDialog.create(player))
-                    }
+                    player.showDialog(SettingsDialog.create(player))
                 }
             },
             ClickCallback.Options.builder()
@@ -199,10 +193,8 @@ internal object MenuDialog : KoinComponent {
             DialogAction.customClick(
                 { _, audience ->
                     val player = audience as? Player ?: return@customClick
-                    plugin.launch(plugin.entityDispatcher(player)) {
-                        val island = player.ownedIsland()
-                        player.openInventory(StorageInventory(island, island.storageSize, plugin).inventory)
-                    }
+                    val island = player.ownedIsland
+                    player.openInventory(StorageInventory(island, island.storageSize, plugin).inventory)
                 },
                 ClickCallback.Options.builder()
                     .uses(ClickCallback.UNLIMITED_USES)

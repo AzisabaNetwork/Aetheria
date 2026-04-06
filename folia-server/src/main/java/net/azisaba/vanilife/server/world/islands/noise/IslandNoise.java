@@ -1,12 +1,14 @@
 package net.azisaba.vanilife.server.world.islands.noise;
 
+import io.papermc.paper.math.BlockPosition;
+import io.papermc.paper.math.FinePosition;
 import net.azisaba.vanilife.server.world.islands.IslandsGeneratorSettings;
 import net.azisaba.vanilife.world.IslandPosition;
 import net.azisaba.vanilife.world.IslandsWorld;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
-import io.papermc.paper.math.BlockPosition;
+
 public final class IslandNoise {
     private static final double SPAWN_BEACH_HEIGHT_RADIUS = 14.0;
     private static final double SPAWN_BEACH_STABILITY_RADIUS = 22.0;
@@ -97,10 +99,10 @@ public final class IslandNoise {
     }
 
     public int computeBaseHighestY(
-            final double x,
-            final double z,
-            final double signedDistance,
-            final IslandsGeneratorSettings generatorSettings
+        final double x,
+        final double z,
+        final double signedDistance,
+        final IslandsGeneratorSettings generatorSettings
     ) {
         if (signedDistance > 0.0) {
             final int shoreDepthStepBlocks = Math.max(1, this.settings.offshoreDepthStepDistanceBlocks());

@@ -5,10 +5,12 @@ import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import me.tofaa.entitylib.APIConfig
 import me.tofaa.entitylib.EntityLib
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform
+import net.azisaba.vanilife.ConfigurationHolder
 import net.azisaba.vanilife.ReloadableConfiguration
-import net.azisaba.vanilife.island.cache.IslandCacheMap
 import net.azisaba.vanilife.island.leveling.LevelingConfiguration
 import net.azisaba.vanilife.island.leveling.score.ScoreSource
+import net.azisaba.vanilife.island.loader.IslandLoader
+import net.azisaba.vanilife.island.loader.IslandLoaderTicker
 import net.azisaba.vanilife.island.wrack.WrackType
 import net.azisaba.vanilife.reloadableConfig
 import org.bukkit.plugin.Plugin
@@ -37,24 +39,37 @@ internal class Main : JavaPlugin() {
         ScoreSource.bootstrap(this)
         WrackType.bootstrap(this)
 
-        val cacheMap = IslandCacheMap(database, plugin = this, wrackConfig = config.map(Configuration::wrack))
-        val ticker = IslandTicker(
-            this,
-            cacheMap,
-            levelUpRequirements = config.map(Configuration::leveling)
-                .map(LevelingConfiguration::levelUpRequirements),
-            levelUpCheckIntervalTicks = config.map(Configuration::leveling)
-                .map(LevelingConfiguration::levelUpCheckIntervalTicks),
-        )
-
         koinApp = startKoin {
             modules(
                 module {
                     single<Plugin> { this@Main }
-                    single<ReloadableConfiguration<Configuration>> { config }
+                    single<ConfigurationHolder<Configuration>> { config }
                     single<Database> { database }
-                    single<IslandTicker> { ticker } onClose { it?.close() }
-                    single<IslandCacheMap> { cacheMap }
+                    single<IslandsAccessor> { IslandsAccessor(get(), get(), get()) }
+                    single<IslandTicker> {
+                        IslandTicker(
+                            get(),
+                            config.map(Configuration::leveling)
+                                .map(LevelingConfiguration::levelUpRequirements),
+                            config.map(Configuration::leveling)
+                                .map(LevelingConfiguration::levelUpCheckIntervalTicks),
+                            get(),
+                        )
+                    } onClose { it?.close() }
+                    single<IslandLoader> {
+                        IslandLoader(
+                            get(),
+                            config.map(Configuration::loader),
+                            get(),
+                        )
+                    } onClose { it?.close() }
+                    single<IslandLoaderTicker> {
+                        IslandLoaderTicker(
+                            get(),
+                            config.map(Configuration::loader),
+                            get(),
+                        )
+                    } onClose { it?.close() }
                 },
             )
         }

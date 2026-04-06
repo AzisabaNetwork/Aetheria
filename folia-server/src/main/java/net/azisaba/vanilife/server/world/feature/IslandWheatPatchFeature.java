@@ -2,6 +2,7 @@ package net.azisaba.vanilife.server.world.feature;
 
 import com.mojang.serialization.Codec;
 import io.papermc.paper.math.BlockPosition;
+import io.papermc.paper.math.FinePosition;
 import net.azisaba.vanilife.world.IslandPosition;
 import net.azisaba.vanilife.world.IslandsWorld;
 import net.minecraft.core.BlockPos;

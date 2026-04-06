@@ -43,13 +43,15 @@ private class LevelDataAccessorImpl(
 
     private var cacheData: CacheData? = null
 
+    private val positionId: Long = position.toLong()
+
     private val scoringManager: ScoringManager = ScoringManager()
 
     override suspend fun level(level: Int) = suspendTransaction(database) {
         require(level in Island.MIN_LEVEL..Island.MAX_LEVEL) {
             "Island level must be between ${Island.MIN_LEVEL}..${Island.MAX_LEVEL}"
         }
-        IslandsTable.update(where = { IslandsTable.id eq position.toLong() }) {
+        IslandsTable.update(where = { IslandsTable.id eq positionId }) {
             it[IslandsTable.level] = level
             it[IslandsTable.score] = 0.0
         }
@@ -57,7 +59,7 @@ private class LevelDataAccessorImpl(
     }
 
     override suspend fun score(score: Double) = suspendTransaction(database) {
-        IslandsTable.update(where = { IslandsTable.id eq position.toLong() }) {
+        IslandsTable.update(where = { IslandsTable.id eq positionId }) {
             it[IslandsTable.score] = score
         }
         cacheData = requireLoaded().copy(score = score)
@@ -70,7 +72,9 @@ private class LevelDataAccessorImpl(
     }
 
     override suspend fun bootstrapLevelData() = suspendTransaction(database) {
-        val row = IslandsTable.select(IslandsTable.level, IslandsTable.score).single()
+        val row = IslandsTable.select(IslandsTable.level, IslandsTable.score)
+            .where { IslandsTable.id eq positionId }
+            .single()
         cacheData = CacheData(
             level = row[IslandsTable.level],
             score = row[IslandsTable.score],

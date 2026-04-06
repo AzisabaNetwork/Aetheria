@@ -33,6 +33,7 @@ import net.azisaba.vanilife.npc.NpcFonts
 import net.azisaba.vanilife.npc.NpcTranslations
 import net.azisaba.vanilife.portal.PortalTranslations
 import net.azisaba.vanilife.toolswap.ToolSwapTranslations
+import net.azisaba.vanilife.travel.TravelFonts
 import net.azisaba.vanilife.travel.TravelItemModels
 import net.azisaba.vanilife.travel.TravelModels
 import net.azisaba.vanilife.travel.TravelTranslations
@@ -60,6 +61,7 @@ internal class Main : JavaPlugin() {
                 IslandFonts.WAVES to IslandFonts.waves()
                 MenuProviderFonts.MENU_ICONS to MenuProviderFonts.menuIcons()
                 NpcFonts.NPC_ICONS to NpcFonts.npcIcons()
+                TravelFonts.TRAVEL_ICONS to TravelFonts.travelIcons()
                 GeneralFonts.DEFAULT to GeneralFonts.default()
             }
 
