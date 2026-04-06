@@ -46,7 +46,7 @@ internal class Main : JavaPlugin() {
                     single<ConfigurationHolder<Configuration>> { config }
                     single<Database> { database }
                     single<IslandsAccessor> { IslandsAccessor(get(), get(), get()) }
-                    single<IslandTicker> {
+                    single<IslandTicker>(createdAtStart = true) {
                         IslandTicker(
                             get(),
                             config.map(Configuration::leveling)
@@ -63,7 +63,7 @@ internal class Main : JavaPlugin() {
                             get(),
                         )
                     } onClose { it?.close() }
-                    single<IslandLoaderTicker> {
+                    single<IslandLoaderTicker>(createdAtStart = true) {
                         IslandLoaderTicker(
                             get(),
                             config.map(Configuration::loader),

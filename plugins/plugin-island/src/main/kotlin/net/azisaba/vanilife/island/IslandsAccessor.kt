@@ -49,15 +49,15 @@ class IslandsAccessor internal constructor(
             val island = Island(position, config.map(Configuration::wrack), database, plugin)
             val owner = row[IslandsTable.owner]
 
-            byPosition[position] = island
-            byOwner[owner] = island
-
             try {
                 island.bootstrap()
                 IslandLoadEvent(island, cause).callEvent()
+
+                byPosition[position] = island
+                byOwner[owner] = island
             } catch (e: Throwable) {
                 byPosition.remove(position)
-                byOwner.remove(island.owner)
+                byOwner.remove(owner)
                 throw e
             }
         }

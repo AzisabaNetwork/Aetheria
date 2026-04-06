@@ -2,6 +2,7 @@ package net.azisaba.vanilife.island.visitors
 
 import net.azisaba.vanilife.world.IslandPosition
 import org.bukkit.OfflinePlayer
+import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.sum
@@ -16,6 +17,10 @@ import kotlin.time.Duration
 import kotlin.time.Instant
 
 interface VisitorsAccessor {
+    val visitors: Set<UUID>
+
+    val totalStayTime: Duration
+
     suspend fun beginVisit(uuid: UUID)
 
     suspend fun beginVisit(player: OfflinePlayer) = beginVisit(player.uniqueId)
@@ -36,13 +41,12 @@ interface VisitorsAccessor {
 
     suspend fun stayTimeOf(player: OfflinePlayer): Duration = stayTimeOf(player.uniqueId)
 
-    suspend fun totalStayTime(): Duration
+    fun hasVisited(uuid: UUID): Boolean = uuid in visitors
 
-    suspend fun hasVisited(uuid: UUID): Boolean
+    fun hasVisited(player: OfflinePlayer): Boolean = hasVisited(player.uniqueId)
 
-    suspend fun hasVisited(player: OfflinePlayer): Boolean = hasVisited(player.uniqueId)
-
-    suspend fun visitors(): Set<UUID>
+    @ApiStatus.Internal
+    suspend fun bootstrapVisitors()
 
     companion object {
         fun fromDatabase(position: IslandPosition, database: Database): VisitorsAccessor =
@@ -53,6 +57,16 @@ interface VisitorsAccessor {
 private class VisitorsAccessorImpl(
     private val position: IslandPosition, private val database: Database,
 ) : VisitorsAccessor {
+    override val visitors: Set<UUID>
+        get() = requireLoaded().visitors
+
+    override val totalStayTime: Duration
+        get() = requireLoaded().totalStayTime
+
+    private val positionId: Long = position.toLong()
+
+    private var cacheData: CacheData? = null
+
     override suspend fun beginVisit(uuid: UUID) = suspendTransaction(database) {
         val now = Clock.System.now()
 
@@ -68,7 +82,9 @@ private class VisitorsAccessorImpl(
             it[lastVisitAt] = now
         }
 
-        Unit
+        if (!hasVisited(uuid)) {
+            cacheData = requireLoaded().copy(visitors = requireLoaded().visitors + uuid)
+        }
     }
 
     override suspend fun endVisit(uuid: UUID) = suspendTransaction(database) {
@@ -84,6 +100,8 @@ private class VisitorsAccessorImpl(
         val delta = now - lastVisit
 
         if (delta.isNegative()) return@suspendTransaction
+
+        cacheData = requireLoaded().copy(totalStayTime = requireLoaded().totalStayTime + delta)
 
         IslandVisitorsTable.update(where = { (IslandVisitorsTable.position eq position.toLong()) and (IslandVisitorsTable.visitor eq uuid) }) {
             it[IslandVisitorsTable.lastVisitAt] = now
@@ -112,26 +130,23 @@ private class VisitorsAccessorImpl(
             ?.get(IslandVisitorsTable.stayTime) ?: Duration.ZERO
     }
 
-    override suspend fun totalStayTime(): Duration = suspendTransaction(database) {
-        val sumExpression = IslandVisitorsTable.stayTime.sum()
-
-        IslandVisitorsTable.select(sumExpression)
-            .where { IslandVisitorsTable.position eq position.toLong() }
-            .firstOrNull()
-            ?.get(sumExpression) ?: Duration.ZERO
-    }
-
-    override suspend fun hasVisited(uuid: UUID): Boolean = suspendTransaction(database) {
-        IslandVisitorsTable
-            .select(IslandVisitorsTable.visitor)
-            .where { (IslandVisitorsTable.position eq position.toLong()) and (IslandVisitorsTable.visitor eq uuid) }
-            .any()
-    }
-
-    override suspend fun visitors(): Set<UUID> = suspendTransaction(database) {
-        IslandVisitorsTable.select(IslandVisitorsTable.visitor)
-            .where { IslandVisitorsTable.position eq position.toLong() }
+    override suspend fun bootstrapVisitors() = suspendTransaction(database) {
+        val visitors = IslandVisitorsTable.select(IslandVisitorsTable.visitor)
+            .where { IslandVisitorsTable.position eq positionId }
             .map { it[IslandVisitorsTable.visitor] }
             .toSet()
+
+        val stayTimeSumExpression = IslandVisitorsTable.stayTime.sum()
+        val totalStayTime = IslandVisitorsTable.select(stayTimeSumExpression)
+            .where { IslandVisitorsTable.position eq positionId }
+            .firstOrNull()
+            ?.get(stayTimeSumExpression) ?: Duration.ZERO
+
+        cacheData = CacheData(visitors, totalStayTime)
     }
+
+    private fun requireLoaded(): CacheData =
+        cacheData ?: throw IllegalStateException("Visitors data has not yet been loaded")
+
+    private data class CacheData(val visitors: Set<UUID>, val totalStayTime: Duration)
 }

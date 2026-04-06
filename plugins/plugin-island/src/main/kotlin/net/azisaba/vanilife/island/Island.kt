@@ -105,6 +105,7 @@ class Island internal constructor(
         bootstrapLevelData()
         bootstrapEnchantments()
         bootstrapStorage()
+        bootstrapVisitors()
     }
 
     companion object {

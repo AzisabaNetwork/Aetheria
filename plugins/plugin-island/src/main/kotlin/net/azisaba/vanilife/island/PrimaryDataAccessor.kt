@@ -1,7 +1,10 @@
 package net.azisaba.vanilife.island
 
+import com.destroystokyo.paper.profile.PlayerProfile
+import kotlinx.coroutines.future.await
 import net.azisaba.vanilife.world.IslandPosition
 import net.kyori.adventure.text.Component
+import org.bukkit.Bukkit
 import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -14,6 +17,8 @@ interface PrimaryDataAccessor {
     val position: IslandPosition
 
     val owner: UUID
+
+    val ownerProfile: PlayerProfile
 
     val displayName: Component
 
@@ -32,6 +37,9 @@ private class PrimaryDataAccessorImpl(override val position: IslandPosition, pri
     PrimaryDataAccessor {
     override val owner: UUID
         get() = requireLoaded().owner
+
+    override val ownerProfile: PlayerProfile
+        get() = requireLoaded().ownerProfile
 
     override val displayName: Component
         get() = requireLoaded().displayName
@@ -52,8 +60,13 @@ private class PrimaryDataAccessorImpl(override val position: IslandPosition, pri
         val row = IslandsTable.select(IslandsTable.owner, IslandsTable.displayName)
             .where { IslandsTable.id eq positionId }
             .single()
+
+        val ownerUuid = row[IslandsTable.owner]
+        val ownerProfile = Bukkit.createProfile(ownerUuid).update().await()
+
         cacheData = CacheData(
-            owner = row[IslandsTable.owner],
+            owner = ownerUuid,
+            ownerProfile = ownerProfile,
             displayName = row[IslandsTable.displayName],
         )
     }
@@ -61,5 +74,5 @@ private class PrimaryDataAccessorImpl(override val position: IslandPosition, pri
     private fun requireLoaded(): CacheData =
         cacheData ?: throw IllegalStateException("Primary data has not yet been loaded")
 
-    private data class CacheData(val owner: UUID, val displayName: Component)
+    private data class CacheData(val owner: UUID, val ownerProfile: PlayerProfile, val displayName: Component)
 }

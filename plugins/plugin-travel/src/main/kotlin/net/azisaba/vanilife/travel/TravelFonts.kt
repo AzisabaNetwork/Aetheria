@@ -14,8 +14,20 @@ object TravelFonts {
     fun travelIcons(): PackFont = PackFont(
         listOf(
             PackBitmapFontProvider(
+                file = Key.key("gui/sprites/icon/search.png"),
+                chars = listOf(TravelIcons.SEARCH.toString()),
+                ascent = 8,
+                height = 9,
+            ),
+            PackBitmapFontProvider(
                 file = Key.key(Vanilife.NAMESPACE, "icon/travel/ticket.png"),
                 chars = listOf(TravelIcons.TICKET.toString()),
+                ascent = 8,
+                height = 9,
+            ),
+            PackBitmapFontProvider(
+                file = Key.key(Vanilife.NAMESPACE, "icon/travel/visitors.png"),
+                chars = listOf(TravelIcons.VISITORS.toString()),
                 ascent = 8,
                 height = 9,
             ),
@@ -23,6 +35,8 @@ object TravelFonts {
     )
 
     object TravelIcons : CharCodeFactory() {
+        val SEARCH: Char = nextChar()
         val TICKET: Char = nextChar()
+        val VISITORS: Char = nextChar()
     }
 }
