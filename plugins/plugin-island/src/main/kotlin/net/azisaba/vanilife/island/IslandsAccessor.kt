@@ -7,6 +7,7 @@ import net.azisaba.vanilife.Vanilife
 import net.azisaba.vanilife.island.event.IslandInitEvent
 import net.azisaba.vanilife.island.event.IslandLoadEvent
 import net.azisaba.vanilife.world.IslandPosition
+import net.azisaba.vanilife.world.IslandsWorld
 import org.bukkit.plugin.Plugin
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.*
@@ -91,9 +92,9 @@ class IslandsAccessor internal constructor(
 
         suspendTransaction(database) {
             IslandsTable.update(where = { IslandsTable.id eq positionId }) {
-                it[IslandsTable.spawnOffsetX] = spawn.x()
-                it[IslandsTable.spawnOffsetY] = spawn.y()
-                it[IslandsTable.spawnOffsetZ] = spawn.z()
+                it[IslandsTable.spawnOffsetX] = spawn.x() - position.centerBlockX().toDouble()
+                it[IslandsTable.spawnOffsetY] = spawn.y() - IslandsWorld.MIN_Y.toDouble()
+                it[IslandsTable.spawnOffsetZ] = spawn.z() - position.centerBlockZ().toDouble()
             }
         }
 
