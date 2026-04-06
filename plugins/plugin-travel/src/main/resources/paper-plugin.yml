@@ -1,0 +1,12 @@
+name: AzisabaNetwork.Vanilife.Travel
+version: 0.0.0
+api-version: 1.21.11
+main: net.azisaba.vanilife.travel.Main
+folia-supported: true
+dependencies:
+  bootstrap:
+    AzisabaNetwork.Vanilife.Runtime:
+      load: BEFORE
+  server:
+    AzisabaNetwork.Vanilife.Runtime:
+      load: BEFORE
