@@ -10,6 +10,7 @@ dependencies {
     compileOnly(project(":plugins:plugin-npc"))
     compileOnly(project(":plugins:plugin-portal"))
     compileOnly(project(":plugins:plugin-tool-swap"))
+    compileOnly(project(":plugins:plugin-travel"))
     compileOnly(libs.packed.core)
     compileOnly(libs.packed.resource)
     compileOnly(libs.packed.server)

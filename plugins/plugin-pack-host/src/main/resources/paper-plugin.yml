@@ -27,3 +27,5 @@ dependencies:
       load: BEFORE
     AzisabaNetwork.Vanilife.ToolSwap:
       load: BEFORE
+    AzisabaNetwork.Vanilife.Travel:
+      load: BEFORE

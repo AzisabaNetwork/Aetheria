@@ -33,6 +33,9 @@ import net.azisaba.vanilife.npc.NpcFonts
 import net.azisaba.vanilife.npc.NpcTranslations
 import net.azisaba.vanilife.portal.PortalTranslations
 import net.azisaba.vanilife.toolswap.ToolSwapTranslations
+import net.azisaba.vanilife.travel.TravelItemModels
+import net.azisaba.vanilife.travel.TravelModels
+import net.azisaba.vanilife.travel.TravelTranslations
 import net.kyori.adventure.resource.ResourcePackInfo
 import net.kyori.adventure.text.Component
 import org.bukkit.plugin.java.JavaPlugin
@@ -169,17 +172,19 @@ internal class Main : JavaPlugin() {
                 MiningItemModels.FROZEN_RAW_GOLD to MiningItemModels.frozenRawGold()
                 MiningItemModels.FROZEN_RAW_IRON to MiningItemModels.frozenRawIron()
                 MiningItemModels.FROZEN_REDSTONE to MiningItemModels.frozenRedstone()
+
+                TravelItemModels.TRAVEL_TICKET to TravelItemModels.travelTicket()
             }
 
             lang {
                 PackedKey.lang(
                     Vanilife.NAMESPACE,
                     Locale.US
-                ) to (CookingTranslations.us() + EnchantingTranslations.us() + FarmingTranslations.us() + FishingTranslations.us() + ForestryTranslations.us() + IslandTranslations.us() + MenuProviderTranslations.us() + MiningTranslations.us() + NpcTranslations.us() + PortalTranslations.us() + ToolSwapTranslations.us() + GeneralTranslations.us())
+                ) to (CookingTranslations.us() + EnchantingTranslations.us() + FarmingTranslations.us() + FishingTranslations.us() + ForestryTranslations.us() + IslandTranslations.us() + MenuProviderTranslations.us() + MiningTranslations.us() + NpcTranslations.us() + PortalTranslations.us() + ToolSwapTranslations.us() + TravelTranslations.us() + GeneralTranslations.us())
                 PackedKey.lang(
                     Vanilife.NAMESPACE,
                     Locale.JAPAN
-                ) to (CookingTranslations.jp() + EnchantingTranslations.jp() + FarmingTranslations.jp() + FishingTranslations.jp() + ForestryTranslations.jp() + IslandTranslations.jp() + MenuProviderTranslations.jp() + MiningTranslations.jp() + NpcTranslations.jp() + PortalTranslations.jp() + ToolSwapTranslations.jp() + GeneralTranslations.jp())
+                ) to (CookingTranslations.jp() + EnchantingTranslations.jp() + FarmingTranslations.jp() + FishingTranslations.jp() + ForestryTranslations.jp() + IslandTranslations.jp() + MenuProviderTranslations.jp() + MiningTranslations.jp() + NpcTranslations.jp() + PortalTranslations.jp() + ToolSwapTranslations.jp() + TravelTranslations.jp() + GeneralTranslations.jp())
             }
 
             models {
@@ -291,6 +296,8 @@ internal class Main : JavaPlugin() {
                 MiningModels.FROZEN_RAW_GOLD to MiningModels.frozenRawGold()
                 MiningModels.FROZEN_RAW_IRON to MiningModels.frozenRawIron()
                 MiningModels.FROZEN_REDSTONE to MiningModels.frozenRedstone()
+
+                TravelModels.TRAVEL_TICKET to TravelModels.travelTicket()
             }
 
             sounds {
