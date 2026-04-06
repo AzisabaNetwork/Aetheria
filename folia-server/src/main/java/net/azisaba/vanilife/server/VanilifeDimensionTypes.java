@@ -2,6 +2,7 @@ package net.azisaba.vanilife.server;
 
 import net.azisaba.vanilife.Vanilife;
 import net.azisaba.vanilife.world.IslandsWorld;
+import net.azisaba.vanilife.world.ResourceWorld;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.WritableRegistry;
@@ -72,7 +73,7 @@ public final class VanilifeDimensionTypes {
     private static EnvironmentAttributeMap resourceEnvironment() {
         return EnvironmentAttributeMap.builder()
             .set(EnvironmentAttributes.CLOUD_COLOR, ARGB.white(0.8F))
-            .set(EnvironmentAttributes.CLOUD_HEIGHT, IslandsWorld.CLOUD_HEIGHT)
+            .set(EnvironmentAttributes.CLOUD_HEIGHT, ResourceWorld.CLOUD_HEIGHT)
             .set(EnvironmentAttributes.FOG_COLOR, -4138753)
             .set(EnvironmentAttributes.SKY_COLOR, OverworldBiomes.calculateSkyColor(0.8F))
             .set(EnvironmentAttributes.BED_RULE, BedRule.CAN_SLEEP_WHEN_DARK)
@@ -86,7 +87,7 @@ public final class VanilifeDimensionTypes {
     private static EnvironmentAttributeMap islandsEnvironment() {
         return EnvironmentAttributeMap.builder()
             .set(EnvironmentAttributes.CLOUD_COLOR, -1508609)
-            .set(EnvironmentAttributes.CLOUD_HEIGHT, 108.0F)
+            .set(EnvironmentAttributes.CLOUD_HEIGHT, IslandsWorld.CLOUD_HEIGHT)
             .set(EnvironmentAttributes.FOG_COLOR, 12835832)
             .set(EnvironmentAttributes.FOG_END_DISTANCE, 256f)
             .set(EnvironmentAttributes.FOG_START_DISTANCE, 125f)
