@@ -71,7 +71,7 @@ internal object TravelTicketDialog {
                     Component.text()
                         .color(NamedTextColor.WHITE)
                         .append(
-                            Component.text(IslandFonts.LevelIcons.levelOf(island.level)).font(IslandFonts.LEVEL_ICONS)
+                            Component.text(IslandFonts.IslandLevelIcons.levelOf(island.level)).font(IslandFonts.ISLAND_LEVEL_ICONS)
                         )
                         .append(Component.text(island.level))
                         .build(),

@@ -18,7 +18,7 @@ internal class WrapperLevelUpEffect(private val level: Int) : WrapperEntity(Enti
         if (!super.spawn(location, parent)) return false
         consumeEntityMeta(TextDisplayMeta::class.java) { meta ->
             meta.text = Component.text()
-                .append(Component.text(IslandFonts.LevelIcons.levelUpOf(level)).font(IslandFonts.LEVEL_ICONS))
+                .append(Component.text(IslandFonts.IslandLevelIcons.levelUpOf(level)).font(IslandFonts.ISLAND_LEVEL_ICONS))
                 .appendSpace()
                 .append(Component.translatable(IslandTranslations.ISLAND_LEVEL_UP))
                 .build()

@@ -8,7 +8,7 @@ dependencies:
   bootstrap:
     AzisabaNetwork.Vanilife.Enchanting:
       load: BEFORE
-    AzisabaNetwork.Vanilife.Portal:
+    AzisabaNetwork.Vanilife.Island:
       load: BEFORE
     AzisabaNetwork.Vanilife.Runtime:
       load: BEFORE

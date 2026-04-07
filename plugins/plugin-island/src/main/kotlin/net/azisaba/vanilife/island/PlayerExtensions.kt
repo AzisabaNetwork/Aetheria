@@ -17,6 +17,9 @@ val OfflinePlayer.ownedIsland: Island?
         return islands.byOwner(uniqueId)
     }
 
+val Player.isInOwnedIsland: Boolean
+    get() = currentIsland == ownedIsland
+
 suspend fun Player.teleport(island: Island) {
     teleportAsync(island.spawnPoint).await()
     assignToIsland(island)

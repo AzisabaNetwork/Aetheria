@@ -31,7 +31,6 @@ import net.azisaba.vanilife.mining.MiningModels
 import net.azisaba.vanilife.mining.MiningTranslations
 import net.azisaba.vanilife.npc.NpcFonts
 import net.azisaba.vanilife.npc.NpcTranslations
-import net.azisaba.vanilife.portal.PortalTranslations
 import net.azisaba.vanilife.toolswap.ToolSwapTranslations
 import net.azisaba.vanilife.travel.TravelFonts
 import net.azisaba.vanilife.travel.TravelItemModels
@@ -55,9 +54,8 @@ internal class Main : JavaPlugin() {
             font {
                 EnchantingFonts.ENCHANTING_ICONS to EnchantingFonts.enchantingIcons()
                 FishingFonts.FISH_SHADOWS to FishingFonts.fishShadows()
-                IslandFonts.ENCHANTS to IslandFonts.enchants()
                 IslandFonts.ISLAND_ICONS to IslandFonts.islandIcons()
-                IslandFonts.LEVEL_ICONS to IslandFonts.levelIcons()
+                IslandFonts.ISLAND_LEVEL_ICONS to IslandFonts.levelIcons()
                 IslandFonts.WAVES to IslandFonts.waves()
                 MenuProviderFonts.MENU_ICONS to MenuProviderFonts.menuIcons()
                 NpcFonts.NPC_ICONS to NpcFonts.npcIcons()
@@ -182,11 +180,11 @@ internal class Main : JavaPlugin() {
                 PackedKey.lang(
                     Vanilife.NAMESPACE,
                     Locale.US
-                ) to (CookingTranslations.us() + EnchantingTranslations.us() + FarmingTranslations.us() + FishingTranslations.us() + ForestryTranslations.us() + IslandTranslations.us() + MenuProviderTranslations.us() + MiningTranslations.us() + NpcTranslations.us() + PortalTranslations.us() + ToolSwapTranslations.us() + TravelTranslations.us() + GeneralTranslations.us())
+                ) to (CookingTranslations.us() + EnchantingTranslations.us() + FarmingTranslations.us() + FishingTranslations.us() + ForestryTranslations.us() + IslandTranslations.us() + MenuProviderTranslations.us() + MiningTranslations.us() + NpcTranslations.us() + ToolSwapTranslations.us() + TravelTranslations.us() + GeneralTranslations.us())
                 PackedKey.lang(
                     Vanilife.NAMESPACE,
                     Locale.JAPAN
-                ) to (CookingTranslations.jp() + EnchantingTranslations.jp() + FarmingTranslations.jp() + FishingTranslations.jp() + ForestryTranslations.jp() + IslandTranslations.jp() + MenuProviderTranslations.jp() + MiningTranslations.jp() + NpcTranslations.jp() + PortalTranslations.jp() + ToolSwapTranslations.jp() + TravelTranslations.jp() + GeneralTranslations.jp())
+                ) to (CookingTranslations.jp() + EnchantingTranslations.jp() + FarmingTranslations.jp() + FishingTranslations.jp() + ForestryTranslations.jp() + IslandTranslations.jp() + MenuProviderTranslations.jp() + MiningTranslations.jp() + NpcTranslations.jp() + ToolSwapTranslations.jp() + TravelTranslations.jp() + GeneralTranslations.jp())
             }
 
             models {

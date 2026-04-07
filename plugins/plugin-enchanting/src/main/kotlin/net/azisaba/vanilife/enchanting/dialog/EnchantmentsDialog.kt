@@ -2,6 +2,7 @@ package net.azisaba.vanilife.enchanting.dialog
 
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.dialog.Dialog
+import io.papermc.paper.registry.data.dialog.ActionButton
 import io.papermc.paper.registry.data.dialog.DialogBase
 import io.papermc.paper.registry.data.dialog.body.DialogBody
 import io.papermc.paper.registry.data.dialog.body.PlainMessageDialogBody
@@ -49,7 +50,12 @@ object EnchantmentsDialog {
                     )
                     .build()
             )
-            .type(DialogType.notice())
+            .type(
+                DialogType.notice(
+                    ActionButton.builder(Component.translatable("gui.done"))
+                        .build()
+                )
+            )
     }
 
     private fun summary(enchantments: EnchantmentAccessor): PlainMessageDialogBody = DialogBody.plainMessage(
@@ -68,8 +74,8 @@ object EnchantmentsDialog {
             DialogBody.plainMessage(
                 Component.text()
                     .append(
-                        Component.text(IslandFonts.LevelIcons.levelOf(from))
-                            .font(IslandFonts.LEVEL_ICONS)
+                        Component.text(IslandFonts.IslandLevelIcons.levelOf(from))
+                            .font(IslandFonts.ISLAND_LEVEL_ICONS)
                     )
                     .append(
                         Component.translatable(
@@ -95,7 +101,11 @@ object EnchantmentsDialog {
         ItemStack.of(Material.STICK).apply {
             setData(
                 DataComponentTypes.ITEM_NAME,
-                Component.text("I wanna commit suicide", NamedTextColor.DARK_GRAY, TextDecoration.OBFUSCATED) // 自殺したい...
+                Component.text(
+                    "I wanna commit suicide",
+                    NamedTextColor.DARK_GRAY,
+                    TextDecoration.OBFUSCATED
+                ) // 自殺したい...
                     .font(Key.key("alt"))
             )
             setData(DataComponentTypes.ITEM_MODEL, EnchantingItemModels.DIALOG_ENCHANTMENT_LOCKED)
@@ -122,8 +132,8 @@ object EnchantmentsDialog {
             Component.text()
                 .color(NamedTextColor.WHITE)
                 .append(
-                    Component.text(IslandFonts.LevelIcons.levelOf(wrackType.targetLevel.min))
-                        .font(IslandFonts.LEVEL_ICONS)
+                    Component.text(IslandFonts.IslandLevelIcons.levelOf(wrackType.targetLevel.min))
+                        .font(IslandFonts.ISLAND_LEVEL_ICONS)
                 )
                 .append(Component.text(wrackType.targetLevel.min))
                 .build(),

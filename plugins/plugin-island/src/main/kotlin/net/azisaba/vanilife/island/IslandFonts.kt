@@ -12,39 +12,27 @@ object IslandFonts {
     private const val WAVE_ASCENT: Int = 511
     private const val WAVE_HEIGHT: Int = 512
 
-    val ENCHANTS: PackedKey<PackFont> = PackedKey.font(Vanilife.NAMESPACE, "enchants")
     val ISLAND_ICONS: PackedKey<PackFont> = PackedKey.font(Vanilife.NAMESPACE, "island_icons")
-    val LEVEL_ICONS: PackedKey<PackFont> = PackedKey.font(Vanilife.NAMESPACE, "level_icons")
+    val ISLAND_LEVEL_ICONS: PackedKey<PackFont> = PackedKey.font(Vanilife.NAMESPACE, "island_level_icons")
     val WAVES: PackedKey<PackFont> = PackedKey.font(Vanilife.NAMESPACE, "waves")
-
-    fun enchants(): PackFont = PackFont(
-        listOf(
-            PackBitmapFontProvider(
-                file = Key.key(Vanilife.NAMESPACE, "enchanting_table/enchanting_table.png"),
-                chars = listOf(Enchants.ENCHANTING_TABLE.toString()),
-                ascent = 8,
-                height = 9,
-            ),
-            PackBitmapFontProvider(
-                file = Key.key("item/enchanted_book.png"),
-                chars = listOf(Enchants.ENCHANTED_BOOK.toString()),
-                ascent = 12,
-                height = 16,
-            ),
-            PackBitmapFontProvider(
-                file = Key.key(Vanilife.NAMESPACE, "enchanting_table/book.png"),
-                chars = listOf(Enchants.BOOK.toString()),
-                ascent = 0,
-                height = 52,
-            ),
-        )
-    )
 
     fun islandIcons(): PackFont = PackFont(
         listOf(
             PackBitmapFontProvider(
                 file = Key.key("item/name_tag.png"),
                 chars = listOf(IslandIcons.DISPLAY_NAME.toString()),
+                ascent = 8,
+                height = 9,
+            ),
+            PackBitmapFontProvider(
+                file = Key.key(Vanilife.NAMESPACE, "icon/island/portal.png"),
+                chars = listOf(IslandIcons.PORTAL.toString()),
+                ascent = 8,
+                height = 9,
+            ),
+            PackBitmapFontProvider(
+                file = Key.key(Vanilife.NAMESPACE, "icon/island/settings.png"),
+                chars = listOf(IslandIcons.SETTINGS.toString()),
                 ascent = 8,
                 height = 9,
             ),
@@ -67,61 +55,61 @@ object IslandFonts {
         listOf(
             PackBitmapFontProvider(
                 file = Key.key(Vanilife.NAMESPACE, "icon/level/level_blue.png"),
-                chars = listOf(LevelIcons.LEVEL_BLUE.toString()),
+                chars = listOf(IslandLevelIcons.LEVEL_BLUE.toString()),
                 ascent = 8,
                 height = 9,
             ),
             PackBitmapFontProvider(
                 file = Key.key(Vanilife.NAMESPACE, "icon/level/level_green.png"),
-                chars = listOf(LevelIcons.LEVEL_GREEN.toString()),
+                chars = listOf(IslandLevelIcons.LEVEL_GREEN.toString()),
                 ascent = 8,
                 height = 9,
             ),
             PackBitmapFontProvider(
                 file = Key.key(Vanilife.NAMESPACE, "icon/level/level_pink.png"),
-                chars = listOf(LevelIcons.LEVEL_PINK.toString()),
+                chars = listOf(IslandLevelIcons.LEVEL_PINK.toString()),
                 ascent = 8,
                 height = 9,
             ),
             PackBitmapFontProvider(
                 file = Key.key(Vanilife.NAMESPACE, "icon/level/level_purple.png"),
-                chars = listOf(LevelIcons.LEVEL_PURPLE.toString()),
+                chars = listOf(IslandLevelIcons.LEVEL_PURPLE.toString()),
                 ascent = 8,
                 height = 9,
             ),
             PackBitmapFontProvider(
                 file = Key.key(Vanilife.NAMESPACE, "icon/level/level_yellow.png"),
-                chars = listOf(LevelIcons.LEVEL_YELLOW.toString()),
+                chars = listOf(IslandLevelIcons.LEVEL_YELLOW.toString()),
                 ascent = 8,
                 height = 9,
             ),
             PackBitmapFontProvider(
                 file = Key.key(Vanilife.NAMESPACE, "icon/level/level_up_blue.png"),
-                chars = listOf(LevelIcons.LEVEL_UP_BLUE.toString()),
+                chars = listOf(IslandLevelIcons.LEVEL_UP_BLUE.toString()),
                 ascent = 8,
                 height = 9,
             ),
             PackBitmapFontProvider(
                 file = Key.key(Vanilife.NAMESPACE, "icon/level/level_up_green.png"),
-                chars = listOf(LevelIcons.LEVEL_UP_GREEN.toString()),
+                chars = listOf(IslandLevelIcons.LEVEL_UP_GREEN.toString()),
                 ascent = 8,
                 height = 9,
             ),
             PackBitmapFontProvider(
                 file = Key.key(Vanilife.NAMESPACE, "icon/level/level_up_pink.png"),
-                chars = listOf(LevelIcons.LEVEL_UP_PINK.toString()),
+                chars = listOf(IslandLevelIcons.LEVEL_UP_PINK.toString()),
                 ascent = 8,
                 height = 9,
             ),
             PackBitmapFontProvider(
                 file = Key.key(Vanilife.NAMESPACE, "icon/level/level_up_purple.png"),
-                chars = listOf(LevelIcons.LEVEL_UP_PURPLE.toString()),
+                chars = listOf(IslandLevelIcons.LEVEL_UP_PURPLE.toString()),
                 ascent = 8,
                 height = 9,
             ),
             PackBitmapFontProvider(
                 file = Key.key(Vanilife.NAMESPACE, "icon/level/level_up_yellow.png"),
-                chars = listOf(LevelIcons.LEVEL_UP_YELLOW.toString()),
+                chars = listOf(IslandLevelIcons.LEVEL_UP_YELLOW.toString()),
                 ascent = 8,
                 height = 9,
             ),
@@ -199,19 +187,15 @@ object IslandFonts {
         )
     )
 
-    object Enchants : CharCodeFactory() {
-        val ENCHANTING_TABLE: Char = nextChar()
-        val ENCHANTED_BOOK: Char = nextChar()
-        val BOOK: Char = nextChar()
-    }
-
     object IslandIcons : CharCodeFactory() {
         val DISPLAY_NAME: Char = nextChar()
+        val PORTAL: Char = nextChar()
+        val SETTINGS: Char = nextChar()
         val SKY_COLOR: Char = nextChar()
         val SPAWN_LOCATION: Char = nextChar()
     }
 
-    object LevelIcons : CharCodeFactory() {
+    object IslandLevelIcons : CharCodeFactory() {
         val LEVEL_BLUE: Char = nextChar()
         val LEVEL_GREEN: Char = nextChar()
         val LEVEL_PINK: Char = nextChar()

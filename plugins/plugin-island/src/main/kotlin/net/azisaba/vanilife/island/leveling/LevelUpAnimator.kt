@@ -48,7 +48,7 @@ internal object LevelUpAnimator {
     private fun sendMessage(player: Player, newLevel: Int, oldLevel: Int) = player.sendMessage {
         val componentBuilder = Component.text().appendNewline()
 
-        componentBuilder.append(Component.text(IslandFonts.LevelIcons.levelOf(newLevel)).font(IslandFonts.LEVEL_ICONS))
+        componentBuilder.append(Component.text(IslandFonts.IslandLevelIcons.levelOf(newLevel)).font(IslandFonts.ISLAND_LEVEL_ICONS))
             .append(Component.text(newLevel))
             .appendSpace()
             .append(Component.translatable(IslandTranslations.ISLAND_LEVEL_UP, NamedTextColor.YELLOW))

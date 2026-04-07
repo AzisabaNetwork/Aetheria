@@ -1,26 +1,23 @@
 package net.azisaba.vanilife.menuprovider.dialog
 
-import com.github.shynixn.mccoroutine.folia.launch
-import io.papermc.paper.registry.RegistryAccess
-import io.papermc.paper.registry.RegistryKey
 import io.papermc.paper.registry.data.dialog.ActionButton
 import io.papermc.paper.registry.data.dialog.DialogBase
 import io.papermc.paper.registry.data.dialog.DialogRegistryEntry
 import io.papermc.paper.registry.data.dialog.action.DialogAction
 import io.papermc.paper.registry.data.dialog.type.DialogType
+import io.papermc.paper.registry.keys.SoundEventKeys
 import net.azisaba.vanilife.enchanting.dialog.EnchantmentsDialog
+import net.azisaba.vanilife.island.dialog.MyIslandDialog
+import net.azisaba.vanilife.island.dialog.ReturnDialog
 import net.azisaba.vanilife.island.ownedIsland
-import net.azisaba.vanilife.menuprovider.MenuProviderDialogs
 import net.azisaba.vanilife.menuprovider.MenuProviderFonts
 import net.azisaba.vanilife.menuprovider.MenuProviderTranslations
 import net.azisaba.vanilife.menuprovider.inventory.StorageInventory
 import net.azisaba.vanilife.menuprovider.inventory.TrashInventory
-import net.azisaba.vanilife.portal.PortalDialogs
+import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickCallback
-import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.ShadowColor
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import org.koin.core.component.KoinComponent
@@ -31,60 +28,9 @@ internal object MenuDialog : KoinComponent {
         .append(
             Component.text(MenuProviderFonts.MenuIcons.MENU, NamedTextColor.WHITE)
                 .font(MenuProviderFonts.MENU_ICONS)
-                .shadowColor(ShadowColor.none())
         )
         .appendSpace()
         .append(Component.translatable(MenuProviderTranslations.DIALOG_VANILIFE_MENU))
-        .build()
-
-    val RETURN_TO_ISLAND: Component = Component.text()
-        .append(
-            Component.text(MenuProviderFonts.MenuIcons.RETURN_TO_ISLAND)
-                .shadowColor(ShadowColor.none())
-                .font(MenuProviderFonts.MENU_ICONS)
-        )
-        .appendSpace()
-        .append(Component.translatable(MenuProviderTranslations.DIALOG_VANILIFE_MENU_RETURN_TO_ISLAND))
-        .build()
-
-    val SETTINGS: Component = Component.text()
-        .append(
-            Component.text(MenuProviderFonts.MenuIcons.SETTINGS)
-                .shadowColor(ShadowColor.none())
-                .font(MenuProviderFonts.MENU_ICONS)
-        )
-        .appendSpace()
-        .append(Component.translatable(MenuProviderTranslations.DIALOG_VANILIFE_MENU_SETTINGS))
-        .build()
-
-    val STORAGE: Component = Component.text()
-        .append(
-            Component.text(MenuProviderFonts.MenuIcons.STORAGE)
-                .shadowColor(ShadowColor.none())
-                .font(MenuProviderFonts.MENU_ICONS)
-        )
-        .appendSpace()
-        .append(Component.translatable(MenuProviderTranslations.DIALOG_VANILIFE_MENU_STORAGE))
-        .build()
-
-    val TRASH: Component = Component.text()
-        .append(
-            Component.text(MenuProviderFonts.MenuIcons.TRASH)
-                .shadowColor(ShadowColor.none())
-                .font(MenuProviderFonts.MENU_ICONS)
-        )
-        .appendSpace()
-        .append(Component.translatable(MenuProviderTranslations.DIALOG_VANILIFE_MENU_TRASH))
-        .build()
-
-    val DISCORD: Component = Component.text()
-        .append(
-            Component.text(MenuProviderFonts.MenuIcons.DISCORD)
-                .shadowColor(ShadowColor.none())
-                .font(MenuProviderFonts.MENU_ICONS)
-        )
-        .appendSpace()
-        .append(Component.translatable(MenuProviderTranslations.DIALOG_VANILIFE_MENU_DISCORD))
         .build()
 
     private val plugin: Plugin by inject()
@@ -101,41 +47,85 @@ internal object MenuDialog : KoinComponent {
             .type(
                 DialogType.multiAction(
                     listOf(
-                        returnToIsland(),
+                        returnButton(),
+                        myIslandButton(),
+                        enchantmentsButton(),
                         trashButton(),
                         storageButton(),
-                        enchantments(),
-                        settingsButton(),
-                        discordButton(),
                     )
-                ).exitAction(
-                    ActionButton.builder(Component.translatable("gui.done"))
-                        .action(
-                            DialogAction.customClick(
-                                { _, audience -> audience.closeDialog() },
-                                ClickCallback.Options.builder()
-                                    .uses(ClickCallback.UNLIMITED_USES)
-                                    .build()
-                            )
-                        )
-                        .build()
-                ).columns(1).build()
+                ).exitAction(exitButton()).columns(1).build()
             )
     }
 
-    fun backToMenuButton(): ActionButton = ActionButton.builder(Component.translatable("gui.back"))
+    private fun returnButton(): ActionButton = ActionButton.builder(ReturnDialog.TITLE)
         .action(
-            DialogAction.staticAction(
-                ClickEvent.showDialog(
-                    RegistryAccess.registryAccess()
-                        .getRegistry(RegistryKey.DIALOG)
-                        .getOrThrow(MenuProviderDialogs.MENU)
-                )
+            DialogAction.customClick(
+                { _, audience ->
+                    val player = audience as? Player ?: return@customClick
+                    player.showDialog(ReturnDialog.create(player))
+                },
+                ClickCallback.Options.builder()
+                    .uses(ClickCallback.UNLIMITED_USES)
+                    .build()
+            )
+        ).build()
+
+    private fun myIslandButton(): ActionButton = ActionButton.builder(MyIslandDialog.TITLE)
+        .action(
+            DialogAction.customClick(
+                { _, audience ->
+                    val player = audience as? Player ?: return@customClick
+                    player.showDialog(MyIslandDialog.create(player))
+                },
+                ClickCallback.Options.builder()
+                    .uses(ClickCallback.UNLIMITED_USES)
+                    .build()
             )
         )
         .build()
 
-    private fun enchantments(): ActionButton = ActionButton.builder(EnchantmentsDialog.TITLE)
+    private fun trashButton(): ActionButton = ActionButton.builder(
+        Component.text()
+            .append(
+                Component.text(MenuProviderFonts.MenuIcons.TRASH)
+                    .font(MenuProviderFonts.MENU_ICONS)
+            )
+            .appendSpace()
+            .append(Component.translatable(MenuProviderTranslations.DIALOG_VANILIFE_MENU_TRASH))
+            .build()
+    ).action(
+        DialogAction.customClick(
+            { _, audience -> (audience as? Player)?.openInventory(TrashInventory(plugin).inventory) },
+            ClickCallback.Options.builder()
+                .uses(ClickCallback.UNLIMITED_USES)
+                .build()
+        )
+    ).build()
+
+    private fun storageButton(): ActionButton = ActionButton.builder(
+        Component.text()
+            .append(
+                Component.text(MenuProviderFonts.MenuIcons.STORAGE)
+                    .font(MenuProviderFonts.MENU_ICONS)
+            )
+            .appendSpace()
+            .append(Component.translatable(MenuProviderTranslations.DIALOG_VANILIFE_MENU_STORAGE))
+            .build()
+    ).action(
+        DialogAction.customClick(
+            { _, audience ->
+                val player = audience as? Player ?: return@customClick
+                val island = player.ownedIsland
+                player.openInventory(StorageInventory(island, island.storageSize, plugin).inventory)
+                player.playSound(Sound.sound(SoundEventKeys.BLOCK_ENDER_CHEST_OPEN, Sound.Source.UI, 1f, 1f))
+            },
+            ClickCallback.Options.builder()
+                .uses(ClickCallback.UNLIMITED_USES)
+                .build()
+        )
+    ).build()
+
+    private fun enchantmentsButton(): ActionButton = ActionButton.builder(EnchantmentsDialog.TITLE)
         .action(
             DialogAction.customClick(
                 { _, audience ->
@@ -150,65 +140,14 @@ internal object MenuDialog : KoinComponent {
         )
         .build()
 
-    private fun returnToIsland(): ActionButton = ActionButton.builder(RETURN_TO_ISLAND).action(
-        DialogAction.customClick(
-            { _, audience ->
-                audience.showDialog(
-                    RegistryAccess.registryAccess()
-                        .getRegistry(RegistryKey.DIALOG)
-                        .getOrThrow(PortalDialogs.RETURN)
-                )
-            },
-            ClickCallback.Options.builder()
-                .uses(ClickCallback.UNLIMITED_USES)
-                .build()
+    private fun exitButton(): ActionButton = ActionButton.builder(Component.translatable("gui.done"))
+        .action(
+            DialogAction.customClick(
+                { _, audience -> audience.closeDialog() },
+                ClickCallback.Options.builder()
+                    .uses(ClickCallback.UNLIMITED_USES)
+                    .build()
+            )
         )
-    ).build()
-
-    private fun settingsButton(): ActionButton = ActionButton.builder(SETTINGS).action(
-        DialogAction.customClick(
-            { _, audience ->
-                (audience as? Player)?.let { player ->
-                    player.showDialog(SettingsDialog.create(player))
-                }
-            },
-            ClickCallback.Options.builder()
-                .uses(ClickCallback.UNLIMITED_USES)
-                .build()
-        )
-    ).build()
-
-    private fun trashButton(): ActionButton = ActionButton.builder(TRASH)
-        .action(
-            DialogAction.customClick(
-                { _, audience -> (audience as? Player)?.openInventory(TrashInventory(plugin).inventory) },
-                ClickCallback.Options.builder()
-                    .uses(ClickCallback.UNLIMITED_USES)
-                    .build()
-            )
-        ).build()
-
-    private fun storageButton(): ActionButton = ActionButton.builder(STORAGE)
-        .action(
-            DialogAction.customClick(
-                { _, audience ->
-                    val player = audience as? Player ?: return@customClick
-                    val island = player.ownedIsland
-                    player.openInventory(StorageInventory(island, island.storageSize, plugin).inventory)
-                },
-                ClickCallback.Options.builder()
-                    .uses(ClickCallback.UNLIMITED_USES)
-                    .build()
-            )
-        ).build()
-
-    private fun discordButton(): ActionButton = ActionButton.builder(DISCORD)
-        .action(
-            DialogAction.customClick(
-                { _, audience -> audience.showDialog(DiscordDialog.create()) },
-                ClickCallback.Options.builder()
-                    .uses(ClickCallback.UNLIMITED_USES)
-                    .build()
-            )
-        ).build()
+        .build()
 }
