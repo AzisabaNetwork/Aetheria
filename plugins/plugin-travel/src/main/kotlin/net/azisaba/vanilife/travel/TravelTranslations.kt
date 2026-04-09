@@ -4,6 +4,8 @@ import net.azisaba.packed.lang.PackLanguage
 import net.azisaba.packed.lang.Translation
 
 object TravelTranslations {
+    const val DIALOG_VANILIFE_TRAVEL: String = "dialog.vanilife.travel"
+
     const val DIALOG_VANILIFE_TRAVEL_TICKET: String = "dialog.vanilife.travel_ticket"
     const val DIALOG_VANILIFE_TRAVEL_TICKET_APPLY_FILTER: String = "dialog.vanilife.travel_ticket.apply_filter"
     const val DIALOG_VANILIFE_TRAVEL_TICKET_SEARCH_BOX: String = "dialog.vanilife.travel_ticket.search_box"
@@ -22,6 +24,8 @@ object TravelTranslations {
     const val ITEM_VANILIFE_TRAVEL_TICKET = "item.vanilife.travel_ticket"
 
     fun us(): PackLanguage = mapOf(
+        DIALOG_VANILIFE_TRAVEL to Translation.literal("Explore islands"),
+
         DIALOG_VANILIFE_TRAVEL_TICKET_SEARCH_VISITORS to Translation.literal("Number of Visitors: ") + Translation.placeholder(),
         DIALOG_VANILIFE_TRAVEL_TICKET to Translation.literal("Chose a travel destination"),
         DIALOG_VANILIFE_TRAVEL_TICKET_APPLY_FILTER to Translation.literal("Search..."),
@@ -40,6 +44,8 @@ object TravelTranslations {
     )
 
     fun jp(): PackLanguage = mapOf(
+        DIALOG_VANILIFE_TRAVEL to Translation.literal("島におでかけ"),
+
         DIALOG_VANILIFE_TRAVEL_TICKET to Translation.literal("旅行先をえらぶ"),
         DIALOG_VANILIFE_TRAVEL_TICKET_APPLY_FILTER to Translation.literal("検索..."),
         DIALOG_VANILIFE_TRAVEL_TICKET_SEARCH to Translation.literal("「") + Translation.placeholder() +

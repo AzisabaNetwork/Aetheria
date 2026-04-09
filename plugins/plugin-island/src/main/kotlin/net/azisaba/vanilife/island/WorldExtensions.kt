@@ -6,14 +6,12 @@ import net.azisaba.vanilife.world.IslandsWorld
 import org.koin.core.context.GlobalContext
 
 val IslandsWorld.loadedIslands: Collection<Island>
-    get() {
-        val islands = GlobalContext.get().get<IslandsAccessor>()
-        return islands.islands
-    }
+    get() = GlobalContext.get().get<IslandSource>().loadedIslands
 
 fun IslandsWorld.getIslandAt(position: IslandPosition): Island? {
-    val islands = GlobalContext.get().get<IslandsAccessor>()
-    return islands.byPosition(position)
+    val islandSource = GlobalContext.get().get<IslandSource>()
+    return islandSource[position]
 }
 
-fun IslandsWorld.getIslandAt(position: Position): Island? = getIslandAt(IslandPosition.fromPosition(position))
+fun IslandsWorld.getIslandAt(position: Position): Island? =
+    getIslandAt(IslandPosition.fromPosition(position))

@@ -11,8 +11,8 @@ import net.azisaba.serialization.EnchantmentSerializer
 import net.azisaba.vanilife.DynamicContents
 import net.azisaba.vanilife.ItemStackProvider
 import net.azisaba.vanilife.island.Island
-import net.azisaba.vanilife.island.enchantment.EnchantmentAccessor
-import net.azisaba.vanilife.island.leveling.IslandLevelPredicate
+import net.azisaba.vanilife.island.enchantments.EnchantmentHolder
+import net.azisaba.vanilife.island.leveling.LevelPredicate
 import net.kyori.adventure.sound.Sound
 import org.bukkit.entity.Player
 import kotlin.random.Random
@@ -22,7 +22,7 @@ import kotlin.time.Duration.Companion.milliseconds
 sealed interface WrackType {
     val weight: Int
 
-    val targetLevel: IslandLevelPredicate
+    val targetLevel: LevelPredicate
 
     val modelName: String
         get() = "bottle"
@@ -36,7 +36,7 @@ sealed interface WrackType {
             it.targetLevel.matches(level)
         }.toSet()
 
-        fun roll(random: Random, level: Int, enchantments: EnchantmentAccessor): WrackType? {
+        fun roll(random: Random, level: Int, enchantments: EnchantmentHolder): WrackType? {
             val entries = byLevel(level)
                 .filter { it.weight > 0 }
                 .filter { it !is Enchantment || !enchantments.has(it.enchantment) }
@@ -58,7 +58,7 @@ sealed interface WrackType {
     data class Item(
         val item: ItemStackProvider,
         override val weight: Int,
-        override val targetLevel: IslandLevelPredicate,
+        override val targetLevel: LevelPredicate,
     ) :
         WrackType {
         override suspend fun drop(random: Random, player: Player, island: Island, entity: WrackEntity) {
@@ -75,16 +75,14 @@ sealed interface WrackType {
     data class Enchantment(
         val enchantment: @Serializable(with = EnchantmentSerializer::class) org.bukkit.enchantments.Enchantment,
         override val weight: Int,
-        override val targetLevel: IslandLevelPredicate,
+        override val targetLevel: LevelPredicate,
     ) : WrackType {
         override suspend fun drop(random: Random, player: Player, island: Island, entity: WrackEntity) {
             val displayLocation = entity.location.clone().add(0.0, 0.35, 0.0)
             val display = WrapperWrackEnchantmentDisplay(displayLocation)
             display.spawn(SpigotConversionUtil.fromBukkitLocation(displayLocation))
 
-            island.audiences()
-                .filterIsInstance<Player>()
-                .ifEmpty { listOf(player) }
+            island.players.ifEmpty { listOf(player) }
                 .forEach { viewer ->
                     display.addViewer(viewer.uniqueId)
                 }
@@ -95,8 +93,9 @@ sealed interface WrackType {
             }
             display.finish()
 
-            if (!island.has(enchantment)) {
-                island.addEnchantment(enchantment)
+            val enchantments = island as? EnchantmentHolder
+            if (enchantments != null && !enchantments.has(enchantment)) {
+                enchantments.addEnchantment(enchantment)
             }
 
             player.playSound(Sound.sound(SoundEventKeys.ENTITY_ITEM_PICKUP, Sound.Source.PLAYER, 0.6f, 1.4f))

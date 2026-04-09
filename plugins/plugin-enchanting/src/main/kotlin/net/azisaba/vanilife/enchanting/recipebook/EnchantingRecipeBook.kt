@@ -21,6 +21,7 @@ import io.github.retrooper.packetevents.util.SpigotConversionUtil
 import io.papermc.paper.math.Position
 import kotlinx.coroutines.delay
 import net.azisaba.vanilife.enchanting.EnchantingRecipe
+import net.azisaba.vanilife.island.PlayerIsland
 import net.azisaba.vanilife.island.getIslandAt
 import net.azisaba.vanilife.world.IslandsWorld
 import net.kyori.adventure.text.format.NamedTextColor
@@ -113,7 +114,7 @@ internal class EnchantingRecipeBook(private val candidates: List<Candidate>) {
         fun empty(): EnchantingRecipeBook = EnchantingRecipeBook(emptyList())
 
         suspend fun fromContext(player: Player, itemStack: ItemStack?): EnchantingRecipeBook {
-            val island = (player.world as? IslandsWorld)?.getIslandAt(Position.fine(player.location))
+            val island = (player.world as? IslandsWorld)?.getIslandAt(Position.fine(player.location)) as PlayerIsland
             val target = itemStack ?: return empty()
             val candidates = EnchantingRecipe.toList().withIndex().mapNotNull { (index, recipe) ->
                 val level = recipe.targetLevelFor(target) ?: return@mapNotNull null

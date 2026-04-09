@@ -14,20 +14,8 @@ object MenuProviderFonts {
     fun menuIcons(): PackFont = PackFont(
         listOf(
             PackBitmapFontProvider(
-                file = Key.key(Vanilife.NAMESPACE, "icon/menu/discord.png"),
-                chars = listOf(MenuIcons.DISCORD.toString()),
-                ascent = 7,
-                height = 8,
-            ),
-            PackBitmapFontProvider(
                 file = Key.key(Vanilife.NAMESPACE, "icon/menu/menu.png"),
                 chars = listOf(MenuIcons.MENU.toString()),
-                ascent = 7,
-                height = 8,
-            ),
-            PackBitmapFontProvider(
-                file = Key.key(Vanilife.NAMESPACE, "icon/menu/settings.png"),
-                chars = listOf(MenuIcons.SETTINGS.toString()),
                 ascent = 7,
                 height = 8,
             ),
@@ -48,8 +36,6 @@ object MenuProviderFonts {
 
     object MenuIcons : CharCodeFactory() {
         val MENU: Char = nextChar()
-        val DISCORD: Char = nextChar()
-        val SETTINGS: Char = nextChar()
         val STORAGE: Char = nextChar()
         val TRASH: Char = nextChar()
     }

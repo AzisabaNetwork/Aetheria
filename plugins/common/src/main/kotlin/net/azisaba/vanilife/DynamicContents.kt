@@ -10,7 +10,7 @@ import java.nio.file.Path
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.io.path.*
 
-abstract class DynamicContents<T>(
+abstract class DynamicContents<T : Any>(
     val name: String, private val lazySerializer: Lazy<KSerializer<T>>, private val yaml: Yaml = DEFAULT_YAML,
 ) : Contents<T> {
     private val mapReference: AtomicReference<Map<Key, T>?> = AtomicReference(null)

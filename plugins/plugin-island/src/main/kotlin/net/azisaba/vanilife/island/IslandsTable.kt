@@ -1,21 +1,20 @@
 package net.azisaba.vanilife.island
 
 import net.azisaba.exposed.component
+import net.azisaba.exposed.key
 import net.kyori.adventure.text.Component
 import org.jetbrains.exposed.v1.core.Column
-import org.jetbrains.exposed.v1.core.between
 import org.jetbrains.exposed.v1.core.dao.id.LongIdTable
-import org.jetbrains.exposed.v1.core.java.javaUUID
-import java.util.*
 
-object IslandsTable : LongIdTable("islands", "position") {
-    val owner: Column<UUID> = javaUUID("owner").uniqueIndex()
-
-    val level: Column<Int> = integer("level").clientDefault { Island.MIN_LEVEL }.check { it.between(Island.MIN_LEVEL, Island.MAX_LEVEL) }
-
-    val score: Column<Double> = double("score").clientDefault { 0.0 }
+object IslandsTable : LongIdTable(name = "islands", columnName = "position") {
+    val type: Column<IslandType<*>> = key("type").transform(
+        { IslandType.byKeyOrThrow(it) },
+        { it.key() },
+    )
 
     val displayName: Column<Component> = component("display_name").clientDefault { Component.text("Untitled") }
+
+    val description: Column<Component> = component("description").clientDefault { Component.empty() }
 
     val spawnOffsetX: Column<Double> = double("spawn_offset_x").clientDefault { 0.0 }
 

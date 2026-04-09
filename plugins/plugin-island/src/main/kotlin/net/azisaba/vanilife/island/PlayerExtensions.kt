@@ -1,34 +1,30 @@
 package net.azisaba.vanilife.island
 
 import kotlinx.coroutines.future.await
-import org.bukkit.OfflinePlayer
+import net.azisaba.vanilife.island.lookup.OwnerLookup
+import net.azisaba.vanilife.island.lookup.PlayerLookup
 import org.bukkit.entity.Player
 import org.koin.core.context.GlobalContext
 
 val Player.currentIsland: Island?
-    get() = IslandsPlayerAccessor.byPlayer(uniqueId)
-
-val Player.ownedIsland: Island
-    get() = (this as OfflinePlayer).ownedIsland!!
-
-val OfflinePlayer.ownedIsland: Island?
     get() {
-        val islands = GlobalContext.get().get<IslandsAccessor>()
-        return islands.byOwner(uniqueId)
+        val islandSource = GlobalContext.get().get<IslandSource>()
+        val position = PlayerLookup[uniqueId]
+        return position?.let(islandSource::get)
+    }
+
+val Player.ownedIsland: PlayerIsland
+    get() {
+        val islandSource = GlobalContext.get().get<IslandSource>()
+        val position = OwnerLookup[uniqueId] ?: error("Not bound to owner lookup: $uniqueId")
+        return islandSource[position] as? PlayerIsland ?: error("Player island not loaded: $position")
     }
 
 val Player.isInOwnedIsland: Boolean
     get() = currentIsland == ownedIsland
 
 suspend fun Player.teleport(island: Island) {
-    teleportAsync(island.spawnPoint).await()
-    assignToIsland(island)
-}
-
-suspend fun Player.assignToIsland(island: Island) {
-    IslandsPlayerAccessor.assign(this, island)
-}
-
-suspend fun Player.unassignFromIsland() {
-    IslandsPlayerAccessor.unassign(this)
+    currentIsland?.removePlayer(this)
+    teleportAsync(island.defaultSpawnPoint).await()
+    island.addPlayer(this)
 }

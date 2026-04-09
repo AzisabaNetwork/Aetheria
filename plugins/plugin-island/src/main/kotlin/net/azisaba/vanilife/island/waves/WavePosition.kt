@@ -2,23 +2,13 @@ package net.azisaba.vanilife.island.waves
 
 import com.github.retrooper.packetevents.protocol.world.Location
 import com.github.retrooper.packetevents.util.Vector3d
-import net.azisaba.vanilife.island.CoastSide
-import net.azisaba.vanilife.island.boundaryBlock
+import net.azisaba.vanilife.island.util.CoastSide
+import net.azisaba.vanilife.island.util.boundaryBlock
 import net.azisaba.vanilife.world.IslandPosition
 import net.azisaba.vanilife.world.IslandsWorld
 
 data class WavePosition(val islandPosition: IslandPosition, val coastSide: CoastSide, val index: Int) {
     fun edgeCoord(): Int = islandPosition.boundaryBlock(coastSide)
-
-    fun location(): Location {
-        val lateralStart = if (coastSide.axisX) islandPosition.minBlockZ().toDouble() else islandPosition.minBlockX().toDouble()
-        val lateralEnd = if (coastSide.axisX) islandPosition.maxBlockZ().toDouble() else islandPosition.maxBlockX().toDouble()
-        val lateralStep = (lateralEnd - lateralStart) / (WAVES_PER_COAST_SIDE - 1).toDouble()
-        val lateral = lateralStart + lateralStep * index
-        val x = if (coastSide.axisX) edgeCoord().toDouble() else lateral
-        val z = if (coastSide.axisX) lateral else edgeCoord().toDouble()
-        return Location(x, IslandsWorld.SEA_LEVEL + 0.15, z, coastSide.yaw, 0f)
-    }
 
     fun computeForward(location: Location, offset: Double): Location {
         val forwardDir = -coastSide.coastNormalSign
@@ -32,6 +22,16 @@ data class WavePosition(val islandPosition: IslandPosition, val coastSide: Coast
         seed = seed xor (index.toLong() * 83492791L)
         seed = seed xor (coastSide.ordinal.toLong() * 29791L)
         return seed
+    }
+
+    fun toLocation(): Location {
+        val lateralStart = if (coastSide.axisX) islandPosition.minBlockZ().toDouble() else islandPosition.minBlockX().toDouble()
+        val lateralEnd = if (coastSide.axisX) islandPosition.maxBlockZ().toDouble() else islandPosition.maxBlockX().toDouble()
+        val lateralStep = (lateralEnd - lateralStart) / (WAVES_PER_COAST_SIDE - 1).toDouble()
+        val lateral = lateralStart + lateralStep * index
+        val x = if (coastSide.axisX) edgeCoord().toDouble() else lateral
+        val z = if (coastSide.axisX) lateral else edgeCoord().toDouble()
+        return Location(x, IslandsWorld.SEA_LEVEL + 0.15, z, coastSide.yaw, 0f)
     }
 
     companion object {

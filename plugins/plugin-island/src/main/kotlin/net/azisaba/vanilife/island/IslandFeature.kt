@@ -1,6 +1,6 @@
 package net.azisaba.vanilife.island
 
-import net.azisaba.vanilife.island.leveling.IslandLevelPredicate
+import net.azisaba.vanilife.island.leveling.LevelPredicate
 import net.kyori.adventure.translation.Translatable
 
 enum class IslandFeature(val requiredLevel: Int, private val translationKey: String) : Translatable {
@@ -12,5 +12,5 @@ enum class IslandFeature(val requiredLevel: Int, private val translationKey: Str
 
     override fun translationKey(): String = translationKey
 
-    fun asLevelPredicate(): IslandLevelPredicate = IslandLevelPredicate.AtLeast(requiredLevel)
+    fun asLevelPredicate(): LevelPredicate = LevelPredicate.AtLeast(requiredLevel)
 }

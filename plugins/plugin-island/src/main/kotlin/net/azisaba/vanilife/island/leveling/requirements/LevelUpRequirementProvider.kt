@@ -2,7 +2,7 @@ package net.azisaba.vanilife.island.leveling.requirements
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import net.azisaba.vanilife.island.Island
+import net.azisaba.vanilife.island.leveling.Levellable
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -172,14 +172,14 @@ sealed interface LevelUpRequirementProvider {
     }
 
     companion object {
-        const val START_LEVEL: Int = Island.MIN_LEVEL + 1
+        const val START_LEVEL: Int = Levellable.MIN_LEVEL + 1
 
-        private fun requireLevel(level: Int) = require(level in START_LEVEL..Island.MAX_LEVEL) {
-            "Level $level is out of range [$START_LEVEL..${Island.MAX_LEVEL}]"
+        private fun requireLevel(level: Int) = require(level in START_LEVEL..Levellable.MAX_LEVEL) {
+            "Level $level is out of range [$START_LEVEL..${Levellable.MAX_LEVEL}]"
         }
 
         private fun progress(level: Int): Double {
-            val range = Island.MAX_LEVEL - START_LEVEL
+            val range = Levellable.MAX_LEVEL - START_LEVEL
             if (range <= 0) return 1.0
 
             val raw = (level - START_LEVEL).toDouble() / range

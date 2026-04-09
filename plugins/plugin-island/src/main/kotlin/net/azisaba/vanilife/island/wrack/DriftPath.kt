@@ -1,10 +1,10 @@
 package net.azisaba.vanilife.island.wrack
 
 import io.papermc.paper.math.Position
-import net.azisaba.vanilife.island.CoastSide
+import net.azisaba.vanilife.island.util.CoastSide
 import net.azisaba.vanilife.world.IslandPosition
 import net.azisaba.vanilife.world.IslandsWorld
-import net.azisaba.vanilife.island.boundaryBlock
+import net.azisaba.vanilife.island.util.boundaryBlock
 import org.bukkit.World
 import org.bukkit.plugin.Plugin
 import kotlin.math.PI

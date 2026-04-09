@@ -1,7 +1,6 @@
 package net.azisaba.vanilife.enchanting
 
 import com.github.retrooper.packetevents.PacketEvents
-import com.github.shynixn.mccoroutine.folia.launch
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import me.tofaa.entitylib.APIConfig
 import me.tofaa.entitylib.EntityLib
@@ -41,10 +40,6 @@ internal class Main : JavaPlugin() {
 
         EnchantingRecipe.bootstrap(this)
         setupEventListeners()
-
-        launch {
-            UnlockRateSource.bootstrap(database)
-        }
     }
 
     override fun onDisable() {

@@ -1,7 +1,8 @@
 package net.azisaba.vanilife.island.listener
 
 import com.github.shynixn.mccoroutine.folia.launch
-import net.azisaba.vanilife.island.IslandsAccessor
+import net.azisaba.vanilife.island.IslandSource
+import net.azisaba.vanilife.island.leveling.Levellable
 import net.azisaba.vanilife.island.leveling.score.ScoreSource
 import net.azisaba.vanilife.world.IslandPosition
 import net.azisaba.vanilife.world.IslandsWorld
@@ -13,7 +14,7 @@ import org.bukkit.event.entity.EntityBreedEvent
 import org.bukkit.event.player.PlayerHarvestBlockEvent
 import org.bukkit.plugin.Plugin
 
-internal class ScoreSourceListener(private val islands: IslandsAccessor, private val plugin: Plugin) : Listener {
+internal class ScoreSourceListener(private val islandSource: IslandSource, private val plugin: Plugin) : Listener {
     @EventHandler
     fun onBlockBreak(event: BlockBreakEvent) {
         if (event.block.world !is IslandsWorld) return
@@ -22,13 +23,13 @@ internal class ScoreSourceListener(private val islands: IslandsAccessor, private
         val position = IslandPosition.fromPosition(blockState.location)
 
         plugin.launch {
-            val island = islands.byPosition(position) ?: return@launch
+            val levellable = islandSource[position] as? Levellable ?: return@launch
 
-            ScoreSource.byLevel(island.level)
+            ScoreSource.byLevel(levellable.level)
                 .filterIsInstance<ScoreSource.BreakBlock>()
                 .filter { it.containsBlock(blockState) }
                 .forEach { source ->
-                    island.updateScore(source)
+                    levellable.updateScore(source)
                 }
         }
     }
@@ -41,13 +42,13 @@ internal class ScoreSourceListener(private val islands: IslandsAccessor, private
         val position = IslandPosition.fromPosition(blockState.location)
 
         plugin.launch {
-            val island = islands.byPosition(position) ?: return@launch
+            val levellable = islandSource[position] as? Levellable ?: return@launch
 
-            ScoreSource.byLevel(island.level)
+            ScoreSource.byLevel(levellable.level)
                 .filterIsInstance<ScoreSource.PlaceBlock>()
                 .filter { it.containsBlock(blockState) }
                 .forEach { source ->
-                    island.updateScore(source)
+                    levellable.updateScore(source)
                 }
         }
     }
@@ -59,13 +60,13 @@ internal class ScoreSourceListener(private val islands: IslandsAccessor, private
         val position = IslandPosition.fromPosition(event.entity.location)
 
         plugin.launch {
-            val island = islands.byPosition(position) ?: return@launch
+            val levellable = islandSource[position] as? Levellable ?: return@launch
 
-            ScoreSource.byLevel(island.level)
+            ScoreSource.byLevel(levellable.level)
                 .filterIsInstance<ScoreSource.Breed>()
                 .filter { it.containsEntity(event.entity) }
                 .forEach { source ->
-                    island.updateScore(source)
+                    levellable.updateScore(source)
                 }
         }
     }
@@ -78,13 +79,13 @@ internal class ScoreSourceListener(private val islands: IslandsAccessor, private
         val position = IslandPosition.fromPosition(blockState.location)
 
         plugin.launch {
-            val island = islands.byPosition(position) ?: return@launch
+            val levellable = islandSource[position] as? Levellable ?: return@launch
 
-            ScoreSource.byLevel(island.level)
+            ScoreSource.byLevel(levellable.level)
                 .filterIsInstance<ScoreSource.Harvest>()
                 .filter { it.containsCrop(blockState) }
                 .forEach { source ->
-                    island.updateScore(source)
+                    levellable.updateScore(source)
                 }
         }
     }

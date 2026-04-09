@@ -14,6 +14,7 @@ import net.azisaba.vanilife.menuprovider.MenuProviderFonts
 import net.azisaba.vanilife.menuprovider.MenuProviderTranslations
 import net.azisaba.vanilife.menuprovider.inventory.StorageInventory
 import net.azisaba.vanilife.menuprovider.inventory.TrashInventory
+import net.azisaba.vanilife.travel.dialog.TravelDialog
 import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickCallback
@@ -48,6 +49,7 @@ internal object MenuDialog : KoinComponent {
                 DialogType.multiAction(
                     listOf(
                         returnButton(),
+                        travelButton(),
                         myIslandButton(),
                         enchantmentsButton(),
                         trashButton(),
@@ -69,6 +71,20 @@ internal object MenuDialog : KoinComponent {
                     .build()
             )
         ).build()
+
+    private fun travelButton(): ActionButton = ActionButton.builder(TravelDialog.TITLE)
+        .action(
+            DialogAction.customClick(
+                { _, audience ->
+                    val player = audience as? Player ?: return@customClick
+                    player.showDialog(TravelDialog.create(player))
+                },
+                ClickCallback.Options.builder()
+                    .uses(ClickCallback.UNLIMITED_USES)
+                    .build()
+            )
+        )
+        .build()
 
     private fun myIslandButton(): ActionButton = ActionButton.builder(MyIslandDialog.TITLE)
         .action(

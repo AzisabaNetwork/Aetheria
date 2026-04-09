@@ -12,7 +12,7 @@ import kotlin.time.Duration
 import kotlin.time.Instant
 
 object IslandVisitorsTable : Table("island_visitors") {
-    val position: Column<EntityID<Long>> = reference("position", IslandsTable)
+    val position: Column<EntityID<Long>> = reference(IslandsTable.id.name, IslandsTable)
 
     val visitor: Column<UUID> = javaUUID("visitor")
 

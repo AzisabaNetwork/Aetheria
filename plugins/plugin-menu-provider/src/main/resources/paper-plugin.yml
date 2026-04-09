@@ -12,6 +12,8 @@ dependencies:
       load: BEFORE
     AzisabaNetwork.Vanilife.Runtime:
       load: BEFORE
+    AzisabaNetwork.Vanilife.Travel:
+      load: BEFORE
   server:
     AzisabaNetwork.Vanilife.Enchanting:
       load: BEFORE
@@ -20,4 +22,6 @@ dependencies:
     AzisabaNetwork.Vanilife.Portal:
       load: BEFORE
     AzisabaNetwork.Vanilife.Runtime:
+      load: BEFORE
+    AzisabaNetwork.Vanilife.Travel:
       load: BEFORE

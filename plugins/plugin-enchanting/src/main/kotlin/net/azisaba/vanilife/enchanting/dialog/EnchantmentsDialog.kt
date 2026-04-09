@@ -10,10 +10,10 @@ import io.papermc.paper.registry.data.dialog.type.DialogType
 import net.azisaba.vanilife.enchanting.EnchantingFonts
 import net.azisaba.vanilife.enchanting.EnchantingItemModels
 import net.azisaba.vanilife.enchanting.EnchantingTranslations
-import net.azisaba.vanilife.enchanting.UnlockRateSource
-import net.azisaba.vanilife.island.Island
 import net.azisaba.vanilife.island.IslandFonts
-import net.azisaba.vanilife.island.enchantment.EnchantmentAccessor
+import net.azisaba.vanilife.island.PlayerIsland
+import net.azisaba.vanilife.island.enchantments.EnchantmentHolder
+import net.azisaba.vanilife.island.util.EnchantmentUnlockRates
 import net.azisaba.vanilife.island.wrack.WrackType
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
@@ -34,7 +34,7 @@ object EnchantmentsDialog {
         .append(Component.translatable(EnchantingTranslations.DIALOG_VANILIFE_ENCHANTMENTS))
         .build()
 
-    fun create(island: Island): Dialog = Dialog.create { builder ->
+    fun create(island: PlayerIsland): Dialog = Dialog.create { builder ->
         builder.empty()
             .base(
                 DialogBase.builder(TITLE)
@@ -58,7 +58,7 @@ object EnchantmentsDialog {
             )
     }
 
-    private fun summary(enchantments: EnchantmentAccessor): PlainMessageDialogBody = DialogBody.plainMessage(
+    private fun summary(enchantments: EnchantmentHolder): PlainMessageDialogBody = DialogBody.plainMessage(
         Component.translatable(
             EnchantingTranslations.DIALOG_VANILIFE_ENCHANTMENTS_SUMMARY,
             Component.text()
@@ -69,7 +69,7 @@ object EnchantmentsDialog {
         )
     )
 
-    private fun section(island: Island, from: Int, to: Int): List<DialogBody> = buildList {
+    private fun section(island: PlayerIsland, from: Int, to: Int): List<DialogBody> = buildList {
         add(
             DialogBody.plainMessage(
                 Component.text()
@@ -149,7 +149,7 @@ object EnchantmentsDialog {
         .append(
             Component.translatable(
                 EnchantingTranslations.DIALOG_VANILIFE_ENCHANTMENTS_UNLOCK_RATE,
-                Component.text((UnlockRateSource[enchantment] * 100).roundToInt(), NamedTextColor.WHITE),
+                Component.text((EnchantmentUnlockRates[enchantment] * 100).roundToInt(), NamedTextColor.WHITE),
             )
         )
         .build()

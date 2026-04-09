@@ -7,7 +7,7 @@ import io.papermc.paper.registry.data.dialog.DialogBase
 import io.papermc.paper.registry.data.dialog.action.DialogAction
 import io.papermc.paper.registry.data.dialog.body.DialogBody
 import io.papermc.paper.registry.data.dialog.type.DialogType
-import net.azisaba.vanilife.island.Island
+import net.azisaba.vanilife.island.PlayerIsland
 import net.azisaba.vanilife.island.IslandTranslations
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickCallback
@@ -19,7 +19,7 @@ import org.koin.core.component.inject
 internal object SpawnPointDialog : KoinComponent {
     private val plugin: Plugin by inject()
 
-    fun create(island: Island, location: Location): Dialog = Dialog.create { builder ->
+    fun create(island: PlayerIsland, location: Location): Dialog = Dialog.create { builder ->
         builder.empty()
             .base(
                 DialogBase.builder(MyIslandDialog.TITLE)
@@ -39,13 +39,13 @@ internal object SpawnPointDialog : KoinComponent {
             )
     }
 
-    private fun yesButton(island: Island, location: Location): ActionButton =
+    private fun yesButton(island: PlayerIsland, location: Location): ActionButton =
         ActionButton.builder(Component.translatable("gui.yes"))
             .action(
                 DialogAction.customClick(
                     { _, _ ->
                         plugin.launch {
-                            island.spawnPoint(location)
+                            island.defaultSpawnPoint(location)
                         }
                     },
                     ClickCallback.Options.builder()
